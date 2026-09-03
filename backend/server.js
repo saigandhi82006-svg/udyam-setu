@@ -33,6 +33,9 @@ app.use(morgan('dev'));
 // Static assets for test preview & documentation
 app.use('/preview', express.static(path.join(__dirname, '../test_harness')));
 
+// Handle favicon request to keep browser console clean
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 // API Root Health Check
 app.get('/api/health', (req, res) => {
   res.json({
