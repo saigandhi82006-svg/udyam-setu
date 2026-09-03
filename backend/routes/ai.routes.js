@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { handleAIChat } = require('../services/aiService');
+const { SUPPORTED_BHASHINI_LANGUAGES, synthesizeVoicePayload } = require('../services/bhashiniService');
 
 // POST /api/ai/chat - conversational AI assistant for rural entrepreneurs
 router.post('/chat', async (req, res) => {
@@ -32,21 +33,29 @@ router.post('/chat', async (req, res) => {
   }
 });
 
-// GET /api/ai/languages - list supported vernacular languages
+// GET /api/ai/languages - list supported vernacular languages (Digital India BHASHINI)
 router.get('/languages', (req, res) => {
   return res.json({
     success: true,
-    languages: [
-      { code: 'en', name: 'English', label: 'English' },
-      { code: 'hi', name: 'Hindi', label: 'हिन्दी' },
-      { code: 'te', name: 'Telugu', label: 'తెలుగు' },
-      { code: 'ta', name: 'Tamil', label: 'தமிழ்' },
-      { code: 'mr', name: 'Marathi', label: 'मराठी' },
-      { code: 'bn', name: 'Bengali', label: 'বাংলা' },
-      { code: 'kn', name: 'Kannada', label: 'ಕನ್ನಡ' },
-      { code: 'gu', name: 'Gujarati', label: 'ગુજરાતી' }
-    ]
+    engine: 'Digital India BHASHINI (MeitY)',
+    languages: SUPPORTED_BHASHINI_LANGUAGES
   });
+});
+
+// POST /api/ai/bhashini/speak - Digital India Bhashini Text-to-Speech synthesis endpoint
+router.post('/bhashini/speak', (req, res) => {
+  try {
+    const { text, languageCode = 'hi', speed = 0.85 } = req.body;
+
+    if (!text) {
+      return res.status(400).json({ success: false, message: 'Text is required for voice synthesis' });
+    }
+
+    const payload = synthesizeVoicePayload({ text, languageCode, speed });
+    return res.json(payload);
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Voice synthesis error', error: error.message });
+  }
 });
 
 module.exports = router;

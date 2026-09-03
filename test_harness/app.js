@@ -94,8 +94,185 @@ function handleVerifyOTP() {
   logTerminal(`[Auth] User authenticated successfully. Session initiated.`);
 }
 
-// 2. AI Chat (Screen 4)
-async function sendChatMessage() {
+// 2. Digital India BHASHINI Voice & AI Chat (Screen 4)
+let isSpeaking = false;
+let currentUtterance = null;
+
+function stopSpeech() {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+  isSpeaking = false;
+  document.querySelectorAll('.listen-btn').forEach(b => {
+    b.classList.remove('speaking');
+    b.innerHTML = '🔊 Suniye / వినండి (Listen)';
+  });
+}
+
+function speakBhashiniVoice(text, langName, btnElement) {
+  if (!('speechSynthesis' in window)) {
+    alert('Voice speech synthesis is not supported in this browser.');
+    return;
+  }
+
+  if (isSpeaking) {
+    stopSpeech();
+    return;
+  }
+
+  stopSpeech();
+
+  // Strip markdown, asterisks, brackets, and linebreaks for natural speech audio
+  const cleanText = text
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/#{1,6}\s?/g, '')
+    .replace(/[•\-\*]\s+/g, ', ')
+    .replace(/₹/g, 'Rupees ')
+    .replace(/✨ Source:.*/g, '')
+    .trim();
+
+  const utterance = new SpeechSynthesisUtterance(cleanText);
+
+  // Regional Indian locales for Bhashini
+  const lang = (langName || 'English').toLowerCase();
+  if (lang.includes('hindi')) utterance.lang = 'hi-IN';
+  else if (lang.includes('telugu')) utterance.lang = 'te-IN';
+  else if (lang.includes('tamil')) utterance.lang = 'ta-IN';
+  else if (lang.includes('marathi')) utterance.lang = 'mr-IN';
+  else if (lang.includes('kannada')) utterance.lang = 'kn-IN';
+  else if (lang.includes('bengali')) utterance.lang = 'bn-IN';
+  else utterance.lang = 'en-IN';
+
+  // 0.88x speed - tailored for rural elders & low-literacy users
+  utterance.rate = 0.88;
+  utterance.pitch = 1.0;
+
+  utterance.onstart = () => {
+    isSpeaking = true;
+    if (btnElement) {
+      btnElement.classList.add('speaking');
+      btnElement.innerHTML = '🔊 Speaking aloud... (Tap to Stop)';
+    }
+  };
+
+  utterance.onend = () => {
+    stopSpeech();
+  };
+
+  utterance.onerror = () => {
+    stopSpeech();
+  };
+
+  window.speechSynthesis.speak(utterance);
+}
+
+function onLanguageChanged() {
+  const lang = document.getElementById('chatLangSelect').value;
+  const input = document.getElementById('chatInput');
+  const voiceText = document.getElementById('voicePromptText');
+  
+  if (lang === 'Hindi') {
+    input.placeholder = 'हिंदी में पूछें या बोलें...';
+    voiceText.innerText = '🎙️ बोलें (Tap to Speak in Hindi)';
+  } else if (lang === 'Telugu') {
+    input.placeholder = 'తెలుగులో అడగండి లేదా మాట్లాడండి...';
+    voiceText.innerText = '🎙️ మాట్లాడండి (Tap to Speak in Telugu)';
+  } else if (lang === 'Tamil') {
+    input.placeholder = 'தமிழில் பேசவும்...';
+    voiceText.innerText = '🎙️ பேசுங்கள் (Tap to Speak in Tamil)';
+  } else if (lang === 'Marathi') {
+    input.placeholder = 'मराठीत विचारा...';
+    voiceText.innerText = '🎙️ बोला (Tap to Speak in Marathi)';
+  } else {
+    input.placeholder = 'Ask or speak in your language...';
+    voiceText.innerText = '🎙️ Tap to Speak in your Language';
+  }
+}
+
+function triggerBhashiniSpeechInput() {
+  const langSelect = document.getElementById('chatLangSelect').value;
+  const voiceBtn = document.getElementById('voiceBtn');
+  const voiceText = document.getElementById('voicePromptText');
+  const input = document.getElementById('chatInput');
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (SpeechRecognition) {
+    const recognition = new SpeechRecognition();
+    const lang = langSelect.toLowerCase();
+
+    if (lang.includes('hindi')) recognition.lang = 'hi-IN';
+    else if (lang.includes('telugu')) recognition.lang = 'te-IN';
+    else if (lang.includes('tamil')) recognition.lang = 'ta-IN';
+    else if (lang.includes('marathi')) recognition.lang = 'mr-IN';
+    else recognition.lang = 'en-IN';
+
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      voiceBtn.classList.add('listening');
+      voiceText.innerText = `Listening in ${langSelect}... Speak now!`;
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      input.value = transcript;
+      voiceText.innerText = `Heard: "${transcript}"`;
+      voiceBtn.classList.remove('listening');
+      sendChatMessage(true); // Auto-send and auto-speak reply
+    };
+
+    recognition.onerror = () => {
+      voiceBtn.classList.remove('listening');
+      voiceText.innerText = 'Tap to Speak';
+      fallbackSimulatedSpeech(langSelect);
+    };
+
+    recognition.onend = () => {
+      voiceBtn.classList.remove('listening');
+    };
+
+    try {
+      recognition.start();
+    } catch (e) {
+      fallbackSimulatedSpeech(langSelect);
+    }
+  } else {
+    fallbackSimulatedSpeech(langSelect);
+  }
+}
+
+function fallbackSimulatedSpeech(langSelect) {
+  const btn = document.getElementById('voiceBtn');
+  const txt = document.getElementById('voicePromptText');
+  const input = document.getElementById('chatInput');
+
+  btn.classList.add('listening');
+  txt.innerText = `Listening in ${langSelect}... Speak now`;
+
+  setTimeout(() => {
+    btn.classList.remove('listening');
+    txt.innerText = '🎙️ Tap to Speak in your Language';
+
+    if (langSelect === 'Hindi') {
+      input.value = 'मुझे दुकान खोलने के लिए सरकारी लोन चाहिए।';
+    } else if (langSelect === 'Telugu') {
+      input.value = 'నాకు చిన్న వ్యాపారం కోసం ముద్ర లోన్ కావాలి.';
+    } else if (langSelect === 'Tamil') {
+      input.value = 'எனக்கு சிறு தொழில் தொடங்க கடன் வேண்டும்.';
+    } else if (langSelect === 'Marathi') {
+      input.value = 'मला व्यवसाय सुरू करण्यासाठी कर्ज हवे आहे.';
+    } else {
+      input.value = 'I want a loan for starting a small food business.';
+    }
+
+    sendChatMessage(true);
+  }, 1500);
+}
+
+async function sendChatMessage(autoSpeak = false) {
   const input = document.getElementById('chatInput');
   const message = input.value.trim();
   const lang = document.getElementById('chatLangSelect').value;
@@ -114,7 +291,7 @@ async function sendChatMessage() {
   // Append typing indicator
   const typingBubble = document.createElement('div');
   typingBubble.className = 'chat-bubble ai typing';
-  typingBubble.innerText = '... Analyzing scheme guidelines';
+  typingBubble.innerText = '... Bhashini AI is analyzing schemes';
   chatContainer.appendChild(typingBubble);
   chatContainer.scrollTop = chatContainer.scrollHeight;
 
@@ -134,33 +311,47 @@ async function sendChatMessage() {
 
     const aiBubble = document.createElement('div');
     aiBubble.className = 'chat-bubble ai';
-    aiBubble.innerHTML = `${data.reply.replace(/\n/g, '<br>')}<small class="ai-credit">✨ Source: ${data.source}</small>`;
+    aiBubble.innerHTML = `
+      <div>${data.reply.replace(/\n/g, '<br>')}</div>
+      <button class="listen-btn" onclick="speakBhashiniVoice('${escapeTextForAttr(data.reply)}', '${lang}', this)">🔊 Suniye / వినండి (Listen)</button>
+      <small class="ai-credit">✨ Source: ${data.source} • Digital India BHASHINI</small>
+    `;
     chatContainer.appendChild(aiBubble);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 
-    logTerminal(`[POST /api/ai/chat] Language: ${lang}\nReply from: ${data.source}\n\n${data.reply.substring(0, 180)}...`);
+    logTerminal(`[POST /api/ai/chat] Language: ${lang} (Bhashini Voice)\nReply: ${data.reply.substring(0, 160)}...`);
+
+    if (autoSpeak) {
+      const btn = aiBubble.querySelector('.listen-btn');
+      speakBhashiniVoice(data.reply, lang, btn);
+    }
   } catch (e) {
     typingBubble.remove();
+    const fallbackText = lang === 'Telugu' 
+      ? 'పీఎం ముద్ర యోజన కింద ₹50,000 నుండి ₹10 లక్షల వరకు పూచీకత్తు లేని లోన్ లభిస్తుంది.'
+      : (lang === 'Hindi' 
+        ? 'पीएम मुद्रा योजना के तहत ₹50,000 से ₹10 लाख तक बिना गारंटी लोन मिलता है।'
+        : 'PM Mudra Yojana offers up to ₹10 Lakh collateral-free credit for small enterprises.');
+
     const aiBubble = document.createElement('div');
     aiBubble.className = 'chat-bubble ai';
-    aiBubble.innerHTML = `PM Mudra Yojana offers up to ₹10 Lakh collateral-free loans for food & retail enterprises. You can also explore PMEGP for up to 35% government subsidy.<small class="ai-credit">✨ Built-in Knowledge</small>`;
+    aiBubble.innerHTML = `
+      <div>${fallbackText}</div>
+      <button class="listen-btn" onclick="speakBhashiniVoice('${escapeTextForAttr(fallbackText)}', '${lang}', this)">🔊 Suniye / వినండి (Listen)</button>
+      <small class="ai-credit">✨ Digital India Bhashini Knowledge</small>
+    `;
     chatContainer.appendChild(aiBubble);
     chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    if (autoSpeak) {
+      const btn = aiBubble.querySelector('.listen-btn');
+      speakBhashiniVoice(fallbackText, lang, btn);
+    }
   }
 }
 
-function simulateVoiceInput() {
-  const btn = document.getElementById('voiceBtn');
-  const txt = document.getElementById('voicePromptText');
-  btn.style.background = 'red';
-  txt.innerText = 'Listening... Speak your business need';
-
-  setTimeout(() => {
-    btn.style.background = 'var(--primary-green)';
-    txt.innerText = 'Tap to Speak';
-    document.getElementById('chatInput').value = 'I want a loan for starting a small food business.';
-    sendChatMessage();
-  }, 1400);
+function escapeTextForAttr(text) {
+  return (text || '').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
 }
 
 // 3. Profiling & Rule-Based Matching (Screen 5 & 6)

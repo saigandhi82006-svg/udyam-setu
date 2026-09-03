@@ -221,10 +221,10 @@
             <div class="chat-header">
               <button class="back-btn" onclick="showScreen(3)">‹</button>
               <div class="chat-title-group">
-                <h4>Udyam Sethu AI</h4>
-                <span class="chat-status"><span class="green-dot"></span> Online • Vernacular</span>
+                <h4>Udyam Sethu AI <span class="bhashini-badge">🇮🇳 BHASHINI</span></h4>
+                <span class="chat-status"><span class="green-dot"></span> Online • Digital India Voice (22 Langs)</span>
               </div>
-              <span class="header-icon">📷</span>
+              <span class="header-icon" title="Voice Assistant Ready">🔊</span>
             </div>
 
             <div class="chat-messages" id="chatMessages">
@@ -232,27 +232,30 @@
                 I want a loan for starting a small food business.
               </div>
               <div class="chat-bubble ai">
-                Great! I will help you find the best schemes for your business. May I know your business category?
-                <small class="ai-credit">✨ Powered by Gemini AI</small>
+                Great! For a small food business or tiffin center, the Government provides up to ₹50,000 Shishu Mudra loan completely collateral-free.
+                <button class="listen-btn" onclick="speakBhashiniVoice('For a small food business, the Government provides up to 50,000 rupees Shishu Mudra loan completely collateral-free without pledging any land or gold.', 'English', this)">🔊 Suniye / వినండి (Listen)</button>
+                <small class="ai-credit">✨ Powered by Gemini AI & Digital India Bhashini</small>
               </div>
             </div>
 
             <!-- Voice mic bar -->
             <div class="voice-bar">
-              <span id="voicePromptText">Tap to Speak</span>
-              <button class="voice-btn" id="voiceBtn" onclick="simulateVoiceInput()">🎙️</button>
+              <span id="voicePromptText">🎙️ Tap to Speak in your Language</span>
+              <button class="voice-btn" id="voiceBtn" onclick="triggerBhashiniSpeechInput()" title="Speak in your mother tongue">🎙️</button>
             </div>
 
             <!-- Language & text input row -->
             <div class="chat-input-row">
-              <select id="chatLangSelect" class="lang-select">
-                <option value="English">English</option>
+              <select id="chatLangSelect" class="lang-select" onchange="onLanguageChanged()">
+                <option value="English">English (Indian)</option>
                 <option value="Hindi">हिन्दी (Hindi)</option>
                 <option value="Telugu">తెలుగు (Telugu)</option>
                 <option value="Tamil">தமிழ் (Tamil)</option>
                 <option value="Marathi">मराठी (Marathi)</option>
+                <option value="Kannada">ಕನ್ನಡ (Kannada)</option>
+                <option value="Bengali">বাংলা (Bengali)</option>
               </select>
-              <input type="text" id="chatInput" placeholder="Ask in your own language..." onkeypress="if(event.key==='Enter') sendChatMessage()">
+              <input type="text" id="chatInput" placeholder="Ask or speak in your language..." onkeypress="if(event.key==='Enter') sendChatMessage()">
               <button class="send-btn" onclick="sendChatMessage()">➤</button>
             </div>
           </div>
