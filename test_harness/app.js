@@ -173,7 +173,7 @@ function promptAddGoogleDeviceAccount() {
   }
 }
 
-let googleClientId = localStorage.getItem('udyam_google_client_id') || '';
+let googleClientId = '639490369547-i8jp2qpqh04nkioip8qs57uc274va7im.apps.googleusercontent.com';
 
 async function fetchAuthConfig() {
   try {
@@ -187,43 +187,33 @@ async function fetchAuthConfig() {
 fetchAuthConfig();
 
 async function handleContinueWithGoogle() {
-  // Check if live Google OAuth Client ID is present
-  if (!googleClientId) {
-    const enteredId = prompt(
-      'To enable LIVE, SECURE Google Authentication (where Google verifies real passwords on accounts.google.com), enter your Google OAuth Client ID:\n\n(e.g., from your Firebase/Google Cloud project: 424461774...apps.googleusercontent.com)\n\nOr click Cancel to use the native popup chooser:',
-      localStorage.getItem('udyam_google_client_id') || ''
-    );
-    if (enteredId && enteredId.trim()) {
-      googleClientId = enteredId.trim();
-      localStorage.setItem('udyam_google_client_id', googleClientId);
-      logTerminal(`[Google OAuth] Configured Client ID: ${googleClientId.substring(0, 15)}...`);
-    } else {
-      openGoogleAccountModal();
-      return;
-    }
-  }
+  logTerminal(`[Google OAuth] Opening live Google accounts.google.com authentication window...`);
 
   // Live accounts.google.com OAuth popup via Google Identity Services
   if (window.google && window.google.accounts && window.google.accounts.oauth2) {
     try {
-      logTerminal(`[Google OAuth] Opening live accounts.google.com authentication window...`);
       const tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: googleClientId,
         scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
         callback: async (tokenResponse) => {
           if (tokenResponse.error) {
             logTerminal(`[Google OAuth Error] ${tokenResponse.error}: ${tokenResponse.error_description || ''}`);
-            alert(`Google Authentication Error: ${tokenResponse.error}`);
+            if (tokenResponse.error === 'origin_mismatch') {
+              alert('Google Cloud Console Note: Please add http://localhost:5000 to "Authorized JavaScript origins" in your OAuth Client ID on console.cloud.google.com.');
+              openGoogleAccountModal();
+            } else if (tokenResponse.error !== 'access_denied') {
+              alert(`Google Sign-In: ${tokenResponse.error}`);
+            }
             return;
           }
           if (tokenResponse && tokenResponse.access_token) {
-            logTerminal(`[Google OAuth] Authenticated by Google! Fetching verified profile...`);
+            logTerminal(`[Google OAuth] Real Google token granted! Fetching user profile from Google...`);
             try {
               const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                 headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
               }).then(r => r.json());
 
-              logTerminal(`[Google OAuth] Verified Real User: ${userInfo.name} (${userInfo.email})`);
+              logTerminal(`[Google OAuth] Authenticated verified user: ${userInfo.name} (${userInfo.email})`);
               const initials = (userInfo.name.split(' ').map(n => n[0]).join('') || 'G').substring(0, 2).toUpperCase();
               saveDeviceGoogleAccount(userInfo.email, userInfo.name);
               selectGoogleAccount(userInfo.email, userInfo.name, initials);
@@ -240,6 +230,7 @@ async function handleContinueWithGoogle() {
     }
   }
 
+  // Fallback if GSI script is blocked or still loading
   openGoogleAccountModal();
 }
 
