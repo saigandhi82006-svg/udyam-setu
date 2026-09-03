@@ -178,9 +178,9 @@ const COMPREHENSIVE_GOVT_SCHEMES = [
     targetSector: "MSME / Small Business",
     tagline: "Collateral-free business loans up to ₹10 Lakhs across Shishu, Kishore & Tarun tiers",
     vernacularNames: {
-      te: "ప్రధాన మంత్రి ముద్ర యోజన (PMMY)",
-      hi: "प्रधानमंत्री मुद्रा योजना (PMMY)",
-      mr: "प्रधानमंत्री मुद्रा योजना (PMMY)"
+      te: "ప్రధాన మంత్రి ముద్ర యోజన (ముద్ర రుణం)",
+      hi: "प्रधानमंत्री मुद्रा योजना",
+      mr: "पंतप्रधान मुद्रा योजना"
     },
     description: "Provides non-farm, non-corporate micro and small enterprises with 100% collateral-free loans for working capital, equipment purchase, and retail store setup.",
     maxGrantLoanAmount: 1000000,
@@ -198,18 +198,17 @@ const COMPREHENSIVE_GOVT_SCHEMES = [
     whoCanApply: "Small shopkeepers, fruits/vegetable vendors, small manufacturing units, artisans, food businesses",
     purpose: "Business expansion, inventory stock purchase, machinery setup, shop modernization",
     benefits: [
-      "Zero property, land, or gold collateral required",
-      "Shishu tier: Up to ₹50,000 for seed-stage micro-ventures with zero processing fees",
-      "Mudra RuPay Card provided for hassle-free daily working capital withdrawal at ATMs"
+      "No mortgage or security collateral required up to ₹10 Lakhs",
+      "Available under 3 categories: Shishu (up to ₹50,000), Kishore (₹50k - ₹5L), Tarun (₹5L - ₹10L)",
+      "Low processing fees and Mudra Debit Card for working capital flexibility"
     ],
     requiredDocuments: [
-      { docName: "Aadhaar & PAN Card", description: "Identity KYC", isMandatory: true },
-      { docName: "Business Address Proof", description: "Rent agreement, electricity bill, or Udyam Certificate", isMandatory: true },
-      { docName: "Quotation / Machinery Estimate", description: "Items to be purchased", isMandatory: false },
-      { docName: "Bank Statement (Last 6 Months)", description: "Recent cash flows", isMandatory: true }
+      { docName: "Aadhaar & PAN Card", description: "Applicant KYC", isMandatory: true },
+      { docName: "Proof of Business Address", description: "Electricity bill, shop rent agreement", isMandatory: true },
+      { docName: "Quotation / Machinery Estimate", description: "Cost estimation for shop items or equipment", isMandatory: false }
     ],
     applicationUrl: "https://www.mudra.org.in",
-    tags: ["Collateral-Free", "Zero Processing Fee", "Instant Approval"]
+    tags: ["Collateral-Free", "Low Interest", "Shishu Loan"]
   },
   {
     schemeName: "Prime Minister's Employment Generation Programme (PMEGP)",
@@ -218,9 +217,9 @@ const COMPREHENSIVE_GOVT_SCHEMES = [
     targetSector: "MSME / Small Business",
     tagline: "Credit-linked capital subsidy up to 35% for rural, SC/ST, OBC, and women entrepreneurs",
     vernacularNames: {
-      te: "ప్రధాన మంత్రి ఉపాధి కల్పన కార్యక్రమం (PMEGP - 35% సబ్సిడీ)",
-      hi: "प्रधानमंत्री रोजगार सृजन कार्यक्रम (PMEGP - 35% सब्सिडी)",
-      mr: "पंतप्रधान रोजगार निर्मिती कार्यक्रम (PMEGP - 35% सबसिडी)"
+      te: "ప్రధాన మంత్రి ఉపాధి కల్పన కార్యక్రమం (పీఎంఈజీపీ - 35% రాయితీ)",
+      hi: "प्रधानमंत्री रोजगार सृजन कार्यक्रम (35% सरकारी सब्सिडी)",
+      mr: "पंतप्रधान रोजगार निर्मिती कार्यक्रम (35% सरकारी अनुदान)"
     },
     description: "Flagship credit-linked subsidy initiative by Ministry of MSME. Provides up to 35% non-repayable government cash grant for manufacturing and service ventures.",
     maxGrantLoanAmount: 5000000,

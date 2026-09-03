@@ -125,60 +125,125 @@ async function retrieveRelevantSchemes(query, userProfile = null) {
   return scoredSchemes.slice(0, 4).map(item => item.scheme);
 }
 
+// Helper to provide 100% pure native language scheme details with ZERO English words
+function getVernacularSchemeDetails(scheme, lang) {
+  const l = (lang || 'English').toLowerCase();
+  const id = (scheme?.schemeId || '').toLowerCase();
+  const name = (scheme?.schemeName || '').toLowerCase();
+
+  if (l.includes('telugu') || l === 'te') {
+    let loan = 'రూ. 10 లక్షల వరకు పూచీకత్తు లేని రుణం';
+    let benefit = 'భూమి లేదా బంగారం తాకట్టు పెట్టవలసిన అవసరం లేదు. సులభమైన నెలవారీ వాయిదాలు.';
+    let eligibility = 'చిన్న వ్యాపారులు, కిరాణా కొట్టు యజమానులు, చేతివృత్తుల వారు మరియు మహిళా పారిశ్రామికవేత్తలు.';
+
+    if (id.includes('pmegp') || name.includes('pmegp') || name.includes('ఉపాధి')) {
+      loan = 'రూ. 50 లక్షల వరకు (తయారీ రంగం) / రూ. 20 లక్షల వరకు (సేవా రంగం)';
+      benefit = 'గ్రామీణ ప్రాంతాలలో మరియు మహిళలకు 35% వరకు ప్రభుత్వ నగదు రాయితీ (సబ్సిడీ). ఈ డబ్బును తిరిగి చెల్లించాల్సిన అవసరం లేదు.';
+      eligibility = '18 సంవత్సరాలు నిండిన కొత్త వ్యాపారం లేదా పరిశ్రమ ప్రారంభించాలనుకునే ప్రతి ఒక్కరూ అర్హులు.';
+    } else if (id.includes('mudra') || name.includes('mudra') || name.includes('ముద్ర')) {
+      loan = 'రూ. 50,000 (శిశు) నుండి రూ. 10 లక్షల (తరుణ్) వరకు';
+      benefit = 'ఎటువంటి ఆస్తి లేదా పూచీకత్తు లేకుండా బ్యాంకుల ద్వారా తక్కువ వడ్డీకే సులభంగా లభించే రుణం.';
+      eligibility = 'చిన్న వ్యాపారులు, కిరాణా దుకాణాలు, పండ్ల వ్యాపారులు, చిన్న సర్వీస్ షాపులు.';
+    } else if (id.includes('svanidhi') || name.includes('svanidhi') || name.includes('స్వనిధి')) {
+      loan = 'రూ. 10,000 నుండి రూ. 50,000 వరకు ప్రారంభ మూలధనం';
+      benefit = 'డిజిటల్ లావాదేవీలపై క్యాష్‌బ్యాక్ మరియు సకాలంలో చెల్లిస్తే 7% ప్రభుత్వ వడ్డీ రాయితీ.';
+      eligibility = 'వీధి వ్యాపారులు, తోపుడు బండ్ల వ్యాపారులు మరియు ఫుట్‌పాత్ విక్రేతలు.';
+    } else if (id.includes('kcc') || name.includes('kisan') || name.includes('కిసాన్')) {
+      loan = 'రూ. 3 లక్షల వరకు సులభ వ్యవసాయ రుణం';
+      benefit = 'సకాలంలో చెల్లిస్తే కేవలం 4% వడ్డీ మాత్రమే. 3% ప్రభుత్వ వడ్డీ రాయితీ.';
+      eligibility = 'రైతులు, పాడి రైతులు, పశుపోషకులు మరియు మత్స్యకారులు.';
+    } else if (id.includes('standup') || name.includes('stand') || name.includes('స్టాండప్')) {
+      loan = 'రూ. 10 లక్షల నుండి రూ. 1 కోటి వరకు మూలధనం';
+      benefit = 'మహిళలు మరియు ఎస్సీ/ఎస్టీ వర్గాల కోసం ప్రత్యేక మూలధన రాయితీ మరియు రుణ సదుపాయం.';
+      eligibility = 'మహిళా పారిశ్రామికవేత్తలు లేదా ఎస్సీ/ఎస్టీ వర్గాల నూతన వ్యాపారవేత్తలు.';
+    } else if (id.includes('vishwakarma') || name.includes('విశ్వకర్మ')) {
+      loan = 'రూ. 15,000 ఉచిత ఆధునిక పనిముట్ల గ్రాంట్ + రూ. 3 లక్షల వరకు రుణం';
+      benefit = 'కేవలం 5% తక్కువ వడ్డీతో పాటు ఉచిత ఆధునిక పనిముట్లు మరియు ఉచిత శిక్షణ.';
+      eligibility = 'చేతివృత్తుల వారు, చేనేత కార్మికులు, వడ్రంగులు, కమ్మరులు, కుమ్మరులు, దర్జీలు.';
+    }
+
+    return { loan, benefit, eligibility };
+  }
+
+  if (l.includes('hindi') || l === 'hi') {
+    let loan = '₹10 लाख तक बिना गारंटी ऋण';
+    let benefit = 'जमीन या सोना गिरवी रखने की कोई आवश्यकता नहीं। आसान मासिक किस्तें।';
+    let eligibility = 'छोटे दुकानदार, खुदरा व्यापारी, महिला उद्यमी और कारीगर।';
+
+    if (id.includes('pmegp') || name.includes('pmegp')) {
+      loan = '₹50 लाख तक (विनिर्माण) / ₹20 लाख तक (सेवा व्यवसाय)';
+      benefit = 'ग्रामीण और महिला उद्यमियों के लिए 35% तक सरकारी नकद अनुदान (सब्सिडी)।';
+      eligibility = '18 वर्ष से अधिक आयु का कोई भी नागरिक जो नया व्यवसाय शुरू करना चाहता है।';
+    } else if (id.includes('mudra') || name.includes('mudra')) {
+      loan = '₹50,000 (शिशु) से ₹10 लाख (तरुण) तक';
+      benefit = 'बिना किसी संपत्ति गारंटी के बैंकों द्वारा आसान ऋण सुविधा।';
+      eligibility = 'दुकानदार, फल-सब्जी विक्रेता, छोटे सेवा प्रदाता और निर्माता।';
+    } else if (id.includes('svanidhi') || name.includes('svanidhi')) {
+      loan = '₹10,000 से ₹50,000 तक';
+      benefit = 'समय पर भुगतान पर 7% ब्याज सब्सिडी और डिजिटल कैशबैक।';
+      eligibility = 'स्ट्रीट वेंडर, ठेले वाले और रेहड़ी-पटरी व्यापारी।';
+    } else if (id.includes('kcc') || name.includes('kisan')) {
+      loan = '₹3 लाख तक आसान कृषि ऋण';
+      benefit = 'समय पर अदायगी पर केवल 4% प्रभावी ब्याज दर।';
+      eligibility = 'किसान, पशुपालक और डेयरी किसान।';
+    }
+
+    return { loan, benefit, eligibility };
+  }
+
+  return {
+    loan: scheme.loanAmountFormatted,
+    benefit: scheme.benefits?.[0] || 'Collateral-free government credit',
+    eligibility: scheme.whoCanApply || 'Micro and small business owners'
+  };
+}
+
 /**
- * 3. Dynamic Vernacular Fallback Generator (When API key is offline)
+ * 3. Dynamic Vernacular Fallback Generator (100% Pure Language, Zero English)
  */
 function buildVernacularFallbackReply(message, schemes, language = 'English', userProfile = null) {
   const lang = (language || 'English').toLowerCase();
   const top = schemes[0] || {};
   const second = schemes[1] || {};
 
-  // TELUGU (తెలుగు)
-  if (lang.includes('telugu') || lang === 'te') {
+  // TELUGU (100% Pure Telugu, Zero English Words)
+  if (lang.includes('telugu') || lang === 'te' || /[\u0C00-\u0C7F]/.test(message)) {
+    const topV = getVernacularSchemeDetails(top, 'telugu');
+    const secondV = getVernacularSchemeDetails(second, 'telugu');
+
     return `నమస్కారం! మీ ప్రశ్న ఆధారంగా, ప్రభుత్వం నుండి మీకు అత్యంత ప్రయోజనకరమైన పథకాలు ఇక్కడ ఉన్నాయి:
 
 1. **${top.vernacularNames?.te || top.schemeName}**:
-   - **ఆర్థిక సహాయం:** ${top.loanAmountFormatted || 'రుణ సదుపాయం'} (${top.subsidyPercentage ? top.subsidyPercentage + '% సబ్సిడీ' : 'పూచీకత్తు లేని రుణం'}).
-   - **ప్రయోజనం:** ${top.benefits?.[0] || 'సులభమైన వాయిదాలు'}.
-   - **ఎవరు అర్హులు:** ${top.whoCanApply || 'చిన్న వ్యాపారులు మరియు పారిశ్రామికవేత్తలు'}.
+   - **ఆర్థిక సహాయం:** ${topV.loan}
+   - **ప్రయోజనం:** ${topV.benefit}
+   - **ఎవరు అర్హులు:** ${topV.eligibility}
 
 ${second.schemeName ? `2. **${second.vernacularNames?.te || second.schemeName}**:
-   - **సహాయం:** ${second.loanAmountFormatted}
-   - **ప్రత్యేకత:** ${second.benefits?.[0] || 'ప్రభుత్వ సహాయం'}.` : ''}
+   - **ఆర్థిక సహాయం:** ${secondV.loan}
+   - **ప్రయోజనం:** ${secondV.benefit}
+   - **ఎవరు అర్హులు:** ${secondV.eligibility}` : ''}
 
-**ముఖ్యమైన పత్రాలు:** ఆధార్ కార్డు, బ్యాంక్ పాస్‌బుక్ మరియు వ్యాపార/భూమి వివరాలు సిద్ధం చేసుకోండి. మీరు దగ్గరలోని గ్రామీణ బ్యాంక్ లేదా CSC కేంద్రం ద్వారా దరఖాస్తు చేసుకోవచ్చు. మీకు మరిన్ని వివరాలు కావాలా?`;
+**ముఖ్యమైన పత్రాలు:** ఆధార్ కార్డు, పాన్ కార్డు, బ్యాంక్ ఖాతా పుస్తకం మరియు మీ వ్యాపార వివరాలు సిద్ధం చేసుకోండి. మీరు మీ దగ్గరలోని గ్రామీణ బ్యాంకు లేదా మీ-సేవ కేంద్రం ద్వారా సులభంగా దరఖాస్తు చేసుకోవచ్చు. మీకు ఈ పథకాలపై మరిన్ని వివరాలు కావాలా?`;
   }
 
-  // MARATHI (मराठी)
-  if (lang.includes('marathi') || lang === 'mr') {
-    return `नमस्कार! तुमच्या प्रश्नानुसार आणि व्यवसायाच्या गरजेनुसार सर्वात योग्य सरकारी योजना खालीलप्रमाणे आहेत:
+  // HINDI (100% Pure Hindi, Zero English Words)
+  if (lang.includes('hindi') || lang === 'hi' || /[\u0900-\u097F]/.test(message)) {
+    const topV = getVernacularSchemeDetails(top, 'hindi');
+    const secondV = getVernacularSchemeDetails(second, 'hindi');
 
-1. **${top.vernacularNames?.mr || top.schemeName}**:
-   - **आर्थिक मदत:** ${top.loanAmountFormatted || 'कर्ज सुविधा'} (${top.subsidyPercentage ? top.subsidyPercentage + '% सरकारी सबसिडी' : 'विनातारण कर्ज'}).
-   - **फायदा:** ${top.benefits?.[0] || 'सुलभ हप्ते'}.
-   - **पात्रता:** ${top.whoCanApply || 'लहान व्यावसायिक आणि उद्योजक'}.
-
-${second.schemeName ? `2. **${second.vernacularNames?.mr || second.schemeName}**:
-   - **मदत:** ${second.loanAmountFormatted}
-   - **वैशिष्ट्य:** ${second.benefits?.[0] || 'सरकारी अनुदान'}.` : ''}
-
-**आवश्यक कागदपत्रे:** आधार कार्ड, बँक पासबुक आणि व्यवसाय/जमीन पुरावा. जवळच्या ग्रामीण बँक किंवा सीएससी (CSC) केंद्रात संपर्क साधा. आपल्याला आणखी काही माहिती हवी आहे का?`;
-  }
-
-  // HINDI (हिन्दी)
-  if (lang.includes('hindi') || lang === 'hi') {
     return `नमस्ते! आपके प्रश्न और आवश्यकता के अनुसार सबसे उपयुक्त सरकारी योजनाएं निम्नलिखित हैं:
 
 1. **${top.vernacularNames?.hi || top.schemeName}**:
-   - **वित्तीय सहायता:** ${top.loanAmountFormatted || 'ऋण सुविधा'} (${top.subsidyPercentage ? top.subsidyPercentage + '% सरकारी सब्सिडी' : 'बिना गारंटी लोन'}).
-   - **मुख्य लाभ:** ${top.benefits?.[0] || 'आसान मासिक किस्तें'}.
-   - **कौन आवेदन कर सकता है:** ${top.whoCanApply || 'सूक्ष्म एवं छोटे उद्यमी'}.
+   - **वित्तीय सहायता:** ${topV.loan}
+   - **मुख्य लाभ:** ${topV.benefit}
+   - **कौन आवेदन कर सकता है:** ${topV.eligibility}
 
 ${second.schemeName ? `2. **${second.vernacularNames?.hi || second.schemeName}**:
-   - **सहायता:** ${second.loanAmountFormatted}
-   - **विशेषता:** ${second.benefits?.[0] || 'सरकारी अनुदान'}.` : ''}
+   - **वित्तीय सहायता:** ${secondV.loan}
+   - **मुख्य लाभ:** ${secondV.benefit}
+   - **कौन आवेदन कर सकता है:** ${secondV.eligibility}` : ''}
 
-**ज़रूरी दस्तावेज़:** आधार कार्ड, पैन कार्ड और बैंक पासबुक। नजदीकी बैंक या सीएससी (CSC) केंद्र में आवेदन कर सकते हैं। क्या आप किसी विशेष योजना की पात्रता जानना चाहते हैं?`;
+**ज़रूरी दस्तावेज़:** आधार कार्ड, पैन कार्ड और बैंक पासबुक। नजदीकी बैंक या जन सेवा केंद्र में आवेदन कर सकते हैं। क्या आप किसी विशेष योजना की पात्रता जानना चाहते हैं?`;
   }
 
   // ENGLISH
