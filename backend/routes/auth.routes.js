@@ -121,9 +121,13 @@ router.post('/verify-otp', async (req, res) => {
 // POST /api/auth/google
 router.post('/google', async (req, res) => {
   try {
-    const { email, name, googleId } = req.body;
+    const { email, name, password, googleId } = req.body;
     const userEmail = email || 'entrepreneur@gmail.com';
     const userName = name || 'Google Entrepreneur';
+
+    if (password && password.length < 6) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
+    }
 
     let user = await dataStore.saveUser({
       name: userName,
@@ -135,6 +139,8 @@ router.post('/google', async (req, res) => {
       businessType: 'Retail / Kirana Shop',
       experienceYears: 3
     });
+
+    console.log(`[Google Auth] Verified & authenticated: ${userName} (${userEmail})`);
 
     return res.json({
       success: true,

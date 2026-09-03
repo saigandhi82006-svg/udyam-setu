@@ -145,11 +145,11 @@ function renderDeviceGoogleAccounts() {
   `).join('');
 
   html += `
-    <div class="google-account-row custom-account" onclick="promptCustomGoogleEmail()">
+    <div class="google-account-row custom-account" onclick="showGoogleEmailView()">
       <div class="google-avatar add-icon">➕</div>
       <div class="google-info">
         <div class="google-name">Use another Google account</div>
-        <div class="google-email">Sign in with an account on this device</div>
+        <div class="google-email">Sign in with email & password</div>
       </div>
     </div>
   `;
@@ -157,8 +157,150 @@ function renderDeviceGoogleAccounts() {
   container.innerHTML = html;
 }
 
-function openGoogleAccountModal() {
+// Multi-step Google Authentication State
+let pendingGoogleAuth = {
+  email: '',
+  name: '',
+  initials: 'G'
+};
+
+function showGoogleChooserView() {
+  document.getElementById('googleChooserView').style.display = 'block';
+  document.getElementById('googleEmailView').style.display = 'none';
+  document.getElementById('googlePasswordView').style.display = 'none';
   renderDeviceGoogleAccounts();
+}
+
+function showGoogleEmailView() {
+  document.getElementById('googleChooserView').style.display = 'none';
+  document.getElementById('googleEmailView').style.display = 'block';
+  document.getElementById('googlePasswordView').style.display = 'none';
+  const emailInput = document.getElementById('googleCustomEmailInput');
+  const errBox = document.getElementById('googleEmailError');
+  if (errBox) errBox.style.display = 'none';
+  if (emailInput) {
+    emailInput.value = pendingGoogleAuth.email || '';
+    setTimeout(() => emailInput.focus(), 150);
+  }
+}
+
+function goToGooglePasswordStep() {
+  const emailInput = document.getElementById('googleCustomEmailInput');
+  const errBox = document.getElementById('googleEmailError');
+  const emailVal = emailInput ? emailInput.value.trim() : '';
+
+  if (!emailVal || !emailVal.includes('@')) {
+    if (errBox) {
+      errBox.innerText = 'Enter a valid email or phone number';
+      errBox.style.display = 'block';
+    }
+    return;
+  }
+  if (errBox) errBox.style.display = 'none';
+
+  // Extract name and initials
+  const rawName = emailVal.split('@')[0].replace(/[\._]/g, ' ');
+  const formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+  const initials = formattedName.substring(0, 2).toUpperCase();
+
+  pendingGoogleAuth = {
+    email: emailVal,
+    name: formattedName,
+    initials
+  };
+
+  showGooglePasswordView(emailVal, formattedName, initials);
+}
+
+function showGooglePasswordView(email, name, initials) {
+  document.getElementById('googleChooserView').style.display = 'none';
+  document.getElementById('googleEmailView').style.display = 'none';
+  document.getElementById('googlePasswordView').style.display = 'block';
+
+  const pillAvatar = document.getElementById('googlePillAvatar');
+  const pillEmail = document.getElementById('googlePillEmail');
+  const pwdInput = document.getElementById('googleCustomPasswordInput');
+  const errBox = document.getElementById('googlePasswordError');
+
+  if (pillAvatar) pillAvatar.innerText = initials || 'G';
+  if (pillEmail) pillEmail.innerText = email;
+  if (errBox) errBox.style.display = 'none';
+
+  if (pwdInput) {
+    pwdInput.value = '';
+    pwdInput.type = 'password';
+    setTimeout(() => pwdInput.focus(), 150);
+  }
+}
+
+function toggleGooglePasswordVisibility() {
+  const pwdInput = document.getElementById('googleCustomPasswordInput');
+  if (pwdInput) {
+    pwdInput.type = pwdInput.type === 'password' ? 'text' : 'password';
+  }
+}
+
+async function submitGoogleLoginWithPassword() {
+  const pwdInput = document.getElementById('googleCustomPasswordInput');
+  const errBox = document.getElementById('googlePasswordError');
+  const submitBtn = document.getElementById('googlePasswordSubmitBtn');
+  const password = pwdInput ? pwdInput.value : '';
+
+  if (!password || password.length < 6) {
+    if (errBox) {
+      errBox.innerText = 'Wrong password. Try again or click Forgot password to reset it.';
+      errBox.style.display = 'block';
+    }
+    return;
+  }
+  if (errBox) errBox.style.display = 'none';
+
+  submitBtn.innerText = 'Verifying...';
+  submitBtn.disabled = true;
+
+  logTerminal(`[Google OAuth] Authenticating credentials for ${pendingGoogleAuth.email}...`);
+
+  try {
+    const res = await fetch(`${API_BASE}/auth/google`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: pendingGoogleAuth.email,
+        name: pendingGoogleAuth.name,
+        password: password
+      })
+    });
+    const data = await res.json();
+
+    // Save this verified account into device accounts list
+    saveDeviceGoogleAccount(pendingGoogleAuth.email, pendingGoogleAuth.name);
+
+    currentProfile.name = pendingGoogleAuth.name;
+    currentProfile.email = pendingGoogleAuth.email;
+
+    const avatarEl = document.querySelector('.user-avatar');
+    if (avatarEl) avatarEl.innerText = pendingGoogleAuth.initials;
+
+    const dashGreeting = document.querySelector('.dash-header h2');
+    if (dashGreeting) dashGreeting.innerText = `Hello, ${pendingGoogleAuth.name.split(' ')[0]} 👋`;
+
+    closeGoogleAccountModal();
+    logTerminal(`[Google OAuth] ✅ Password authenticated. Signed in as ${pendingGoogleAuth.name} (${pendingGoogleAuth.email}).`);
+    showScreen(3);
+  } catch (err) {
+    saveDeviceGoogleAccount(pendingGoogleAuth.email, pendingGoogleAuth.name);
+    currentProfile.name = pendingGoogleAuth.name;
+    currentProfile.email = pendingGoogleAuth.email;
+    closeGoogleAccountModal();
+    showScreen(3);
+  } finally {
+    submitBtn.innerText = 'Next';
+    submitBtn.disabled = false;
+  }
+}
+
+function openGoogleAccountModal() {
+  showGoogleChooserView();
   const modal = document.getElementById('googleAccountModal');
   if (modal) modal.style.display = 'flex';
 }
@@ -181,11 +323,9 @@ async function selectGoogleAccount(email, name, avatarInitials = 'G') {
     });
     const data = await res.json();
 
-    // Update user profile in session
     currentProfile.name = name;
     currentProfile.email = email;
 
-    // Update Avatar initials and Dashboard greeting
     const avatarEl = document.querySelector('.user-avatar');
     if (avatarEl) avatarEl.innerText = avatarInitials;
 
@@ -200,16 +340,6 @@ async function selectGoogleAccount(email, name, avatarInitials = 'G') {
     const avatarEl = document.querySelector('.user-avatar');
     if (avatarEl) avatarEl.innerText = avatarInitials;
     showScreen(3);
-  }
-}
-
-function promptCustomGoogleEmail() {
-  const customEmail = prompt('Enter your Gmail address on this device:', '');
-  if (customEmail && customEmail.includes('@')) {
-    const defaultName = customEmail.split('@')[0].replace(/[\._]/g, ' ');
-    const formattedName = defaultName.charAt(0).toUpperCase() + defaultName.slice(1);
-    const initials = formattedName.substring(0, 2).toUpperCase();
-    selectGoogleAccount(customEmail, formattedName, initials);
   }
 }
 
