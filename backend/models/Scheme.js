@@ -1,0 +1,104 @@
+const mongoose = require('mongoose');
+
+const SchemeSchema = new mongoose.Schema({
+  schemeName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  shortCode: {
+    type: String,
+    trim: true
+  },
+  category: {
+    type: String, // e.g., 'Central Government', 'State Government', 'MSME', 'Women Empowerment', 'Rural Development'
+    default: 'Central Government'
+  },
+  tagline: {
+    type: String,
+    default: ''
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  maxGrantLoanAmount: {
+    type: Number, // in INR
+    required: true
+  },
+  loanAmountFormatted: {
+    type: String, // e.g. "Up to ₹10,00,000"
+    default: ''
+  },
+  interestRate: {
+    type: String, // e.g., "8% - 12% (approx.)" or "Subsidized (0% - 7%)"
+    default: '8% - 12%'
+  },
+  interestRateNumeric: {
+    type: Number, // for financial calculation default, e.g. 9.5
+    default: 9.5
+  },
+  repaymentPeriod: {
+    type: String, // e.g., "Up to 5 Years"
+    default: 'Up to 5 Years'
+  },
+  repaymentPeriodYears: {
+    type: Number,
+    default: 5
+  },
+  minAge: {
+    type: Number,
+    default: 18
+  },
+  maxIncome: {
+    type: Number, // 0 or null means no income cap
+    default: 0
+  },
+  eligibleCategories: [{
+    type: String
+    // 'General', 'OBC', 'SC', 'ST', 'Women Entrepreneur', 'Minority', 'All'
+  }],
+  eligibleBusinessTypes: [{
+    type: String
+    // 'Food Business', 'Handicrafts & Handlooms', 'Retail / Kirana Shop', etc. or 'All'
+  }],
+  minExperienceYears: {
+    type: Number,
+    default: 0
+  },
+  subsidyPercentage: {
+    type: Number, // e.g. 15 to 35% subsidy
+    default: 0
+  },
+  whoCanApply: {
+    type: String,
+    default: 'Micro & Small Enterprises'
+  },
+  purpose: {
+    type: String,
+    default: 'Business Expansion, Working Capital, New Business Setup'
+  },
+  benefits: [{
+    type: String
+  }],
+  requiredDocuments: [{
+    docName: { type: String, required: true },
+    description: { type: String, default: '' },
+    isMandatory: { type: Boolean, default: true }
+  }],
+  applicationUrl: {
+    type: String,
+    default: 'https://udyamregistration.gov.in'
+  },
+  tags: [{
+    type: String // e.g. "Low Interest", "Collateral-Free", "High Subsidy", "Fast Process"
+  }],
+  isActive: {
+    type: Boolean,
+    default: true
+  }
+}, {
+  timestamps: true
+});
+
+module.exports = mongoose.models.Scheme || mongoose.model('Scheme', SchemeSchema);

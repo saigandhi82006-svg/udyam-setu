@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Udyam Setu - AI-Driven Scheme Matching Platform (SIH PS ID: 92)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="brand">
+      <div class="brand-badge">
+        <span class="logo-icon">🌱</span>
+      </div>
+      <div>
+        <h1 class="brand-title">Udyam Setu <span class="sih-tag">SIH 2026 • PS ID: 92</span></h1>
+        <p class="brand-sub">Right Scheme • Right Guidance • Right Growth</p>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <div class="backend-status" id="backendStatus">
+        <span class="status-dot"></span> Backend Online: Port 5000
+      </div>
+      <button class="nav-btn" onclick="switchView('mobile')">📱 Mobile App Simulator</button>
+      <button class="nav-btn secondary" onclick="switchView('api')">⚡ Live API Tester</button>
+    </div>
+  </header>
+
+  <main class="main-layout">
+    <!-- Left Screen Switcher / Journey Step Tracker -->
+    <aside class="workflow-sidebar">
+      <h3 class="sidebar-title">APP INTERFACE • STEP-BY-STEP</h3>
+      <div class="steps-nav" id="stepsNav">
+        <button class="step-btn active" onclick="showScreen(1)">
+          <span class="step-num">1</span>
+          <div class="step-meta"><strong>Splash Screen</strong><small>Welcome & mission</small></div>
+        </button>
+        <button class="step-btn" onclick="showScreen(2)">
+          <span class="step-num">2</span>
+          <div class="step-meta"><strong>Login / Sign Up</strong><small>OTP & guest access</small></div>
+        </button>
+        <button class="step-btn" onclick="showScreen(3)">
+          <span class="step-num">3</span>
+          <div class="step-meta"><strong>Home Dashboard</strong><small>Quick access grid</small></div>
+        </button>
+        <button class="step-btn" onclick="showScreen(4)">
+          <span class="step-num">4</span>
+          <div class="step-meta"><strong>AI Chat / Ask</strong><small>Gemini vernacular AI</small></div>
+        </button>
+        <button class="step-btn" onclick="showScreen(5)">
+          <span class="step-num">5</span>
+          <div class="step-meta"><strong>User Details</strong><small>Step-by-step profiling</small></div>
+        </button>
+        <button class="step-btn" onclick="showScreen(6)">
+          <span class="step-num">6</span>
+          <div class="step-meta"><strong>Scheme Match Results</strong><small>Rule engine scores</small></div>
+        </button>
+        <button class="step-btn" onclick="showScreen(7)">
+          <span class="step-num">7</span>
+          <div class="step-meta"><strong>Scheme Details</strong><small>Benefits & eligibility</small></div>
+        </button>
+        <button class="step-btn" onclick="showScreen(8)">
+          <span class="step-num">8</span>
+          <div class="step-meta"><strong>EMI Calculator</strong><small>Repayment planner</small></div>
+        </button>
+        <button class="step-btn" onclick="showScreen(9)">
+          <span class="step-num">9</span>
+          <div class="step-meta"><strong>Nearest Partner</strong><small>Banks, CSCs, KVKs</small></div>
+        </button>
+        <button class="step-btn" onclick="showScreen(10)">
+          <span class="step-num">10</span>
+          <div class="step-meta"><strong>Document Checklist</strong><small>Upload & verify status</small></div>
+        </button>
+      </div>
+
+      <!-- SIH Impact Summary Box -->
+      <div class="sih-box">
+        <h4>🎯 Key Innovations</h4>
+        <ul>
+          <li><strong>Deterministic Rule Matcher:</strong> Zero hallucinations in eligibility</li>
+          <li><strong>Vernacular Gemini Guidance:</strong> Empowers non-literate rural founders</li>
+          <li><strong>Spatial Channel Locator:</strong> Direct bridge to CSCs & Lead Banks</li>
+          <li><strong>Mathematical EMI Engine:</strong> Realistic financial foresight</li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Center Phone Device Mockup Frame -->
+    <section class="simulator-container">
+      <div class="phone-frame">
+        <div class="phone-notch">
+          <span class="time-label">9:41</span>
+          <div class="speaker-pill"></div>
+          <div class="status-icons">📶 🔋</div>
+        </div>
+
+        <div class="phone-screen" id="phoneScreen">
+          <!-- SCREEN 1: SPLASH SCREEN -->
+          <div class="screen active" id="screen-1">
+            <div class="splash-header">
+              <span class="sih-chip">SIH 2026 • PS 92</span>
+            </div>
+            <div class="splash-hero">
+              <div class="sprout-badge">🌱</div>
+              <h2 class="app-brand-name">Udyam Setu</h2>
+              <p class="app-tagline">AI-Powered Scheme Matching<br>for Every Entrepreneur</p>
+            </div>
+            <div class="splash-illustration">
+              <div class="scenic-banner">
+                <div class="scenic-top">🌾 🚜 ⚡ ☀️</div>
+                <div class="scenic-bottom">
+                  <h4>Right Scheme • Right Growth</h4>
+                  <small>Empowering Marginalized Businesses</small>
+                </div>
+              </div>
+            </div>
+            <div class="carousel-dots">
+              <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+            <div class="splash-footer">
+              <button class="pill-btn primary" onclick="showScreen(2)">Get Started →</button>
+            </div>
+          </div>
+
+          <!-- SCREEN 2: LOGIN / SIGN UP -->
+          <div class="screen" id="screen-2">
+            <div class="auth-top">
+              <div class="logo-chip">🌱 <strong>Udyam Setu</strong></div>
+              <h2>Welcome Back!</h2>
+              <p>Login to continue your business journey</p>
+            </div>
+            <div class="auth-form">
+              <label>Mobile Number</label>
+              <div class="input-with-prefix">
+                <span class="prefix">🇮🇳 +91</span>
+                <input type="tel" id="loginPhone" value="9876543210" placeholder="Enter Mobile Number" maxlength="10">
+              </div>
+              <button class="pill-btn primary" id="sendOtpBtn" onclick="handleSendOTP()">Send OTP</button>
+
+              <div id="otpBox" style="display:none; margin-top: 16px;">
+                <label>Enter 6-Digit OTP (Test: 123456)</label>
+                <input type="text" id="otpInput" class="otp-input" value="123456" maxlength="6">
+                <button class="pill-btn primary" onclick="handleVerifyOTP()">Verify & Continue</button>
+              </div>
+
+              <div class="or-divider"><span>OR</span></div>
+
+              <button class="pill-btn outline" onclick="showScreen(3)">
+                <span class="btn-icon">🌐</span> Continue with Google
+              </button>
+              <button class="pill-btn outline" onclick="showScreen(3)">
+                <span class="btn-icon">👤</span> Continue as Guest
+              </button>
+
+              <p class="auth-footer-text">New user? <a href="#" onclick="showScreen(5)">Sign Up</a></p>
+            </div>
+          </div>
+
+          <!-- SCREEN 3: HOME DASHBOARD -->
+          <div class="screen" id="screen-3">
+            <div class="dash-header">
+              <div>
+                <h2>Hello, Entrepreneur 👋</h2>
+                <p>How can we help you today?</p>
+              </div>
+              <div class="user-avatar" onclick="showScreen(5)">RK</div>
+            </div>
+
+            <!-- Hero Banner -->
+            <div class="banner-card">
+              <div class="banner-content">
+                <h3>Find Schemes for You</h3>
+                <p>Answer a few questions and get best matching schemes.</p>
+                <button class="banner-btn" onclick="showScreen(5)">Start Now →</button>
+              </div>
+              <div class="banner-icon">📋</div>
+            </div>
+
+            <h4 class="section-title">Quick Access</h4>
+            <div class="quick-grid">
+              <div class="quick-item" onclick="showScreen(5)">
+                <div class="icon-circle green">✨</div>
+                <span>Match Schemes</span>
+              </div>
+              <div class="quick-item" onclick="showScreen(8)">
+                <div class="icon-circle blue">🧮</div>
+                <span>EMI Calculator</span>
+              </div>
+              <div class="quick-item" onclick="showScreen(10)">
+                <div class="icon-circle amber">📄</div>
+                <span>My Applications</span>
+              </div>
+              <div class="quick-item" onclick="showScreen(10)">
+                <div class="icon-circle purple">📁</div>
+                <span>Documents</span>
+              </div>
+              <div class="quick-item" onclick="showScreen(9)">
+                <div class="icon-circle teal">📍</div>
+                <span>Nearby Partners</span>
+              </div>
+              <div class="quick-item" onclick="showScreen(4)">
+                <div class="icon-circle red">💬</div>
+                <span>Help & Support</span>
+              </div>
+            </div>
+
+            <div class="dash-bottom-nav">
+              <div class="nav-tab active" onclick="showScreen(3)"><span>🏠</span><small>Home</small></div>
+              <div class="nav-tab" onclick="showScreen(4)"><span>💬</span><small>Chat</small></div>
+              <div class="nav-tab" onclick="showScreen(6)"><span>⭐</span><small>Saved</small></div>
+              <div class="nav-tab" onclick="showScreen(5)"><span>👤</span><small>Profile</small></div>
+            </div>
+          </div>
+
+          <!-- SCREEN 4: AI CHAT / ASK -->
+          <div class="screen" id="screen-4">
+            <div class="chat-header">
+              <button class="back-btn" onclick="showScreen(3)">‹</button>
+              <div class="chat-title-group">
+                <h4>Udyam Sethu AI</h4>
+                <span class="chat-status"><span class="green-dot"></span> Online • Vernacular</span>
+              </div>
+              <span class="header-icon">📷</span>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+              <div class="chat-bubble user">
+                I want a loan for starting a small food business.
+              </div>
+              <div class="chat-bubble ai">
+                Great! I will help you find the best schemes for your business. May I know your business category?
+                <small class="ai-credit">✨ Powered by Gemini AI</small>
+              </div>
+            </div>
+
+            <!-- Voice mic bar -->
+            <div class="voice-bar">
+              <span id="voicePromptText">Tap to Speak</span>
+              <button class="voice-btn" id="voiceBtn" onclick="simulateVoiceInput()">🎙️</button>
+            </div>
+
+            <!-- Language & text input row -->
+            <div class="chat-input-row">
+              <select id="chatLangSelect" class="lang-select">
+                <option value="English">English</option>
+                <option value="Hindi">हिन्दी (Hindi)</option>
+                <option value="Telugu">తెలుగు (Telugu)</option>
+                <option value="Tamil">தமிழ் (Tamil)</option>
+                <option value="Marathi">मराठी (Marathi)</option>
+              </select>
+              <input type="text" id="chatInput" placeholder="Ask in your own language..." onkeypress="if(event.key==='Enter') sendChatMessage()">
+              <button class="send-btn" onclick="sendChatMessage()">➤</button>
+            </div>
+          </div>
+
+          <!-- SCREEN 5: USER DETAILS PROFILING -->
+          <div class="screen" id="screen-5">
+            <div class="sub-header">
+              <button class="back-btn" onclick="showScreen(3)">‹</button>
+              <h4>Tell us about yourself</h4>
+            </div>
+            <div class="step-indicator">
+              <span>Step 2 of 5</span>
+              <div class="progress-bar"><div class="progress-fill" style="width: 40%;"></div></div>
+            </div>
+
+            <div class="form-body">
+              <div class="form-group">
+                <label>Age</label>
+                <input type="number" id="profAge" value="28">
+              </div>
+              <div class="form-group">
+                <label>Category</label>
+                <select id="profCategory">
+                  <option value="OBC" selected>OBC</option>
+                  <option value="SC">SC</option>
+                  <option value="ST">ST</option>
+                  <option value="General">General</option>
+                  <option value="Women Entrepreneur">Women Entrepreneur</option>
+                  <option value="Minority">Minority</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Annual Income</label>
+                <div class="input-with-prefix">
+                  <span class="prefix">₹</span>
+                  <input type="number" id="profIncome" value="240000">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Business Type / Activity</label>
+                <select id="profBusiness">
+                  <option value="Food Business" selected>Food Business</option>
+                  <option value="Retail / Kirana Shop">Retail / Kirana Shop</option>
+                  <option value="Handicrafts & Handlooms">Handicrafts & Handlooms</option>
+                  <option value="Agriculture & Allied">Agriculture & Allied</option>
+                  <option value="Textile & Garments">Textile & Garments</option>
+                  <option value="Manufacturing & Fabrication">Manufacturing & Fabrication</option>
+                  <option value="Services / Repair Shop">Services / Repair Shop</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Experience</label>
+                <input type="text" id="profExperience" value="2 Years">
+              </div>
+
+              <button class="pill-btn primary mt-4" onclick="runSchemeMatching()">Next →</button>
+            </div>
+          </div>
+
+          <!-- SCREEN 6: SCHEME MATCH RESULTS -->
+          <div class="screen" id="screen-6">
+            <div class="sub-header">
+              <button class="back-btn" onclick="showScreen(5)">‹</button>
+              <div class="center-title">
+                <h4>Matching Schemes</h4>
+                <small>Based on your information</small>
+              </div>
+            </div>
+
+            <div class="scheme-list" id="schemeListContainer">
+              <!-- Dynamically populated by matchingEngine -->
+            </div>
+
+            <div class="screen-footer">
+              <button class="pill-btn primary" onclick="loadAllRegistrySchemes()">View All Schemes</button>
+            </div>
+          </div>
+
+          <!-- SCREEN 7: SCHEME DETAILS -->
+          <div class="screen" id="screen-7">
+            <div class="sub-header">
+              <button class="back-btn" onclick="showScreen(6)">‹</button>
+              <div class="center-title">
+                <h4 id="detailSchemeName">PM Mudra Yojana</h4>
+              </div>
+              <span class="match-badge-pill" id="detailMatchBadge">90% Match</span>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs-bar">
+              <button class="tab-btn active" onclick="switchDetailTab('overview')">Overview</button>
+              <button class="tab-btn" onclick="switchDetailTab('benefits')">Benefits</button>
+              <button class="tab-btn" onclick="switchDetailTab('eligibility')">Eligibility</button>
+              <button class="tab-btn" onclick="switchDetailTab('documents')">Documents</button>
+            </div>
+
+            <div class="detail-content" id="detailTabContent">
+              <!-- Rendered via JS -->
+            </div>
+
+            <div class="scheme-action-bar">
+              <button class="pill-btn outline" onclick="alert('Scheme saved to bookmarks!')">Save</button>
+              <button class="pill-btn primary" onclick="showScreen(10)">Apply Now</button>
+            </div>
+          </div>
+
+          <!-- SCREEN 8: EMI CALCULATOR -->
+          <div class="screen" id="screen-8">
+            <div class="sub-header">
+              <button class="back-btn" onclick="showScreen(3)">‹</button>
+              <h4>EMI Calculator</h4>
+            </div>
+
+            <div class="calculator-body">
+              <div class="calc-field">
+                <div class="field-header">
+                  <span>Loan Amount</span>
+                  <strong id="calcLoanVal">₹ 5,00,000</strong>
+                </div>
+                <input type="range" id="loanRange" min="50000" max="2500000" step="25000" value="500000" oninput="updateEMICalculator()">
+              </div>
+
+              <div class="calc-field">
+                <div class="field-header">
+                  <span>Interest Rate (%)</span>
+                  <strong id="calcRateVal">10 %</strong>
+                </div>
+                <input type="range" id="rateRange" min="4" max="18" step="0.5" value="10" oninput="updateEMICalculator()">
+              </div>
+
+              <div class="calc-field">
+                <div class="field-header">
+                  <span>Tenure (Years)</span>
+                  <strong id="calcTenureVal">3 Years</strong>
+                </div>
+                <input type="range" id="tenureRange" min="1" max="10" step="1" value="3" oninput="updateEMICalculator()">
+              </div>
+
+              <!-- Estimated EMI Card (Matches Screen 8) -->
+              <div class="emi-result-card">
+                <small>Estimated EMI</small>
+                <h2 id="calculatedEmiText">₹ 16,109 / month</h2>
+                <span class="approx-note">*Values are approximate</span>
+                <div class="emi-breakdown">
+                  <div><span>Principal:</span> <strong id="calcPrincipalText">₹ 5,00,000</strong></div>
+                  <div><span>Total Interest:</span> <strong id="calcInterestText">₹ 79,924</strong></div>
+                </div>
+              </div>
+
+              <button class="pill-btn outline mt-4" onclick="updateEMICalculator()">Calculate Again</button>
+              <button class="pill-btn primary mt-2" onclick="showScreen(6)">Find Schemes with this EMI</button>
+            </div>
+          </div>
+
+          <!-- SCREEN 9: NEAREST PARTNER FINDER -->
+          <div class="screen" id="screen-9">
+            <div class="sub-header">
+              <button class="back-btn" onclick="showScreen(3)">‹</button>
+              <div class="center-title">
+                <h4>Nearby Partners</h4>
+                <small>Near Your Location</small>
+              </div>
+              <span class="header-icon">🔍</span>
+            </div>
+
+            <!-- Simulated Map Canvas with Interactive Pins -->
+            <div class="map-view">
+              <div class="map-grid-bg">
+                <div class="road r1"></div>
+                <div class="road r2"></div>
+                <div class="road r3"></div>
+              </div>
+              <div class="pin user-pin" title="Your Location">📍 You</div>
+              <div class="pin partner-pin bank-pin" style="top: 30%; right: 25%;">🏦 Bank</div>
+              <div class="pin partner-pin kvk-pin" style="bottom: 30%; left: 20%;">🔬 KVK</div>
+              <div class="pin partner-pin csc-pin" style="top: 25%; left: 30%;">💻 CSC</div>
+            </div>
+
+            <div class="partner-list" id="partnerListContainer">
+              <!-- Populated dynamically via /api/partners/nearby -->
+            </div>
+
+            <div class="screen-footer">
+              <button class="pill-btn primary" onclick="alert('Opening Google Maps navigation...')">View on Map</button>
+            </div>
+          </div>
+
+          <!-- SCREEN 10: DOCUMENT CHECKLIST & UPLOAD MANAGER -->
+          <div class="screen" id="screen-10">
+            <div class="sub-header">
+              <button class="back-btn" onclick="showScreen(7)">‹</button>
+              <div class="center-title">
+                <h4>Required Documents</h4>
+                <small id="checklistSchemeName">PM Mudra Yojana</small>
+              </div>
+            </div>
+
+            <div class="checklist-progress">
+              <div class="progress-info">
+                <strong id="docCountText">3 of 5 Documents Uploaded</strong>
+                <span class="ready-badge">60% Ready</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" id="docProgressBar" style="width: 60%;"></div></div>
+            </div>
+
+            <div class="doc-list" id="docListContainer">
+              <!-- Rendered via JS -->
+            </div>
+
+            <div class="screen-footer">
+              <button class="pill-btn primary" onclick="handleSubmitApplication()">Submit Application to Bank</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Live API Inspector / Debugger Panel -->
+    <aside class="api-panel" id="apiPanel">
+      <h3 class="sidebar-title">⚡ LIVE BACKEND REST API RUNNER</h3>
+      <p class="api-sub">Inspect deterministic rule matching, Gemini responses & Mongoose queries</p>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method post">POST</span>
+          <code>/api/schemes/match</code>
+        </div>
+        <p class="endpoint-desc">Deterministic rule engine matching schemes with score %</p>
+        <button class="run-api-btn" onclick="testMatchApi()">Test Match Engine</button>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method post">POST</span>
+          <code>/api/ai/chat</code>
+        </div>
+        <p class="endpoint-desc">Gemini AI rural scheme guidance & multilingual counseling</p>
+        <button class="run-api-btn" onclick="testChatApi()">Test Gemini Chat</button>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method get">GET</span>
+          <code>/api/partners/nearby</code>
+        </div>
+        <p class="endpoint-desc">Haversine / MongoDB 2dsphere spatial channel locator</p>
+        <button class="run-api-btn" onclick="testPartnersApi()">Test Spatial Search</button>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method post">POST</span>
+          <code>/api/calculator/emi</code>
+        </div>
+        <p class="endpoint-desc">Financial repayment calculation & amortization</p>
+        <button class="run-api-btn" onclick="testEmiApi()">Test EMI Calculator</button>
+      </div>
+
+      <h4 class="console-title">API Response Terminal:</h4>
+      <pre class="response-terminal" id="apiTerminal">// Output will appear here after API request...</pre>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

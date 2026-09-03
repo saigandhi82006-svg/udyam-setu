@@ -1,0 +1,205 @@
+const User = require('../models/User');
+const Scheme = require('../models/Scheme');
+const ChannelPartner = require('../models/ChannelPartner');
+const Application = require('../models/Application');
+const { isInMemoryFallback } = require('../config/db');
+
+// In-Memory storage repositories
+const memoryDB = {
+  users: [],
+  schemes: [],
+  partners: [],
+  applications: []
+};
+
+// Helper Haversine distance calculator in kilometers
+function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return parseFloat((R * c).toFixed(2));
+}
+
+const dataStore = {
+  memoryDB,
+
+  // Schemes
+  async getSchemes(filter = {}) {
+    if (!isInMemoryFallback()) {
+      try {
+        const schemes = await Scheme.find(filter);
+        if (schemes && schemes.length > 0) return schemes;
+      } catch (e) {
+        console.warn('Falling back to in-memory schemes:', e.message);
+      }
+    }
+    return memoryDB.schemes.filter(s => {
+      if (filter.category && s.category !== filter.category) return false;
+      return true;
+    });
+  },
+
+  async getSchemeById(id) {
+    if (!isInMemoryFallback()) {
+      try {
+        const scheme = await Scheme.findById(id);
+        if (scheme) return scheme;
+      } catch (e) {
+        // Continue to in-memory check
+      }
+    }
+    return memoryDB.schemes.find(s => s._id.toString() === id.toString() || s.shortCode === id);
+  },
+
+  async addScheme(schemeData) {
+    const id = schemeData._id || 'sch_' + Math.random().toString(36).substring(2, 9);
+    const item = { ...schemeData, _id: id };
+    memoryDB.schemes.push(item);
+
+    if (!isInMemoryFallback()) {
+      try {
+        await Scheme.create(schemeData);
+      } catch (e) {
+        // silent
+      }
+    }
+    return item;
+  },
+
+  // Users
+  async getUser(id) {
+    if (!isInMemoryFallback()) {
+      try {
+        const user = await User.findById(id);
+        if (user) return user;
+      } catch (e) {}
+    }
+    return memoryDB.users.find(u => u._id.toString() === id.toString() || u.phone === id);
+  },
+
+  async saveUser(userData) {
+    const id = userData._id || 'usr_' + Math.random().toString(36).substring(2, 9);
+    const existingIndex = memoryDB.users.findIndex(u => u._id.toString() === id.toString() || (userData.phone && u.phone === userData.phone));
+    
+    let user;
+    if (existingIndex >= 0) {
+      memoryDB.users[existingIndex] = { ...memoryDB.users[existingIndex], ...userData };
+      user = memoryDB.users[existingIndex];
+    } else {
+      user = { ...userData, _id: id };
+      memoryDB.users.push(user);
+    }
+
+    if (!isInMemoryFallback()) {
+      try {
+        if (userData._id) {
+          await User.findByIdAndUpdate(userData._id, userData, { upsert: true });
+        } else {
+          await User.create(userData);
+        }
+      } catch (e) {}
+    }
+    return user;
+  },
+
+  // Partners
+  async getNearbyPartners(lat, lng, radiusKm = 25, typeFilter = null) {
+    if (!isInMemoryFallback()) {
+      try {
+        const query = {
+          location: {
+            $near: {
+              $geometry: {
+                type: 'Point',
+                coordinates: [parseFloat(lng), parseFloat(lat)]
+              },
+              $maxDistance: radiusKm * 1000
+            }
+          }
+        };
+        if (typeFilter) query.type = typeFilter;
+        const dbPartners = await ChannelPartner.find(query);
+        if (dbPartners && dbPartners.length > 0) {
+          return dbPartners.map(p => {
+            const partnerObj = p.toObject();
+            partnerObj.distanceKm = calculateHaversineDistance(lat, lng, p.location.coordinates[1], p.location.coordinates[0]);
+            return partnerObj;
+          }).sort((a, b) => a.distanceKm - b.distanceKm);
+        }
+      } catch (e) {
+        // Fall back to memory with Haversine formula
+      }
+    }
+
+    // In-memory spatial Haversine query
+    let filtered = memoryDB.partners;
+    if (typeFilter && typeFilter !== 'All') {
+      filtered = filtered.filter(p => p.type === typeFilter);
+    }
+
+    const calculated = filtered.map(partner => {
+      const pLng = partner.location.coordinates[0];
+      const pLat = partner.location.coordinates[1];
+      const dist = calculateHaversineDistance(lat, lng, pLat, pLng);
+      return {
+        ...partner,
+        distanceKm: dist
+      };
+    });
+
+    return calculated
+      .filter(p => p.distanceKm <= radiusKm)
+      .sort((a, b) => a.distanceKm - b.distanceKm);
+  },
+
+  async addPartner(partnerData) {
+    const id = partnerData._id || 'ptn_' + Math.random().toString(36).substring(2, 9);
+    const item = { ...partnerData, _id: id };
+    memoryDB.partners.push(item);
+    if (!isInMemoryFallback()) {
+      try {
+        await ChannelPartner.create(partnerData);
+      } catch (e) {}
+    }
+    return item;
+  },
+
+  // Applications
+  async getApplications(userId = null) {
+    if (!isInMemoryFallback()) {
+      try {
+        const query = userId ? { userId } : {};
+        const apps = await Application.find(query).populate('schemeId').populate('assignedPartnerId');
+        if (apps && apps.length > 0) return apps;
+      } catch (e) {}
+    }
+    return memoryDB.applications.filter(a => !userId || a.userId.toString() === userId.toString());
+  },
+
+  async createApplication(appData) {
+    const id = appData._id || 'app_' + Math.random().toString(36).substring(2, 9);
+    const item = {
+      _id: id,
+      trackingId: 'UDS-' + Math.floor(100000 + Math.random() * 900000),
+      status: 'Submitted',
+      createdAt: new Date(),
+      ...appData
+    };
+    memoryDB.applications.push(item);
+    if (!isInMemoryFallback()) {
+      try {
+        await Application.create(appData);
+      } catch (e) {}
+    }
+    return item;
+  }
+};
+
+module.exports = dataStore;

@@ -1,0 +1,32 @@
+name: udyam_setu
+description: "AI-Driven Scheme Matching Platform for Marginalized Entrepreneurs (SIH PS ID: 92)"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_fonts: ^6.1.0
+  provider: ^6.1.1
+  http: ^1.2.0
+  speech_to_text: ^6.6.1
+  flutter_tts: ^3.8.5
+  google_maps_flutter: ^2.5.3
+  file_picker: ^8.0.0
+  intl: ^0.19.0
+  url_launcher: ^6.2.4
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
