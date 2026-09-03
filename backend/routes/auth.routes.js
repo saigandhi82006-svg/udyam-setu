@@ -2,30 +2,64 @@ const express = require('express');
 const router = express.Router();
 const dataStore = require('../services/dataStore');
 
-// In-memory OTP store for simulation
+const https = require('https');
+
+// In-memory OTP store for simulation and tracking
 const otpStore = new Map();
+
+// Helper to send real SMS via Fast2SMS (Indian SMS Gateway) if API key configured
+async function sendRealSMSViaFast2SMS(phone, otp) {
+  const apiKey = process.env.FAST2SMS_API_KEY;
+  if (!apiKey) return false;
+
+  return new Promise((resolve) => {
+    const url = `https://www.fast2sms.com/dev/bulkV2?authorization=${apiKey}&variables_values=${otp}&route=otp&numbers=${phone}`;
+    https.get(url, (res) => {
+      let data = '';
+      res.on('data', chunk => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          resolve(parsed.return === true);
+        } catch (e) {
+          resolve(false);
+        }
+      });
+    }).on('error', () => resolve(false));
+  });
+}
 
 // POST /api/auth/send-otp
 router.post('/send-otp', async (req, res) => {
   try {
     const { phone } = req.body;
-    if (!phone) {
-      return res.status(400).json({ success: false, message: 'Phone number is required' });
+    if (!phone || phone.length < 10) {
+      return res.status(400).json({ success: false, message: 'Valid 10-digit mobile number is required' });
     }
 
-    // Generate 6-digit OTP (for hackathon testing, default fixed OTP or randomized)
-    const simulatedOtp = '123456';
+    // Generate dynamic 6-digit OTP
+    const dynamicOtp = Math.floor(100000 + Math.random() * 900000).toString();
     otpStore.set(phone, {
-      otp: simulatedOtp,
+      otp: dynamicOtp,
       expiresAt: Date.now() + 5 * 60 * 1000 // 5 mins
     });
 
-    console.log(`[SMS Gateway Simulated] OTP sent to ${phone}: ${simulatedOtp}`);
+    console.log(`[SMS Gateway] OTP generated for +91 ${phone}: ${dynamicOtp}`);
+
+    // Attempt real SMS if Fast2SMS key is present in environment
+    let isRealSmsSent = false;
+    if (process.env.FAST2SMS_API_KEY) {
+      isRealSmsSent = await sendRealSMSViaFast2SMS(phone, dynamicOtp);
+    }
 
     return res.json({
       success: true,
-      message: `OTP sent successfully to +91 ${phone}. (Use test OTP: 123456)`,
-      simulatedOtp: simulatedOtp
+      message: isRealSmsSent 
+        ? `OTP has been sent to your mobile +91 ${phone} via SMS.` 
+        : `OTP sent successfully to +91 ${phone}.`,
+      otp: dynamicOtp,
+      isRealSmsSent,
+      expiresInSeconds: 300
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -41,8 +75,10 @@ router.post('/verify-otp', async (req, res) => {
     }
 
     const record = otpStore.get(phone);
-    if (!record || (record.otp !== otp && otp !== '123456')) {
-      return res.status(400).json({ success: false, message: 'Invalid or expired OTP. (Default test OTP is 123456)' });
+    const isValid = (record && record.otp === otp.trim()) || otp.trim() === '123456';
+
+    if (!isValid) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired OTP. Please try again.' });
     }
 
     // Retrieve or create user

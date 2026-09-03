@@ -74,24 +74,200 @@ async function checkBackendHealth() {
   }
 }
 
-// 1. Auth Handlers (Screen 2)
-function handleSendOTP() {
-  const phone = document.getElementById('loginPhone').value.trim();
-  if (phone.length < 10) {
-    alert('Please enter a 10-digit mobile number');
-    return;
-  }
-  document.getElementById('sendOtpBtn').innerText = 'Sending OTP...';
-  setTimeout(() => {
-    document.getElementById('sendOtpBtn').style.display = 'none';
-    document.getElementById('otpBox').style.display = 'block';
-    logTerminal(`[SMS Gateway] OTP sent to +91 ${phone}: 123456 (Mock test OTP ready)`);
-  }, 400);
+// 1. Auth Handlers (Screen 2: Mobile OTP & Google Sign-In)
+let generatedOtp = '123456';
+let otpTimerInterval = null;
+
+function openGoogleAccountModal() {
+  const modal = document.getElementById('googleAccountModal');
+  if (modal) modal.style.display = 'flex';
 }
 
-function handleVerifyOTP() {
-  showScreen(3);
-  logTerminal(`[Auth] User authenticated successfully. Session initiated.`);
+function closeGoogleAccountModal() {
+  const modal = document.getElementById('googleAccountModal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function selectGoogleAccount(email, name, avatarInitials = 'G') {
+  closeGoogleAccountModal();
+  logTerminal(`[Google OAuth] Initiating Sign-In for: ${name} (${email})...`);
+
+  try {
+    const res = await fetch(`${API_BASE}/auth/google`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, name })
+    });
+    const data = await res.json();
+
+    // Update user profile in session
+    currentProfile.name = name;
+    currentProfile.email = email;
+
+    // Update Avatar initials and Dashboard greeting
+    const avatarEl = document.querySelector('.user-avatar');
+    if (avatarEl) avatarEl.innerText = avatarInitials;
+
+    const dashGreeting = document.querySelector('.dash-header h2');
+    if (dashGreeting) dashGreeting.innerText = `Hello, ${name.split(' ')[0]} 👋`;
+
+    logTerminal(`[Google OAuth] ✅ Successfully authenticated ${email}. Redirecting to Dashboard.`);
+    showScreen(3);
+  } catch (err) {
+    // Graceful offline fallback
+    currentProfile.name = name;
+    currentProfile.email = email;
+    const avatarEl = document.querySelector('.user-avatar');
+    if (avatarEl) avatarEl.innerText = avatarInitials;
+    showScreen(3);
+  }
+}
+
+function promptCustomGoogleEmail() {
+  const customEmail = prompt('Enter your Google / Gmail address:', 'founder@gmail.com');
+  if (customEmail && customEmail.includes('@')) {
+    const defaultName = customEmail.split('@')[0].replace('.', ' ');
+    const formattedName = defaultName.charAt(0).toUpperCase() + defaultName.slice(1);
+    const initials = formattedName.substring(0, 2).toUpperCase();
+    selectGoogleAccount(customEmail, formattedName, initials);
+  }
+}
+
+async function handleSendOTP() {
+  const phone = document.getElementById('loginPhone').value.trim();
+  if (phone.length < 10) {
+    alert('Please enter a valid 10-digit mobile number');
+    return;
+  }
+
+  const sendBtn = document.getElementById('sendOtpBtn');
+  const otpBox = document.getElementById('otpBox');
+  const statusMsg = document.getElementById('otpStatusMsg');
+
+  sendBtn.innerText = 'Sending OTP...';
+  sendBtn.disabled = true;
+
+  try {
+    const res = await fetch(`${API_BASE}/auth/send-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone })
+    });
+    const data = await res.json();
+
+    generatedOtp = data.otp || '123456';
+
+    sendBtn.style.display = 'none';
+    otpBox.style.display = 'block';
+    statusMsg.innerText = data.isRealSmsSent 
+      ? `✅ SMS sent to +91 ${phone} via telecom network!` 
+      : `✅ OTP sent to +91 ${phone}.`;
+
+    // Show simulated floating SMS banner popup
+    showSmsBanner(generatedOtp);
+
+    // Start 30-second countdown
+    startOtpCountdown(30);
+
+    logTerminal(`[SMS Gateway] OTP generated for +91 ${phone}: ${generatedOtp} (Expires in 5 mins)`);
+  } catch (err) {
+    // Fallback simulation
+    generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    sendBtn.style.display = 'none';
+    otpBox.style.display = 'block';
+    showSmsBanner(generatedOtp);
+    startOtpCountdown(30);
+    logTerminal(`[SMS Gateway] Simulated OTP for +91 ${phone}: ${generatedOtp}`);
+  }
+}
+
+function showSmsBanner(otp) {
+  const banner = document.getElementById('smsNotificationBanner');
+  const codeEl = document.getElementById('smsOtpCode');
+  if (banner && codeEl) {
+    codeEl.innerText = otp;
+    banner.style.display = 'block';
+
+    // Auto-hide banner after 8 seconds
+    setTimeout(() => {
+      if (banner) banner.style.display = 'none';
+    }, 8000);
+  }
+}
+
+function autoFillOtp() {
+  const otpInput = document.getElementById('otpInput');
+  const banner = document.getElementById('smsNotificationBanner');
+  if (otpInput) {
+    otpInput.value = generatedOtp;
+    otpInput.style.borderColor = '#16A34A';
+    otpInput.style.background = '#F0FDF4';
+  }
+  if (banner) banner.style.display = 'none';
+}
+
+function startOtpCountdown(seconds) {
+  clearInterval(otpTimerInterval);
+  let timeLeft = seconds;
+  const timerEl = document.getElementById('otpCountdown');
+  const resendBtn = document.getElementById('resendOtpBtn');
+
+  if (resendBtn) resendBtn.disabled = true;
+
+  timerEl.innerText = `Resend in ${timeLeft}s`;
+
+  otpTimerInterval = setInterval(() => {
+    timeLeft--;
+    if (timeLeft <= 0) {
+      clearInterval(otpTimerInterval);
+      timerEl.innerText = '';
+      if (resendBtn) {
+        resendBtn.disabled = false;
+        resendBtn.innerText = 'Resend OTP';
+      }
+    } else {
+      timerEl.innerText = `Resend in ${timeLeft}s`;
+    }
+  }, 1000);
+}
+
+async function handleVerifyOTP() {
+  const phone = document.getElementById('loginPhone').value.trim();
+  const enteredOtp = document.getElementById('otpInput').value.trim();
+  const verifyBtn = document.getElementById('verifyOtpBtn');
+
+  if (!enteredOtp || enteredOtp.length !== 6) {
+    alert('Please enter a 6-digit OTP');
+    return;
+  }
+
+  verifyBtn.innerText = 'Verifying...';
+
+  try {
+    const res = await fetch(`${API_BASE}/auth/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, otp: enteredOtp })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      logTerminal(`[Auth] User +91 ${phone} verified successfully.`);
+      showScreen(3);
+    } else {
+      alert(data.message || 'Invalid OTP');
+      verifyBtn.innerText = 'Verify & Continue';
+    }
+  } catch (err) {
+    // If entered OTP matches generated OTP or test OTP 123456
+    if (enteredOtp === generatedOtp || enteredOtp === '123456') {
+      logTerminal(`[Auth] User +91 ${phone} verified successfully (Offline mode).`);
+      showScreen(3);
+    } else {
+      alert('Invalid OTP. Please check the code received.');
+      verifyBtn.innerText = 'Verify & Continue';
+    }
+  }
 }
 
 // 2. Digital India BHASHINI Voice & AI Chat (Screen 4)
