@@ -59,26 +59,77 @@ router.post('/bhashini/speak', (req, res) => {
   }
 });
 
-// GET /api/ai/voice/stream - Streams native studio-quality Indian vernacular audio (Telugu, Hindi, Tamil, etc.)
-router.get('/voice/stream', (req, res) => {
+// Helper: split text into natural sentence chunks under 150 characters
+function splitTextIntoSentences(text, maxLen = 150) {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  if (!clean) return [];
+
+  // Match sentences on periods, exclamation marks, question marks, newlines, or Indian danda (।)
+  const sentences = clean.match(/[^.!?\n।]+[.!?\n।]+|[^.!?\n।]+$/g) || [clean];
+  const chunks = [];
+  let current = '';
+
+  for (let s of sentences) {
+    s = s.trim();
+    if (!s) continue;
+    if ((current + ' ' + s).trim().length <= maxLen) {
+      current = (current + ' ' + s).trim();
+    } else {
+      if (current) chunks.push(current);
+      if (s.length > maxLen) {
+        // Break long sentence on commas or spaces
+        const parts = s.match(new RegExp('.{1,' + maxLen + '}(?:[,\\s]|$)', 'g')) || [s];
+        for (let p of parts) {
+          if (p && p.trim()) chunks.push(p.trim());
+        }
+        current = '';
+      } else {
+        current = s;
+      }
+    }
+  }
+  if (current) chunks.push(current);
+  return chunks;
+}
+
+// Helper: fetch single MP3 audio chunk from Google TTS
+function fetchTTSAudioBuffer(chunk, langCode) {
+  return new Promise((resolve) => {
+    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langCode}&client=tw-ob&q=${encodeURIComponent(chunk)}`;
+    const options = {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    };
+    https.get(ttsUrl, options, (audioRes) => {
+      const data = [];
+      audioRes.on('data', c => data.push(c));
+      audioRes.on('end', () => resolve(Buffer.concat(data)));
+      audioRes.on('error', () => resolve(Buffer.alloc(0)));
+    }).on('error', () => resolve(Buffer.alloc(0)));
+  });
+}
+
+// Master voice processor to speak 100% of the entire generated context
+async function processFullVoiceAudio(rawText, lang, res) {
   try {
-    const { text, lang = 'te' } = req.query;
-    if (!text) {
+    if (!rawText) {
       return res.status(400).send('Missing text parameter');
     }
 
-    // Clean text: strip markdown symbols, currency symbols, and extra newlines
-    let cleanText = text
+    // Clean text: strip markdown symbols, URLs, bullet points
+    let cleanText = rawText
       .replace(/<[^>]*>/g, ' ')
       .replace(/\*\*(.*?)\*\*/g, '$1')
       .replace(/\*(.*?)\*/g, '$1')
       .replace(/#{1,6}\s?/g, '')
       .replace(/[•\-\*]\s+/g, ', ')
       .replace(/✨ Source:.*/g, '')
+      .replace(/https?:\/\/\S+/g, '')
       .replace(/\s+/g, ' ')
       .trim();
 
-    // Map language parameter to ISO code
+    // Map language parameter to ISO code and expand Indian currency
     let langCode = 'te';
     const l = (lang || '').toLowerCase();
     if (l.includes('hindi') || l === 'hi') {
@@ -104,27 +155,39 @@ router.get('/voice/stream', (req, res) => {
       cleanText = cleanText.replace(/₹/g, ' Rupees ');
     }
 
-    // Truncate to first 180 characters for immediate audio stream response
-    const snippet = cleanText.substring(0, 180);
-    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langCode}&client=tw-ob&q=${encodeURIComponent(snippet)}`;
+    // Split entire 100% text into manageable sentence chunks
+    const chunks = splitTextIntoSentences(cleanText, 150);
 
-    const options = {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      }
-    };
+    if (chunks.length === 0) {
+      return res.status(400).send('No readable text found');
+    }
 
-    https.get(ttsUrl, options, (audioRes) => {
-      res.setHeader('Content-Type', 'audio/mpeg');
-      res.setHeader('Cache-Control', 'public, max-age=86400');
-      audioRes.pipe(res);
-    }).on('error', (err) => {
-      console.warn('TTS streaming error:', err.message);
-      res.status(500).send('Audio generation failed');
-    });
+    // Fetch all audio chunks in parallel for high speed
+    const audioBuffers = await Promise.all(chunks.map(chunk => fetchTTSAudioBuffer(chunk, langCode)));
+
+    // Concatenate all MP3 audio buffers into one continuous 100% full-speech stream
+    const combinedBuffer = Buffer.concat(audioBuffers.filter(b => b.length > 0));
+
+    res.setHeader('Content-Type', 'audio/mpeg');
+    res.setHeader('Content-Length', combinedBuffer.length);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    return res.end(combinedBuffer);
   } catch (err) {
-    res.status(500).send(err.message);
+    console.error('TTS Full Stream Error:', err);
+    return res.status(500).send(err.message);
   }
+}
+
+// GET /api/ai/voice/stream - Streams 100% full-text audio via query params
+router.get('/voice/stream', (req, res) => {
+  const { text, lang = 'te' } = req.query;
+  processFullVoiceAudio(text, lang, res);
+});
+
+// POST /api/ai/voice/stream - Streams 100% full-text audio via JSON body (for long Gemini answers)
+router.post('/voice/stream', (req, res) => {
+  const { text, lang = 'te' } = req.body;
+  processFullVoiceAudio(text, lang, res);
 });
 
 module.exports = router;

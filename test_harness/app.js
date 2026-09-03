@@ -535,7 +535,7 @@ function stopSpeech() {
   });
 }
 
-function speakBhashiniVoice(text, langName, btnElement) {
+async function speakBhashiniVoice(text, langName, btnElement) {
   if (isSpeaking) {
     stopSpeech();
     return;
@@ -551,6 +551,7 @@ function speakBhashiniVoice(text, langName, btnElement) {
     .replace(/#{1,6}\s?/g, '')
     .replace(/[•\-\*]\s+/g, ', ')
     .replace(/✨ Source:.*/g, '')
+    .replace(/https?:\/\/\S+/g, '')
     .trim();
 
   const lang = (langName || 'English').toLowerCase();
@@ -569,22 +570,36 @@ function speakBhashiniVoice(text, langName, btnElement) {
   }
   isSpeaking = true;
 
-  // Stream authentic native Indian human voice directly (Independent of Windows voice packs!)
-  const audioUrl = `${API_BASE}/ai/voice/stream?text=${encodeURIComponent(cleanText)}&lang=${langCode}`;
-  activeAudioPlayer = new Audio(audioUrl);
+  try {
+    // Post the full text to receive 100% of the entire generated context as a seamless audio stream
+    const res = await fetch(`${API_BASE}/ai/voice/stream`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: cleanText, lang: langCode })
+    });
 
-  activeAudioPlayer.onended = () => {
-    stopSpeech();
-  };
+    if (!res.ok) throw new Error('Voice stream failed: ' + res.status);
 
-  activeAudioPlayer.onerror = () => {
+    const audioBlob = await res.blob();
+    const blobUrl = URL.createObjectURL(audioBlob);
+    activeAudioPlayer = new Audio(blobUrl);
+
+    activeAudioPlayer.onended = () => {
+      URL.revokeObjectURL(blobUrl);
+      stopSpeech();
+    };
+
+    activeAudioPlayer.onerror = (e) => {
+      console.warn('Audio player error, using synthesis fallback', e);
+      URL.revokeObjectURL(blobUrl);
+      fallbackSpeechSynthesis(cleanText, langCode, btnElement);
+    };
+
+    await activeAudioPlayer.play();
+  } catch (err) {
+    console.warn('Voice streaming failed, using browser synthesis fallback:', err);
     fallbackSpeechSynthesis(cleanText, langCode, btnElement);
-  };
-
-  activeAudioPlayer.play().catch((err) => {
-    console.warn('Audio play exception, attempting synthesis fallback:', err);
-    fallbackSpeechSynthesis(cleanText, langCode, btnElement);
-  });
+  }
 }
 
 function fallbackSpeechSynthesis(cleanText, langCode, btnElement) {
