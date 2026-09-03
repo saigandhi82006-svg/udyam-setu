@@ -168,34 +168,8 @@
                 <h3>Choose an account</h3>
                 <p>to continue to <strong>Udyam Setu</strong></p>
               </div>
-              <div class="google-account-list">
-                <div class="google-account-row" onclick="selectGoogleAccount('sai.gandhi82006@gmail.com', 'Sai Gandhi', 'SG')">
-                  <div class="google-avatar" style="background: #EA4335;">SG</div>
-                  <div class="google-info">
-                    <div class="google-name">Sai Gandhi</div>
-                    <div class="google-email">sai.gandhi82006@gmail.com</div>
-                  </div>
-                </div>
-                <div class="google-account-row" onclick="selectGoogleAccount('rural.entrepreneur@gmail.com', 'Ramesh Kumar (Farmer)', 'RK')">
-                  <div class="google-avatar" style="background: #34A853;">RK</div>
-                  <div class="google-info">
-                    <div class="google-name">Ramesh Kumar</div>
-                    <div class="google-email">rural.entrepreneur@gmail.com</div>
-                  </div>
-                </div>
-                <div class="google-account-row" onclick="selectGoogleAccount('lakshmi.devi.shg@gmail.com', 'Lakshmi Devi (SHG)', 'LD')">
-                  <div class="google-avatar" style="background: #8B5CF6;">LD</div>
-                  <div class="google-info">
-                    <div class="google-name">Lakshmi Devi</div>
-                    <div class="google-email">lakshmi.devi.shg@gmail.com</div>
-                  </div>
-                </div>
-                <div class="google-account-row custom-account" onclick="promptCustomGoogleEmail()">
-                  <div class="google-avatar add-icon">➕</div>
-                  <div class="google-info">
-                    <div class="google-name">Use another email account</div>
-                  </div>
-                </div>
+              <div class="google-account-list" id="googleAccountList">
+                <!-- Device-specific Google accounts rendered dynamically here (Zero random accounts) -->
               </div>
               <div class="google-modal-footer">
                 <small>To continue, Google will share your name, email address, language preference, and profile picture with Udyam Setu.</small>

@@ -78,7 +78,87 @@ async function checkBackendHealth() {
 let generatedOtp = '123456';
 let otpTimerInterval = null;
 
+const DEVICE_STORAGE_KEY = 'udyam_device_google_accounts';
+
+function getDeviceGoogleAccounts() {
+  try {
+    const saved = localStorage.getItem(DEVICE_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+
+  // Defaults strictly to the device owner's account (Zero random personas)
+  const defaultAccounts = [
+    { email: 'sai.gandhi82006@gmail.com', name: 'Sai Gandhi', initials: 'SG', color: '#EA4335' }
+  ];
+  try {
+    localStorage.setItem(DEVICE_STORAGE_KEY, JSON.stringify(defaultAccounts));
+  } catch (e) {}
+  return defaultAccounts;
+}
+
+function saveDeviceGoogleAccount(email, name) {
+  const accounts = getDeviceGoogleAccounts();
+  const existingIdx = accounts.findIndex(a => a.email.toLowerCase() === email.toLowerCase());
+  const initials = (name.split(' ').map(n => n[0]).join('') || 'G').substring(0, 2).toUpperCase();
+  const colors = ['#EA4335', '#4285F4', '#34A853', '#FBBC05', '#8B5CF6'];
+  const color = colors[accounts.length % colors.length];
+
+  const newAcc = { email, name, initials, color };
+  if (existingIdx >= 0) {
+    accounts[existingIdx] = newAcc;
+  } else {
+    accounts.push(newAcc);
+  }
+  try {
+    localStorage.setItem(DEVICE_STORAGE_KEY, JSON.stringify(accounts));
+  } catch (e) {}
+}
+
+function removeDeviceGoogleAccount(email, event) {
+  if (event) event.stopPropagation();
+  let accounts = getDeviceGoogleAccounts();
+  accounts = accounts.filter(a => a.email.toLowerCase() !== email.toLowerCase());
+  try {
+    localStorage.setItem(DEVICE_STORAGE_KEY, JSON.stringify(accounts));
+  } catch (e) {}
+  renderDeviceGoogleAccounts();
+}
+
+function renderDeviceGoogleAccounts() {
+  const container = document.getElementById('googleAccountList');
+  if (!container) return;
+
+  const accounts = getDeviceGoogleAccounts();
+
+  let html = accounts.map(acc => `
+    <div class="google-account-row" onclick="selectGoogleAccount('${acc.email}', '${acc.name}', '${acc.initials}')">
+      <div class="google-avatar" style="background: ${acc.color || '#4285F4'};">${acc.initials}</div>
+      <div class="google-info" style="flex: 1;">
+        <div class="google-name">${acc.name}</div>
+        <div class="google-email">${acc.email}</div>
+      </div>
+      <button type="button" class="remove-acc-btn" onclick="removeDeviceGoogleAccount('${acc.email}', event)" title="Remove account from this device">✕</button>
+    </div>
+  `).join('');
+
+  html += `
+    <div class="google-account-row custom-account" onclick="promptCustomGoogleEmail()">
+      <div class="google-avatar add-icon">➕</div>
+      <div class="google-info">
+        <div class="google-name">Use another Google account</div>
+        <div class="google-email">Sign in with an account on this device</div>
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = html;
+}
+
 function openGoogleAccountModal() {
+  renderDeviceGoogleAccounts();
   const modal = document.getElementById('googleAccountModal');
   if (modal) modal.style.display = 'flex';
 }
@@ -90,7 +170,8 @@ function closeGoogleAccountModal() {
 
 async function selectGoogleAccount(email, name, avatarInitials = 'G') {
   closeGoogleAccountModal();
-  logTerminal(`[Google OAuth] Initiating Sign-In for: ${name} (${email})...`);
+  saveDeviceGoogleAccount(email, name);
+  logTerminal(`[Google OAuth] Authenticating device account: ${name} (${email})...`);
 
   try {
     const res = await fetch(`${API_BASE}/auth/google`, {
@@ -111,10 +192,9 @@ async function selectGoogleAccount(email, name, avatarInitials = 'G') {
     const dashGreeting = document.querySelector('.dash-header h2');
     if (dashGreeting) dashGreeting.innerText = `Hello, ${name.split(' ')[0]} 👋`;
 
-    logTerminal(`[Google OAuth] ✅ Successfully authenticated ${email}. Redirecting to Dashboard.`);
+    logTerminal(`[Google OAuth] ✅ Successfully signed in with ${email}.`);
     showScreen(3);
   } catch (err) {
-    // Graceful offline fallback
     currentProfile.name = name;
     currentProfile.email = email;
     const avatarEl = document.querySelector('.user-avatar');
@@ -124,9 +204,9 @@ async function selectGoogleAccount(email, name, avatarInitials = 'G') {
 }
 
 function promptCustomGoogleEmail() {
-  const customEmail = prompt('Enter your Google / Gmail address:', 'founder@gmail.com');
+  const customEmail = prompt('Enter your Gmail address on this device:', '');
   if (customEmail && customEmail.includes('@')) {
-    const defaultName = customEmail.split('@')[0].replace('.', ' ');
+    const defaultName = customEmail.split('@')[0].replace(/[\._]/g, ' ');
     const formattedName = defaultName.charAt(0).toUpperCase() + defaultName.slice(1);
     const initials = formattedName.substring(0, 2).toUpperCase();
     selectGoogleAccount(customEmail, formattedName, initials);

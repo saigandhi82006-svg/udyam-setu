@@ -1455,6 +1455,26 @@ body {
   transform: translateY(-1px);
 }
 
+.remove-acc-btn {
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  font-size: 12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.remove-acc-btn:hover {
+  background: #FEE2E2;
+  color: #EF4444;
+}
+
 .google-avatar {
   width: 34px;
   height: 34px;
