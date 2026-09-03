@@ -7,6 +7,14 @@ const https = require('https');
 // In-memory OTP store for simulation and tracking
 const otpStore = new Map();
 
+// GET /api/auth/config
+router.get('/config', (req, res) => {
+  res.json({
+    success: true,
+    googleClientId: process.env.GOOGLE_CLIENT_ID || ''
+  });
+});
+
 // Helper to send real SMS via Fast2SMS (Indian SMS Gateway) if API key configured
 async function sendRealSMSViaFast2SMS(phone, otp) {
   const apiKey = process.env.FAST2SMS_API_KEY;
