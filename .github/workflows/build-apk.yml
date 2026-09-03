@@ -32,7 +32,13 @@ jobs:
         run: |
           rm -rf android
           flutter create . --platforms=android,web --org com.udyamsetu --project-name udyam_setu
+          # Set minimum SDK to 21 for google_maps_flutter & speech_to_text
+          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' android/app/build.gradle || true
+          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 21/g' android/app/build.gradle || true
+          # Add permissions into AndroidManifest.xml
           sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.RECORD_AUDIO"/>\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>\n    <uses-permission android:name="android.permission.CALL_PHONE"/>' android/app/src/main/AndroidManifest.xml
+          # Add placeholder Google Maps API key meta-data
+          sed -i '/<\/application>/i \        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyDemoKeyForUdyamSetuSIH2026"/>' android/app/src/main/AndroidManifest.xml
 
       - name: Install Dependencies
         working-directory: frontend
