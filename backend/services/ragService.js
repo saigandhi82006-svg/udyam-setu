@@ -224,6 +224,56 @@ async function handleRAGConversationalChat({
 - Application Portal: ${s.applicationUrl}
 `).join('\n---\n');
 
+  let effectiveLang = language || 'English';
+  if (/[\u0C00-\u0C7F]/.test(message)) effectiveLang = 'Telugu';
+  else if (/[\u0B80-\u0BFF]/.test(message)) effectiveLang = 'Tamil';
+  else if (/[\u0900-\u097F]/.test(message)) {
+    effectiveLang = (language || '').toLowerCase().includes('marathi') ? 'Marathi' : 'Hindi';
+  }
+
+  const languageGuidance = effectiveLang === 'Telugu' ? `
+🚨 ABSOLUTE MANDATORY RULE: 100% PURE TELUGU (తెలుగు) ONLY! ZERO ENGLISH!
+- The user speaks ONLY Telugu and does not know English.
+- Every single sentence, word, heading, and bullet point MUST be written in 100% pure Telugu script (తెలుగు లిపి).
+- ABSOLUTELY DO NOT use English headings or phrases like "Financial Benefit:", "Key Advantage:", "Who can apply:", "Next step:", "No Collateral".
+- Instead use purely native Telugu headings:
+  * "పథకం పేరు:"
+  * "ఆర్థిక సహాయం:"
+  * "ప్రయోజనాలు:"
+  * "ఎవరు అర్హులు:"
+  * "తదుపరి చేయవలసిన పని:"
+- Translate all terms into natural Telugu (e.g. "పూచీకత్తు లేదా తాకట్టు లేకుండా", "ప్రభుత్వ నగదు రాయితీ (సబ్సిడీ)").
+- Write scheme names in Telugu script (e.g. "ప్రధానమంత్రి ముద్ర యోజన", "పీఎంఈజీపీ పథకం").
+- Do NOT mix English phrases into sentences. Zero English words!
+` : effectiveLang === 'Hindi' ? `
+🚨 ABSOLUTE MANDATORY RULE: 100% PURE HINDI (हिन्दी) ONLY! ZERO ENGLISH!
+- The user speaks ONLY Hindi.
+- Every single sentence, heading, and bullet point MUST be written in 100% pure Hindi Devanagari script (हिन्दी देवनागरी).
+- ABSOLUTELY DO NOT use English headings like "Financial Benefit:", "Key Advantage:", "Who can apply:", "Next step:", "No Collateral".
+- Instead use purely native Hindi headings:
+  * "योजना का नाम:"
+  * "वित्तीय सहायता:"
+  * "मुख्य लाभ:"
+  * "कौन आवेदन कर सकता है:"
+  * "अगला कदम:"
+- Translate all terms into natural Hindi (e.g. "बिना किसी गारंटी या संपत्ति गिरवी रखे", "सरकारी अनुदान (सब्सिडी)").
+- Write scheme names in Hindi script (e.g. "प्रधानमंत्री मुद्रा योजना", "पीएमईजीपी योजना").
+- Do NOT mix English words. Zero English words!
+` : effectiveLang === 'Marathi' ? `
+🚨 ABSOLUTE MANDATORY RULE: 100% PURE MARATHI (मराठी) ONLY! ZERO ENGLISH!
+- Every single word, heading, and explanation MUST be written 100% in pure Marathi script (मराठी).
+- DO NOT use English labels or mixed phrases.
+- Use native Marathi headings: "योजनेचे नाव:", "आर्थिक मदत:", "फायदे:", "पात्रता:", "पुढील पाऊल:".
+- Zero English words!
+` : effectiveLang === 'Tamil' ? `
+🚨 ABSOLUTE MANDATORY RULE: 100% PURE TAMIL (தமிழ்) ONLY! ZERO ENGLISH!
+- Every single word, heading, and explanation MUST be written 100% in pure Tamil script (தமிழ்).
+- Zero English words!
+` : `
+- Respond in clear, simple Indian English.
+- Avoid bureaucratic or banking jargon.
+`;
+
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (apiKey) {
@@ -232,27 +282,27 @@ async function handleRAGConversationalChat({
 You are "Udyam Setu AI", an expert government scheme counselor for Indian citizens, rural workers, farmers, students, and micro-entrepreneurs.
 You are having a continuous natural conversation with a user.
 
-TARGET RESPONSE LANGUAGE: ${language}
+${languageGuidance}
+
 USER PROFILE:
 - Business / Occupation: ${userProfile?.businessType || 'Not specified'}
 - Demographic Category: ${userProfile?.category || 'Not specified'}
 - Annual Income: ₹${userProfile?.annualIncome || 'Not specified'}
 - Experience: ${userProfile?.experienceYears || 0} Years
 
-GROUND TRUTH GOVERNMENT SCHEME FACTS (Base your answer STRICTLY on these verified facts; do not invent fake loans or rates):
+GROUND TRUTH GOVERNMENT SCHEME FACTS:
 ${schemesFactualContext}
 
-CONVERSATION HISTORY (Previous turns):
+CONVERSATION HISTORY:
 ${conversationHistory.slice(-4).map(h => `${h.role}: ${h.text}`).join('\n')}
 
 USER'S LATEST MESSAGE: "${message}"
 
-INSTRUCTIONS FOR CONVERSATIONAL INTELLIGENCE:
-1. Speak NATURALLY in ${language}. If language is Telugu, write in natural Telugu (తెలుగు). If Marathi, write in Marathi (मराठी).
-2. Directly address the user's specific need (e.g. if they ask about tractors, recommend SMAM tractor subsidy; if education, recommend Vidyalaxmi/CSIS; if grocery store, recommend Mudra/PMEGP).
-3. Do NOT speak in legal jargon. Explain subsidies as "direct government grants you don't return", and collateral-free loans as "no need to pledge land, house, or gold".
-4. Answer follow-up questions intelligently using the scheme facts and conversation history.
-5. Conclude with a warm, comforting next step and ask if they'd like help preparing their documents or finding the nearest bank.
+INSTRUCTIONS:
+1. Directly address the user's specific need based on the ground truth facts.
+2. Formulate your entire response strictly adhering to the Language Purity rule above (100% ${effectiveLang} with zero code-switching or mixed English words).
+3. Do NOT speak in legal jargon.
+4. Conclude with a comforting next step asking if they'd like help with documents or finding their nearest local bank or CSC center.
 `;
 
       const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
@@ -261,7 +311,7 @@ INSTRUCTIONS FOR CONVERSATIONAL INTELLIGENCE:
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
-            temperature: 0.6,
+            temperature: 0.3,
             maxOutputTokens: 1000
           }
         })
@@ -282,7 +332,7 @@ INSTRUCTIONS FOR CONVERSATIONAL INTELLIGENCE:
           })),
           detectedSector: classifyUserSector(message, userProfile),
           source: 'Google Gemini 3.6 Flash (Real Autonomous AI)',
-          language,
+          language: effectiveLang,
           bhashiniVoiceEnabled: true
         };
       }
