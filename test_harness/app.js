@@ -137,7 +137,14 @@ function findBestIndianVoice(targetLocale) {
   return null;
 }
 
+let activeAudioPlayer = null;
+
 function stopSpeech() {
+  if (activeAudioPlayer) {
+    activeAudioPlayer.pause();
+    activeAudioPlayer.currentTime = 0;
+    activeAudioPlayer = null;
+  }
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
   }
@@ -149,11 +156,6 @@ function stopSpeech() {
 }
 
 function speakBhashiniVoice(text, langName, btnElement) {
-  if (!('speechSynthesis' in window)) {
-    alert('Voice speech synthesis is not supported in this browser.');
-    return;
-  }
-
   if (isSpeaking) {
     stopSpeech();
     return;
@@ -161,58 +163,70 @@ function speakBhashiniVoice(text, langName, btnElement) {
 
   stopSpeech();
 
-  // Strip markdown, asterisks, brackets, and linebreaks for natural speech audio
+  // Strip markdown, asterisks, brackets, and linebreaks for clean natural speech
   const cleanText = text
     .replace(/<[^>]*>/g, ' ')
     .replace(/\*\*(.*?)\*\*/g, '$1')
     .replace(/\*(.*?)\*/g, '$1')
     .replace(/#{1,6}\s?/g, '')
     .replace(/[•\-\*]\s+/g, ', ')
-    .replace(/₹/g, 'Rupees ')
     .replace(/✨ Source:.*/g, '')
     .trim();
 
-  const utterance = new SpeechSynthesisUtterance(cleanText);
-
-  // Determine target Indian locale
   const lang = (langName || 'English').toLowerCase();
-  let targetLocale = 'en-IN';
-  if (lang.includes('hindi')) targetLocale = 'hi-IN';
-  else if (lang.includes('telugu')) targetLocale = 'te-IN';
-  else if (lang.includes('tamil')) targetLocale = 'ta-IN';
-  else if (lang.includes('marathi')) targetLocale = 'mr-IN';
-  else if (lang.includes('kannada')) targetLocale = 'kn-IN';
-  else if (lang.includes('bengali')) targetLocale = 'bn-IN';
-  else targetLocale = 'en-IN';
+  let langCode = 'te';
+  if (lang.includes('hindi') || lang === 'hi') langCode = 'hi';
+  else if (lang.includes('telugu') || lang === 'te') langCode = 'te';
+  else if (lang.includes('tamil') || lang === 'ta') langCode = 'ta';
+  else if (lang.includes('marathi') || lang === 'mr') langCode = 'mr';
+  else if (lang.includes('kannada') || lang === 'kn') langCode = 'kn';
+  else if (lang.includes('bengali') || lang === 'bn') langCode = 'bn';
+  else langCode = 'en';
 
-  utterance.lang = targetLocale;
+  if (btnElement) {
+    btnElement.classList.add('speaking');
+    btnElement.innerHTML = '🔊 Speaking aloud... (Tap to Stop)';
+  }
+  isSpeaking = true;
 
-  // Bind the best regional voice available on the device
-  const bestVoice = findBestIndianVoice(targetLocale);
-  if (bestVoice) {
-    utterance.voice = bestVoice;
+  // Stream authentic native Indian human voice directly (Independent of Windows voice packs!)
+  const audioUrl = `${API_BASE}/ai/voice/stream?text=${encodeURIComponent(cleanText)}&lang=${langCode}`;
+  activeAudioPlayer = new Audio(audioUrl);
+
+  activeAudioPlayer.onended = () => {
+    stopSpeech();
+  };
+
+  activeAudioPlayer.onerror = () => {
+    fallbackSpeechSynthesis(cleanText, langCode, btnElement);
+  };
+
+  activeAudioPlayer.play().catch((err) => {
+    console.warn('Audio play exception, attempting synthesis fallback:', err);
+    fallbackSpeechSynthesis(cleanText, langCode, btnElement);
+  });
+}
+
+function fallbackSpeechSynthesis(cleanText, langCode, btnElement) {
+  if (!('speechSynthesis' in window)) {
+    stopSpeech();
+    return;
   }
 
-  // 0.88x speed - tailored for rural elders & low-literacy users
+  const utterance = new SpeechSynthesisUtterance(cleanText);
+  let targetLocale = 'en-IN';
+  if (langCode === 'hi') targetLocale = 'hi-IN';
+  else if (langCode === 'te') targetLocale = 'te-IN';
+  else if (langCode === 'ta') targetLocale = 'ta-IN';
+  else if (langCode === 'mr') targetLocale = 'mr-IN';
+
+  utterance.lang = targetLocale;
+  const bestVoice = findBestIndianVoice(targetLocale);
+  if (bestVoice) utterance.voice = bestVoice;
   utterance.rate = 0.88;
-  utterance.pitch = 1.0;
 
-  utterance.onstart = () => {
-    isSpeaking = true;
-    if (btnElement) {
-      btnElement.classList.add('speaking');
-      btnElement.innerHTML = '🔊 Speaking aloud... (Tap to Stop)';
-    }
-  };
-
-  utterance.onend = () => {
-    stopSpeech();
-  };
-
-  utterance.onerror = (err) => {
-    console.warn('Speech synthesis error:', err);
-    stopSpeech();
-  };
+  utterance.onend = () => stopSpeech();
+  utterance.onerror = () => stopSpeech();
 
   window.speechSynthesis.speak(utterance);
 }
