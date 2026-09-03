@@ -97,6 +97,45 @@ function handleVerifyOTP() {
 // 2. Digital India BHASHINI Voice & AI Chat (Screen 4)
 let isSpeaking = false;
 let currentUtterance = null;
+let availableVoices = [];
+
+function initVoices() {
+  if ('speechSynthesis' in window) {
+    availableVoices = window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => {
+      availableVoices = window.speechSynthesis.getVoices();
+    };
+  }
+}
+initVoices();
+
+function findBestIndianVoice(targetLocale) {
+  if (!availableVoices.length && 'speechSynthesis' in window) {
+    availableVoices = window.speechSynthesis.getVoices();
+  }
+
+  // 1. Exact locale match (e.g. te-IN, hi-IN, ta-IN)
+  let voice = availableVoices.find(v => 
+    v.lang.toLowerCase() === targetLocale.toLowerCase() || 
+    v.lang.replace('_', '-').toLowerCase() === targetLocale.toLowerCase()
+  );
+  if (voice) return voice;
+
+  // 2. Language prefix match (e.g. te, hi, ta, mr)
+  const prefix = targetLocale.split('-')[0].toLowerCase();
+  voice = availableVoices.find(v => v.lang.toLowerCase().startsWith(prefix));
+  if (voice) return voice;
+
+  // 3. Indian English / Indian Accent fallback
+  voice = availableVoices.find(v => 
+    v.lang.toLowerCase().includes('in') || 
+    v.name.toLowerCase().includes('india') ||
+    v.name.toLowerCase().includes('hindi')
+  );
+  if (voice) return voice;
+
+  return null;
+}
 
 function stopSpeech() {
   if ('speechSynthesis' in window) {
@@ -135,15 +174,24 @@ function speakBhashiniVoice(text, langName, btnElement) {
 
   const utterance = new SpeechSynthesisUtterance(cleanText);
 
-  // Regional Indian locales for Bhashini
+  // Determine target Indian locale
   const lang = (langName || 'English').toLowerCase();
-  if (lang.includes('hindi')) utterance.lang = 'hi-IN';
-  else if (lang.includes('telugu')) utterance.lang = 'te-IN';
-  else if (lang.includes('tamil')) utterance.lang = 'ta-IN';
-  else if (lang.includes('marathi')) utterance.lang = 'mr-IN';
-  else if (lang.includes('kannada')) utterance.lang = 'kn-IN';
-  else if (lang.includes('bengali')) utterance.lang = 'bn-IN';
-  else utterance.lang = 'en-IN';
+  let targetLocale = 'en-IN';
+  if (lang.includes('hindi')) targetLocale = 'hi-IN';
+  else if (lang.includes('telugu')) targetLocale = 'te-IN';
+  else if (lang.includes('tamil')) targetLocale = 'ta-IN';
+  else if (lang.includes('marathi')) targetLocale = 'mr-IN';
+  else if (lang.includes('kannada')) targetLocale = 'kn-IN';
+  else if (lang.includes('bengali')) targetLocale = 'bn-IN';
+  else targetLocale = 'en-IN';
+
+  utterance.lang = targetLocale;
+
+  // Bind the best regional voice available on the device
+  const bestVoice = findBestIndianVoice(targetLocale);
+  if (bestVoice) {
+    utterance.voice = bestVoice;
+  }
 
   // 0.88x speed - tailored for rural elders & low-literacy users
   utterance.rate = 0.88;
@@ -161,7 +209,8 @@ function speakBhashiniVoice(text, langName, btnElement) {
     stopSpeech();
   };
 
-  utterance.onerror = () => {
+  utterance.onerror = (err) => {
+    console.warn('Speech synthesis error:', err);
     stopSpeech();
   };
 
