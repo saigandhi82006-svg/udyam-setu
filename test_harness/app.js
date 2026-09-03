@@ -181,7 +181,41 @@ async function handleSendOTP() {
   }
 }
 
+function playSmsChime() {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const now = ctx.currentTime;
+
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(659.25, now); // E5
+
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(880.00, now + 0.09); // A5
+
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc1.start(now);
+    osc1.stop(now + 0.09);
+    osc2.start(now + 0.09);
+    osc2.stop(now + 0.38);
+  } catch (e) {
+    // Silent fallback if audio context is blocked
+  }
+}
+
 function showSmsBanner(otp) {
+  playSmsChime();
   const banner = document.getElementById('smsNotificationBanner');
   const codeEl = document.getElementById('smsOtpCode');
   if (banner && codeEl) {
