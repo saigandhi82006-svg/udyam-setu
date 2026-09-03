@@ -1,0 +1,11 @@
+{
+  "name": "Udyam Setu",
+  "short_name": "Udyam Setu",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#1E6F38",
+  "theme_color": "#1E6F38",
+  "description": "AI-Driven Scheme Matching Platform for Marginalized Entrepreneurs",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false
+}
