@@ -243,26 +243,6 @@ body {
   position: relative;
 }
 
-.phone-notch {
-  height: 36px;
-  background: #FFFFFF;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #1E293B;
-  border-bottom: 1px solid #F1F5F9;
-}
-
-.speaker-pill {
-  width: 50px;
-  height: 4px;
-  background: #E2E8F0;
-  border-radius: 2px;
-}
-
 .phone-screen {
   flex: 1;
   background: var(--bg-light);
@@ -270,6 +250,7 @@ body {
   position: relative;
   display: flex;
   flex-direction: column;
+  border-radius: 30px;
 }
 
 /* Screens Common */
@@ -1543,7 +1524,7 @@ body {
    ============================================================ */
 .sms-banner {
   position: absolute;
-  top: 48px;
+  top: 14px;
   left: 12px;
   right: 12px;
   background: rgba(30, 41, 59, 0.95);
