@@ -10,7 +10,7 @@ const otpStore = new Map();
 // Helper to send real SMS via Fast2SMS (Indian SMS Gateway) if API key configured
 async function sendRealSMSViaFast2SMS(phone, otp) {
   const apiKey = process.env.FAST2SMS_API_KEY;
-  if (!apiKey) return false;
+  if (!apiKey) return { success: false, message: 'No API key provided' };
 
   return new Promise((resolve) => {
     const url = `https://www.fast2sms.com/dev/bulkV2?authorization=${apiKey}&variables_values=${otp}&route=otp&numbers=${phone}`;
@@ -20,12 +20,20 @@ async function sendRealSMSViaFast2SMS(phone, otp) {
       res.on('end', () => {
         try {
           const parsed = JSON.parse(data);
-          resolve(parsed.return === true);
+          console.log('[Fast2SMS Gateway Response]:', parsed);
+          if (parsed.return === true) {
+            resolve({ success: true, message: 'SMS delivered to carrier' });
+          } else {
+            resolve({ success: false, message: parsed.message || 'SMS Gateway error' });
+          }
         } catch (e) {
-          resolve(false);
+          resolve({ success: false, message: e.message });
         }
       });
-    }).on('error', () => resolve(false));
+    }).on('error', (err) => {
+      console.warn('[Fast2SMS Network Error]:', err.message);
+      resolve({ success: false, message: err.message });
+    });
   });
 }
 
@@ -46,19 +54,23 @@ router.post('/send-otp', async (req, res) => {
 
     console.log(`[SMS Gateway] OTP generated for +91 ${phone}: ${dynamicOtp}`);
 
-    // Attempt real SMS if Fast2SMS key is present in environment
+    // Attempt real telecom SMS
     let isRealSmsSent = false;
+    let gatewayNote = '';
     if (process.env.FAST2SMS_API_KEY) {
-      isRealSmsSent = await sendRealSMSViaFast2SMS(phone, dynamicOtp);
+      const smsResult = await sendRealSMSViaFast2SMS(phone, dynamicOtp);
+      isRealSmsSent = smsResult.success;
+      gatewayNote = smsResult.message;
     }
 
     return res.json({
       success: true,
       message: isRealSmsSent 
-        ? `OTP has been sent to your mobile +91 ${phone} via SMS.` 
-        : `OTP sent successfully to +91 ${phone}.`,
+        ? `✅ Real SMS delivered to +91 ${phone} via telecom network.` 
+        : `OTP generated for +91 ${phone}. (${gatewayNote || 'Simulator Active'})`,
       otp: dynamicOtp,
       isRealSmsSent,
+      gatewayNote,
       expiresInSeconds: 300
     });
   } catch (error) {
