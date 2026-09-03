@@ -82,8 +82,10 @@ const DEVICE_STORAGE_KEY = 'udyam_device_google_accounts';
 
 function getDeviceGoogleAccounts() {
   const defaultAccounts = [
-    { email: 'saivocals304@gmail.com', name: 'Sai Gandhi', initials: 'SG', color: '#4285F4' },
-    { email: 'sai.gandhi82006@gmail.com', name: 'Sai Gandhi', initials: 'SG', color: '#EA4335' }
+    { email: 'saivocals304@gmail.com', name: 'Sai Vocals', initials: 'SV', color: '#2D3748', emoji: '🎮' },
+    { email: 'merlahemanth@gmail.com', name: 'merla hemanth', initials: 'MH', color: '#0F766E', emoji: 'm' },
+    { email: 'sai.gandhi82006@gmail.com', name: 'Sai Gandhi', initials: 'SG', color: '#C2410C', emoji: 'S' },
+    { email: '24pa1a05d7@vishnu.edu.in', name: 'MADICHARLA SAI GANDHI', initials: 'MS', color: '#991B1B', emoji: 'M' }
   ];
 
   try {
@@ -106,7 +108,7 @@ function saveDeviceGoogleAccount(email, name) {
   const accounts = getDeviceGoogleAccounts();
   const existingIdx = accounts.findIndex(a => a.email.toLowerCase() === email.toLowerCase());
   const initials = (name.split(' ').map(n => n[0]).join('') || 'G').substring(0, 2).toUpperCase();
-  const colors = ['#4285F4', '#EA4335', '#34A853', '#FBBC05', '#8B5CF6'];
+  const colors = ['#2D3748', '#0F766E', '#C2410C', '#991B1B', '#4285F4'];
   const color = colors[accounts.length % colors.length];
 
   const newAcc = { email, name, initials, color };
@@ -138,7 +140,7 @@ function renderDeviceGoogleAccounts() {
 
   let html = accounts.map(acc => `
     <div class="google-account-row" onclick="selectGoogleAccount('${acc.email}', '${acc.name}', '${acc.initials}')">
-      <div class="google-avatar" style="background: ${acc.color || '#4285F4'};">${acc.initials}</div>
+      <div class="google-avatar" style="background: ${acc.color || '#4285F4'}; font-size: 14px;">${acc.emoji || acc.initials}</div>
       <div class="google-info" style="flex: 1;">
         <div class="google-name">${acc.name}</div>
         <div class="google-email">${acc.email}</div>
@@ -172,10 +174,35 @@ function promptAddGoogleDeviceAccount() {
 }
 
 function openGoogleAccountModal() {
-  renderDeviceGoogleAccounts();
-  const modal = document.getElementById('googleAccountModal');
-  if (modal) modal.style.display = 'flex';
+  const w = 460;
+  const h = 600;
+  const left = Math.round((window.screen.width / 2) - (w / 2));
+  const top = Math.round((window.screen.height / 2) - (h / 2));
+
+  logTerminal(`[Google OAuth] Opening official Google Account Chooser popup window...`);
+
+  const popup = window.open(
+    '/preview/google-auth.html',
+    'GoogleSignInWindow',
+    `width=${w},height=${h},top=${top},left=${left},resizable=yes,scrollbars=yes,status=no,toolbar=no`
+  );
+
+  // If popup is blocked by browser, open the in-page Google modal fallback
+  if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+    renderDeviceGoogleAccounts();
+    const modal = document.getElementById('googleAccountModal');
+    if (modal) modal.style.display = 'flex';
+  }
 }
+
+// Global listener for authentic sign-in from Google popup window
+window.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'GOOGLE_AUTH_SUCCESS') {
+    const { name, email, initials } = event.data.account;
+    logTerminal(`[Google OAuth] Authenticated via native Google popup: ${name} (${email})`);
+    selectGoogleAccount(email, name, initials);
+  }
+});
 
 function closeGoogleAccountModal() {
   const modal = document.getElementById('googleAccountModal');
