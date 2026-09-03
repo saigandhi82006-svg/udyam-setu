@@ -335,6 +335,8 @@ function fallbackSimulatedSpeech(langSelect) {
   }, 1500);
 }
 
+let chatHistory = [];
+
 async function sendChatMessage(autoSpeak = false) {
   const input = document.getElementById('chatInput');
   const message = input.value.trim();
@@ -354,7 +356,7 @@ async function sendChatMessage(autoSpeak = false) {
   // Append typing indicator
   const typingBubble = document.createElement('div');
   typingBubble.className = 'chat-bubble ai typing';
-  typingBubble.innerText = '... Bhashini AI is analyzing schemes';
+  typingBubble.innerText = '... RAG Engine analyzing 30+ government schemes';
   chatContainer.appendChild(typingBubble);
   chatContainer.scrollTop = chatContainer.scrollHeight;
 
@@ -365,24 +367,54 @@ async function sendChatMessage(autoSpeak = false) {
       body: JSON.stringify({
         message,
         language: lang,
-        userProfile: currentProfile
+        userProfile: currentProfile,
+        conversationHistory: chatHistory
       })
     });
     const data = await response.json();
 
     typingBubble.remove();
 
+    // Track multi-turn conversation history
+    chatHistory.push({ role: 'user', text: message });
+    chatHistory.push({ role: 'model', text: data.reply });
+    if (chatHistory.length > 8) chatHistory = chatHistory.slice(-8);
+
+    // Build dynamic recommended scheme cards HTML
+    let recommendationsHtml = '';
+    if (data.recommendedSchemes && data.recommendedSchemes.length > 0) {
+      recommendationsHtml = `
+        <div class="rag-recommendations">
+          ${data.recommendedSchemes.map(s => `
+            <div class="scheme-pill">
+              <div>
+                <strong>🏷️ ${s.schemeName}</strong><br>
+                <small style="color:#64748B;">Sector: ${s.sector || 'Govt Scheme'}</small>
+              </div>
+              <span>${s.loanAmount || ''} ${s.subsidy ? '• ' + s.subsidy + '% Subsidy' : ''}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    const sectorBadge = data.detectedSector 
+      ? `<div class="sector-indicator">🎯 Target Sector: ${data.detectedSector}</div>` 
+      : '';
+
     const aiBubble = document.createElement('div');
     aiBubble.className = 'chat-bubble ai';
     aiBubble.innerHTML = `
+      ${sectorBadge}
       <div>${data.reply.replace(/\n/g, '<br>')}</div>
+      ${recommendationsHtml}
       <button class="listen-btn" onclick="speakBhashiniVoice('${escapeTextForAttr(data.reply)}', '${lang}', this)">🔊 Suniye / వినండి (Listen)</button>
-      <small class="ai-credit">✨ Source: ${data.source} • Digital India BHASHINI</small>
+      <small class="ai-credit">✨ Source: ${data.source} • Digital India BHASHINI RAG</small>
     `;
     chatContainer.appendChild(aiBubble);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 
-    logTerminal(`[POST /api/ai/chat] Language: ${lang} (Bhashini Voice)\nReply: ${data.reply.substring(0, 160)}...`);
+    logTerminal(`[POST /api/ai/chat] Language: ${lang} | Sector: ${data.detectedSector || 'General'}\nReply: ${data.reply.substring(0, 160)}...`);
 
     if (autoSpeak) {
       const btn = aiBubble.querySelector('.listen-btn');

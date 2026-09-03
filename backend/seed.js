@@ -6,6 +6,7 @@ const ChannelPartner = require('./models/ChannelPartner');
 const User = require('./models/User');
 const Application = require('./models/Application');
 const dataStore = require('./services/dataStore');
+const { COMPREHENSIVE_GOVT_SCHEMES } = require('./data/comprehensiveSchemes');
 
 const SEED_SCHEMES = [
   {
@@ -386,13 +387,21 @@ async function seedData() {
   console.log('🌱 Seeding Udyam Setu Database with realistic Indian government schemes...');
   await connectDB();
 
+  // Combine baseline schemes with multi-sector schemes catalog
+  const existingNames = new Set(SEED_SCHEMES.map(s => s.schemeName.toLowerCase()));
+  const newSchemes = COMPREHENSIVE_GOVT_SCHEMES.filter(s => !existingNames.has(s.schemeName.toLowerCase())).map((s, idx) => ({
+    _id: `65e0000000000000000000${(20 + idx).toString()}`,
+    ...s
+  }));
+  const allSchemesCombined = [...SEED_SCHEMES, ...newSchemes];
+
   // Populate In-Memory Store always
-  dataStore.memoryDB.schemes = [...SEED_SCHEMES];
+  dataStore.memoryDB.schemes = [...allSchemesCombined];
   dataStore.memoryDB.partners = [...SEED_PARTNERS];
   dataStore.memoryDB.users = [SEED_USER];
   dataStore.memoryDB.applications = [SEED_APPLICATION];
 
-  console.log(`✅ Loaded ${SEED_SCHEMES.length} schemes into In-Memory Store.`);
+  console.log(`✅ Loaded ${allSchemesCombined.length} dynamic schemes across Agriculture, MSME, Students, Women, and Artisans.`);
   console.log(`✅ Loaded ${SEED_PARTNERS.length} channel partners into In-Memory Store.`);
   console.log(`✅ Loaded default entrepreneur profile & application into In-Memory Store.`);
 
@@ -400,7 +409,7 @@ async function seedData() {
   if (!isInMemoryFallback() && mongoose.connection.readyState === 1) {
     try {
       await Scheme.deleteMany({});
-      await Scheme.insertMany(SEED_SCHEMES);
+      await Scheme.insertMany(allSchemesCombined);
 
       await ChannelPartner.deleteMany({});
       await ChannelPartner.insertMany(SEED_PARTNERS);

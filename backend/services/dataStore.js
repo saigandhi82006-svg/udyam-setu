@@ -4,10 +4,12 @@ const ChannelPartner = require('../models/ChannelPartner');
 const Application = require('../models/Application');
 const { isInMemoryFallback } = require('../config/db');
 
+const { COMPREHENSIVE_GOVT_SCHEMES } = require('../data/comprehensiveSchemes');
+
 // In-Memory storage repositories
 const memoryDB = {
   users: [],
-  schemes: [],
+  schemes: [...COMPREHENSIVE_GOVT_SCHEMES.map((s, idx) => ({ _id: `65e0000000000000000000${(20 + idx).toString()}`, ...s }))],
   partners: [],
   applications: []
 };
@@ -42,6 +44,7 @@ const dataStore = {
     }
     return memoryDB.schemes.filter(s => {
       if (filter.category && s.category !== filter.category) return false;
+      if (filter.targetSector && s.targetSector !== filter.targetSector) return false;
       return true;
     });
   },

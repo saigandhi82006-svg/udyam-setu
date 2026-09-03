@@ -4,6 +4,7 @@
  */
 
 const { GoogleGenAI } = require('@google/genai');
+const { handleRAGConversationalChat } = require('./ragService');
 
 const SYSTEM_INSTRUCTION = `
 You are "Udyam Setu Didi / Mitra", a warm, patient, and highly encouraging grassroots business advisor for rural, marginalized, and micro-entrepreneurs across India (including street vendors, SHG women, farmers, and traditional artisans).
@@ -111,50 +112,15 @@ How can I support your business dream today?`;
 }
 
 async function handleAIChat({ message, conversationHistory = [], language = 'English', userProfile = null }) {
-  const client = getGenAIClient();
-
-  if (client) {
-    try {
-      const contents = [];
-
-      let contextMsg = `The user is interacting with Udyam Setu voice assistant. Language requested: ${language}.`;
-      if (userProfile) {
-        contextMsg += ` User Profile: Age ${userProfile.age || 'Unknown'}, Category: ${userProfile.category || 'Unknown'}, Income: ₹${userProfile.annualIncome || 'Unknown'}, Business: ${userProfile.businessType || 'Unknown'}.`;
-      }
-      contents.push({ role: 'user', parts: [{ text: `${contextMsg}\nUser says: ${message}` }] });
-
-      const response = await client.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: contents,
-        config: {
-          systemInstruction: SYSTEM_INSTRUCTION,
-          temperature: 0.6,
-        }
-      });
-
-      if (response && response.text) {
-        return {
-          reply: response.text,
-          source: 'gemini-2.5-flash',
-          language,
-          bhashiniVoiceEnabled: true
-        };
-      }
-    } catch (err) {
-      console.warn('Gemini API call failed, falling back to local vernacular guidance:', err.message);
-    }
-  }
-
-  // Graceful fallback
-  const fallback = getFallbackResponse(message, language);
-  return {
-    reply: fallback,
-    source: 'udyam-setu-vernacular-engine',
+  return await handleRAGConversationalChat({
+    message,
+    conversationHistory,
     language,
-    bhashiniVoiceEnabled: true
-  };
+    userProfile
+  });
 }
 
 module.exports = {
-  handleAIChat
+  handleAIChat,
+  getFallbackResponse
 };

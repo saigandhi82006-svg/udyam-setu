@@ -14,6 +14,24 @@ const SchemeSchema = new mongoose.Schema({
     type: String, // e.g., 'Central Government', 'State Government', 'MSME', 'Women Empowerment', 'Rural Development'
     default: 'Central Government'
   },
+  targetSector: {
+    type: String, // 'Agriculture', 'MSME / Small Business', 'Education / Youth', 'Women Entrepreneur', 'Artisans & Weavers', 'Street Vendors'
+    default: 'MSME / Small Business'
+  },
+  state: {
+    type: String, // 'Central', 'Telangana', 'Maharashtra', 'Andhra Pradesh', 'All'
+    default: 'Central'
+  },
+  vernacularNames: {
+    hi: { type: String, default: '' },
+    te: { type: String, default: '' },
+    mr: { type: String, default: '' },
+    ta: { type: String, default: '' }
+  },
+  embedding: {
+    type: [Number], // 768-dimensional vector embedding for semantic search
+    default: undefined
+  },
   tagline: {
     type: String,
     default: ''
