@@ -224,9 +224,9 @@ async function handleRAGConversationalChat({
 - Application Portal: ${s.applicationUrl}
 `).join('\n---\n');
 
-  const client = getGenAIClient();
+  const apiKey = process.env.GEMINI_API_KEY;
 
-  if (client) {
+  if (apiKey) {
     try {
       const prompt = `
 You are "Udyam Setu AI", an expert government scheme counselor for Indian citizens, rural workers, farmers, students, and micro-entrepreneurs.
@@ -255,17 +255,24 @@ INSTRUCTIONS FOR CONVERSATIONAL INTELLIGENCE:
 5. Conclude with a warm, comforting next step and ask if they'd like help preparing their documents or finding the nearest bank.
 `;
 
-      const response = await client.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [{ parts: [{ text: prompt }] }],
-        config: {
-          temperature: 0.6,
-        }
+      const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.6,
+            maxOutputTokens: 1000
+          }
+        })
       });
 
-      if (response && response.text) {
+      const geminiData = await geminiRes.json();
+      const aiText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (aiText) {
         return {
-          reply: response.text,
+          reply: aiText,
           recommendedSchemes: relevantSchemes.map(s => ({
             schemeName: s.schemeName,
             loanAmount: s.loanAmountFormatted,
@@ -274,7 +281,7 @@ INSTRUCTIONS FOR CONVERSATIONAL INTELLIGENCE:
             url: s.applicationUrl
           })),
           detectedSector: classifyUserSector(message, userProfile),
-          source: 'gemini-2.5-flash (RAG Engine)',
+          source: 'Google Gemini 3.6 Flash (Real Autonomous AI)',
           language,
           bhashiniVoiceEnabled: true
         };
