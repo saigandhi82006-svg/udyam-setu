@@ -81,18 +81,21 @@ let otpTimerInterval = null;
 const DEVICE_STORAGE_KEY = 'udyam_device_google_accounts';
 
 function getDeviceGoogleAccounts() {
+  const defaultAccounts = [
+    { email: 'saivocals304@gmail.com', name: 'Sai Gandhi', initials: 'SG', color: '#4285F4' },
+    { email: 'sai.gandhi82006@gmail.com', name: 'Sai Gandhi', initials: 'SG', color: '#EA4335' }
+  ];
+
   try {
     const saved = localStorage.getItem(DEVICE_STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.some(a => a.email === 'saivocals304@gmail.com')) {
+        return parsed;
+      }
     }
   } catch (e) {}
 
-  // Defaults strictly to the device owner's account (Zero random personas)
-  const defaultAccounts = [
-    { email: 'sai.gandhi82006@gmail.com', name: 'Sai Gandhi', initials: 'SG', color: '#EA4335' }
-  ];
   try {
     localStorage.setItem(DEVICE_STORAGE_KEY, JSON.stringify(defaultAccounts));
   } catch (e) {}
@@ -103,7 +106,7 @@ function saveDeviceGoogleAccount(email, name) {
   const accounts = getDeviceGoogleAccounts();
   const existingIdx = accounts.findIndex(a => a.email.toLowerCase() === email.toLowerCase());
   const initials = (name.split(' ').map(n => n[0]).join('') || 'G').substring(0, 2).toUpperCase();
-  const colors = ['#EA4335', '#4285F4', '#34A853', '#FBBC05', '#8B5CF6'];
+  const colors = ['#4285F4', '#EA4335', '#34A853', '#FBBC05', '#8B5CF6'];
   const color = colors[accounts.length % colors.length];
 
   const newAcc = { email, name, initials, color };
@@ -157,53 +160,6 @@ function renderDeviceGoogleAccounts() {
   container.innerHTML = html;
 }
 
-// Google Identity Services (GIS) Official SSO Integration
-function decodeGoogleJwt(token) {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-    return JSON.parse(jsonPayload);
-  } catch (e) {
-    return null;
-  }
-}
-
-function handleGoogleCredentialResponse(response) {
-  if (!response || !response.credential) return;
-  const payload = decodeGoogleJwt(response.credential);
-  if (payload && payload.email) {
-    const name = payload.name || payload.email.split('@')[0];
-    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-    logTerminal(`[Google Identity] Real Google SSO verified: ${name} (${payload.email})`);
-    selectGoogleAccount(payload.email, name, initials);
-  }
-}
-
-function initGoogleIdentity() {
-  if (window.google && window.google.accounts && window.google.accounts.id) {
-    try {
-      const container = document.getElementById('g_id_signin_container');
-      if (container && !container.hasChildNodes()) {
-        window.google.accounts.id.initialize({
-          client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
-          callback: handleGoogleCredentialResponse,
-          auto_select: false
-        });
-        window.google.accounts.id.renderButton(container, {
-          theme: 'outline',
-          size: 'large',
-          text: 'signin_with',
-          shape: 'rectangular',
-          width: 280
-        });
-      }
-    } catch (e) {
-      // Graceful fallback if no client ID is set
-    }
-  }
-}
-
 function promptAddGoogleDeviceAccount() {
   const customEmail = prompt('Enter your personal Google / Gmail address for this device:', '');
   if (customEmail && customEmail.includes('@')) {
@@ -219,7 +175,6 @@ function openGoogleAccountModal() {
   renderDeviceGoogleAccounts();
   const modal = document.getElementById('googleAccountModal');
   if (modal) modal.style.display = 'flex';
-  initGoogleIdentity();
 }
 
 function closeGoogleAccountModal() {
