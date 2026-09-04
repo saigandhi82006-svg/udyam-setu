@@ -37,7 +37,24 @@ const dataStore = {
     if (!isInMemoryFallback()) {
       try {
         const schemes = await Scheme.find(filter);
-        if (schemes && schemes.length > 0) return schemes;
+        if (schemes && schemes.length > 0) {
+          // Enrich MongoDB schemes with vernacularDetails from in-memory store if missing
+          return schemes.map(s => {
+            if (!s.vernacularDetails || Object.keys(s.vernacularDetails || {}).length === 0) {
+              const inMemScheme = memoryDB.schemes.find(m => 
+                (m.shortCode && m.shortCode === s.shortCode) ||
+                (m.schemeId && m.schemeId === s.schemeId) ||
+                (m.schemeName && m.schemeName === s.schemeName)
+              );
+              if (inMemScheme && inMemScheme.vernacularDetails) {
+                // Return a plain object with vernacularDetails merged in
+                const schemeObj = s.toObject ? s.toObject() : { ...s };
+                return { ...schemeObj, vernacularDetails: inMemScheme.vernacularDetails };
+              }
+            }
+            return s;
+          });
+        }
       } catch (e) {
         console.warn('Falling back to in-memory schemes:', e.message);
       }

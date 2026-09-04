@@ -807,7 +807,16 @@ async function sendChatMessage(autoSpeak = false) {
   // Append typing indicator
   const typingBubble = document.createElement('div');
   typingBubble.className = 'chat-bubble ai typing';
-  typingBubble.innerText = '... RAG Engine analyzing 30+ government schemes';
+  const TYPING_TEXT = {
+    te: '... 30+ ప్రభుత్వ పథకాలను విశ్లేషిస్తున్నాం',
+    hi: '... 30+ सरकारी योजनाओं का विश्लेषण हो रहा है',
+    kn: '... 30+ ಸರ್ಕಾರಿ ಯೋಜನೆಗಳನ್ನು ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ',
+    ta: '... 30+ அரசு திட்டங்களை ஆய்வு செய்கிறோம்',
+    mr: '... 30+ सरकारी योजनांचे विश्लेषण केले जात आहे',
+    bn: '... 30+ সরকারি প্রকল্প বিশ্লেষণ করা হচ্ছে',
+    en: '... RAG Engine analyzing 30+ government schemes'
+  };
+  typingBubble.innerText = TYPING_TEXT[langCode] || TYPING_TEXT.en;
   chatContainer.appendChild(typingBubble);
   chatContainer.scrollTop = chatContainer.scrollHeight;
 
@@ -963,7 +972,7 @@ async function sendChatMessage(autoSpeak = false) {
               </div>
               <p class="ai-scheme-desc">${s.description}</p>
               <button type="button" class="ai-view-scheme-btn" onclick="event.stopPropagation(); navigateToSchemeFromCardKey('${schemeKey}')">
-                <span>View Full Scheme Details</span> ➔
+                <span>${{te:'పూర్తి వివరాలు చూడండి',hi:'पूरी जानकारी देखें',kn:'ಸಂಪೂರ್ಣ ವಿವರ ನೋಡಿ',ta:'முழு விவரங்கள் காண்க',mr:'संपूर्ण तपशील पहा',bn:'বিস্তারিত দেখুন',en:'View Full Scheme Details'}[langCode]||'View Full Scheme Details'}</span> ➔
               </button>
             </div>
           `;}).join('')}
@@ -980,7 +989,7 @@ async function sendChatMessage(autoSpeak = false) {
             <div class="scheme-pill" data-schemekey="${schemeKey}" onclick="navigateToSchemeFromCardKey('${schemeKey}')">
               <div>
                 <strong>🏷️ ${s.schemeName}</strong><br>
-                <small style="color:#64748B;">Sector: ${s.sector || 'Govt Scheme'}</small>
+                <small style="color:#64748B;">${{te:'రంగం',hi:'क्षेत्र',kn:'ಕ್ಷೇತ್ರ',ta:'துறை',mr:'क्षेत्र',bn:'ক্ষেত্র',en:'Sector'}[langCode]||'Sector'}: ${s.sector || 'Govt Scheme'}</small>
               </div>
               <span>${s.loanAmount || ''} ${s.subsidy ? '• ' + s.subsidy : ''}</span>
             </div>
@@ -991,19 +1000,18 @@ async function sendChatMessage(autoSpeak = false) {
 
     const sectorName = data.target_sector || data.detectedSector;
     let sectorBadge = '';
+    const ADVISORY_LABEL = {te:'💡 AI ఆర్థిక సలహా • EMI & తిరిగి చెల్లింపు',hi:'💡 AI वित्तीय सलाह • EMI और पुनर्भुगतान',kn:'💡 AI ಹಣಕಾಸು ಸಲಹೆ • EMI ಮತ್ತು ಮರುಪಾವತಿ',ta:'💡 AI நிதி ஆலோசனை • EMI & திரும்பச் செலுத்தல்',mr:'💡 AI आर्थिक सल्ला • EMI व परतफेड',bn:'💡 AI আর্থিক পরামর্শ • EMI ও পরিশোধ',en:'💡 AI Financial Advisory • EMI & Repayment Terms'};
+    const SECTOR_PREFIX = {te:'🎯 లক్ష్య రంగం',hi:'🎯 लक्षित क्षेत्र',kn:'🎯 ಗುರಿ ಕ್ಷೇತ್ರ',ta:'🎯 இலக்கு துறை',mr:'🎯 लक्ष्य क्षेत्र',bn:'🎯 লক্ষ্য ক্ষেত্র',en:'🎯 Target Sector'};
     if (data.type === 'financial_advisory') {
-      sectorBadge = `<div class="sector-indicator" style="background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;">💡 AI Financial Advisory • EMI & Repayment Terms</div>`;
+      sectorBadge = `<div class="sector-indicator" style="background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;">${ADVISORY_LABEL[langCode]||ADVISORY_LABEL.en}</div>`;
     } else if (sectorName && sectorName !== 'General Advisory') {
-      sectorBadge = `<div class="sector-indicator">🎯 Target Sector: ${sectorName}</div>`;
+      sectorBadge = `<div class="sector-indicator">${SECTOR_PREFIX[langCode]||SECTOR_PREFIX.en}: ${sectorName}</div>`;
     }
 
     const displayText = data.message || data.reply;
 
-    const listenBtnLabel = lang === 'Telugu' ? '🔊 వినండి (Listen)'
-      : (lang === 'Hindi' ? '🔊 सुनिए (Listen)'
-      : (lang === 'Kannada' ? '🔊 ಕೇಳಿ (Listen)'
-      : (lang === 'Bengali' ? '🔊 শুনুন (Listen)'
-      : '🔊 Listen / వినండి')));
+    const LISTEN_LABEL = {te:'🔊 వినండి',hi:'🔊 सुनिए',kn:'🔊 ಕೇಳಿ',ta:'🔊 கேளுங்கள்',mr:'🔊 ऐका',bn:'🔊 শুনুন',en:'🔊 Listen'};
+    const listenBtnLabel = LISTEN_LABEL[langCode] || LISTEN_LABEL.en;
 
     const aiBubble = document.createElement('div');
     aiBubble.className = 'chat-bubble ai';
