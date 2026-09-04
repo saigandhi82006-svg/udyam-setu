@@ -49,6 +49,30 @@ const dataStore = {
     });
   },
 
+  async getSchemesByBusinessType(businessType) {
+    const all = await this.getSchemes();
+    if (!businessType || businessType === 'All') return all;
+    return all.filter(s =>
+      s.eligibleBusinessTypes && (
+        s.eligibleBusinessTypes.includes('All') ||
+        s.eligibleBusinessTypes.includes(businessType)
+      )
+    );
+  },
+
+  getBusinessTypesCatalog() {
+    return [
+      'Food Business',
+      'Retail / Kirana Shop',
+      'Handicrafts & Handlooms',
+      'Agriculture & Allied',
+      'Textile & Garments',
+      'Manufacturing & Fabrication',
+      'Services / Repair Shop',
+      'Street Vending'
+    ];
+  },
+
   async getSchemeById(id) {
     if (!isInMemoryFallback()) {
       try {

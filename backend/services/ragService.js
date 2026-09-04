@@ -93,6 +93,12 @@ function buildGreetingResponse(language = 'English') {
  */
 function isDiscoveryOrUnspecifiedQuery(message = '', userProfile = null) {
   if (!message) return true;
+
+  // If user profile has an explicit business type, then it's NOT an unspecified discovery query!
+  if (userProfile?.businessType && userProfile.businessType !== 'General Advisory' && userProfile.businessType !== 'Discovery') {
+    return false;
+  }
+
   const clean = message.trim().toLowerCase().replace(/[!.,?।]/g, '');
 
   const explicitDiscoveryWords = [
@@ -111,7 +117,7 @@ function isDiscoveryOrUnspecifiedQuery(message = '', userProfile = null) {
   if (explicitDiscoveryWords.includes(clean)) return true;
 
   // Check if message mentions any specific domain/business sector
-  const hasSpecificDomain = /(auto|vehicle|lorry|truck|cab|transport|car|tempo|rickshaw|food|tiffin|hotel|canteen|restaurant|tea stall|chai|bakery|catering|kirana|shop|grocery|thela|vendor|cart|hawker|farm|crop|kisan|cattle|dairy|tractor|fish|student|college|study|school|handicap|disability|divyang|pwd|women|mahila|female|shg|artisan|weaver|carpenter|potter|blacksmith|tailor|craft|vishwakarma|industry|factory|manufacturing|msme|ఆటో|వాహనం|లారీ|ఫుడ్|టిఫిన్|హోటల్|కిరాణా|షాప్|తోపుడు బండి|రైతు|వ్యవసాయం|పంట|పాడి|చదువు|విద్య|దివ్యాంగ|వైకల్యం|మహిళ|చేతివృత్తి|చేనేత|పరిశ్రమ|ಆಟೋ|ವಾಹನ|ಲಾರಿ|ಆಹಾರ|ತಿಂಡಿ|ಹೋಟೆಲ್|ಕಿರಾಣಿ|ಅಂಗಡಿ|ತಳ್ಳುವ ಗಾಡಿ|ಕೃಷಿ|ರೈತ|ಬೆಳೆ|ಹಾಲು|ಹೈನುಗಾರಿಕೆ|ಶಿಕ್ಷಣ|ವಿಕಲಚೇತನ|ದಿವ್ಯಾಂಗ|ಮಹಿಳೆ|ಕುಶಲಕರ್ಮಿ|ನೇಕಾರ|ಕೈಗಾರಿಕೆ|অটো|গাড়ি|লরি|খাবার|টিফিন|হোটেল|মুদি|দোকান|হকার|কৃষি|কৃষক|ফসল|দুগ্ধ|শিক্ষা|প্রতিবন্ধী|দিব্যাঙ্গ|মহিলা|কারিগর|তাঁতি|শিল্প|कारखाना|गाड़ी|ऑटो|रिक्शा|ट्रक|टिफिन|होटल|किराना|दुकान|ठेला|रेहड़ी|खेती|किसान|डेयरी|गाय|भैंस|पढ़ाई|छात्र|दिव्यांग|विकलांग|महिला|कारीगर|बुनकर|उद्योग|कारखाना)/i.test(message);
+  const hasSpecificDomain = /(auto|vehicle|lorry|truck|cab|transport|car|tempo|rickshaw|repair|service|mechanic|garage|food|tiffin|hotel|canteen|restaurant|tea stall|chai|bakery|catering|kirana|shop|retail|grocery|supermarket|thela|vendor|vending|pushcart|cart|hawker|farm|crop|kisan|cattle|dairy|tractor|fish|student|college|study|school|handicap|disability|divyang|pwd|women|mahila|female|shg|artisan|weaver|carpenter|potter|blacksmith|tailor|tailoring|textile|garment|boutique|dress|cloth|sewing|craft|vishwakarma|industry|factory|manufacturing|fabrication|workshop|msme|zed|ఆటో|వాహనం|లారీ|రిపేర్|సర్వీస్|మెకానిక్|గ్యారేజ్|ఫుడ్|టిఫిన్|హోటల్|ఆహారం|భోజనం|క్యాటరింగ్|కిరాణా|షాప్|దుకాణం|తోపుడు బండి|తోపుడు|వీధి వ్యాపారం|రైతు|వ్యవసాయం|పంట|పాడి|చేపల|గొర్రెలు|ట్రాక్టర్|టైలరింగ్|వస్త్ర|బట్టలు|దర్జీ|చేనేత|చేతివృత్తులు|వడ్రంగి|కమ్మరి|కుమ్మరి|పరిశ్రమ|తయారీ పరిశ్రమ|ఫ్యాబ్రికేషన్|చదువు|విద్య|దివ్యాంగ|వైకల్యం|మహిళ|ಆಟೋ|ವಾಹನ|ಲಾರಿ|ರಿಪೇರಿ|ಸೇವೆ|ಗ್ಯಾರೇಜ್|ಮೆಕ್ಯಾನಿಕ್|ಆಹಾರ|ತಿಂಡಿ|ಊಟ|ಹೋಟೆಲ್|ಬೇಕರಿ|ಕ್ಯಾಟರಿಂಗ್|ಕಿರಾಣಿ|ಅಂಗಡಿ|ಚಿಲ್ಲರೆ|ತಳ್ಳುವ ಗಾಡಿ|ಬೀದಿ ವ್ಯಾಪಾರ|ಕೃಷಿ|ರೈತ|ಬೆಳೆ|ಹಾಲು|ಹೈನುಗಾರಿಕೆ|ಮೀನು|ಟ್ರಾಕ್ಟರ್|ಟೈಲರಿಂಗ್|ಜವಳಿ|ಬಟ್ಟೆ|ದರ್ಜಿ|ಕರಕುಶಲ|ನೇಕಾರ|ಕುಂಬಾರ|ಕಮ್ಮಾರ|ಬಡಗಿ|ಉತ್ಪಾದನೆ|ಕೈಗಾರಿಕೆ|ಫ್ಯಾಬ್ರಿಕೇಶನ್|ಶಿಕ್ಷಣ|ವಿಕಲಚೇತನ|ದಿವ್ಯಾಂಗ|ಮಹಿಳೆ|অটো|গাড়ি|লরি|রিকশা|মেরামত|গ্যারেজ|সার্ভিস|মেকানিক|খাবার|টিফিন|হোটেল|বেকারি|ক্যাটারিং|মুদি|দোকান|খুচরা|হকার|ঠেলাগাড়ি|ফুটপাত|কৃষি|কৃষক|ফসল|দুগ্ধ|মাছ|ট্র্যাক্টর|দর্জি|পোশাক|বস্ত্র|সেলাই|হস্তশিল্প|তাঁতি|কারিগর|ছুতোর|কামার|কুমার|ম্যানুফ্যাকচারিং|কারখানা|উৎপাদন|ফ্যাব্রিকেশন|শিক্ষা|প্রতিবন্ধী|দিব্যাঙ্গ|মহিলা|गाड़ी|ऑटो|रिक्शा|ट्रक|मरम्मत|गैरेज|सर्विस|मैकेनिक|टिफिन|होटल|खाना|भोजन|ढाबा|किराना|दुकान|खुदरा|जनरल स्टोर|ठेला|रेहड़ी|पटरी|फेरीवाला|खेती|किसान|डेयरी|पशुपालन|मत्स्य|ट्रैक्टर|टेलर|सिलाई|कपड़ा|दर्जी|परिधान|हथकरघा|बुनकर|दस्तकार|कारीगर|बढ़ई|लोहार|कुम्हार|उद्योग|कारखाना|विनिर्माण|फैब्रिकेशन|पढ़ाई|छात्र|दिव्यांग|विकलांग|महिला|गॅरेज|दुरुस्ती|हॉटेल|किराणा|हातगाडी|फेरीवाला|शेती|टेलरिंग|शिवणकाम|विणकर|कारागीर|உணவு|ஹோட்டல்|டிபன்|மளிகை|சில்லறை|தள்ளுவண்டி|தெருவோர|தையல்|ஜவுளி|ஆடை|கைத்தறி|கைவினை|நெசவாளர்|விவசாயம்|பால் பண்ணை|பழுது|கேரேஜ்|வாகனம்|உற்பத்தி|பட்டறை)/i.test(message);
 
   if (!hasSpecificDomain && clean.length <= 40) {
     return true;
@@ -122,74 +128,74 @@ function isDiscoveryOrUnspecifiedQuery(message = '', userProfile = null) {
 
 const DISCOVERY_BUSINESS_OPTIONS = {
   English: [
-    { id: 'auto', label: '🛺 Commercial Vehicle / Auto-rickshaw', prompt: 'I want a loan for a commercial auto-rickshaw / transport vehicle' },
-    { id: 'food', label: '🍲 Food Business / Tiffin / Hotel', prompt: 'I want a loan for starting a food business or tiffin center' },
-    { id: 'retail', label: '🛒 Kirana / Retail Shop / Street Vendor', prompt: 'I want a loan for a kirana shop or retail business' },
-    { id: 'agri', label: '🌾 Agriculture / Dairy Farming (KCC)', prompt: 'I want an agriculture or dairy farming loan (KCC)' },
-    { id: 'artisan', label: '🧵 Traditional Artisan / Weaver (Vishwakarma)', prompt: 'I am an artisan/weaver looking for PM Vishwakarma scheme' },
-    { id: 'msme', label: '🏭 Small Manufacturing / MSME Unit', prompt: 'I want a loan to set up a small manufacturing or MSME business' },
-    { id: 'women', label: '👩‍💼 Women Entrepreneur Schemes', prompt: 'I am a woman entrepreneur looking for government schemes and subsidies' },
-    { id: 'divyang', label: '♿ Differently Abled / Divyangjan Loan', prompt: 'I am a person with disability looking for NHFDC self-employment loan' }
+    { id: 'food', label: '🍲 Food Business / Tiffin / Hotel', prompt: 'I want a loan for starting a food business, hotel, or tiffin center' },
+    { id: 'retail', label: '🛒 Retail / Kirana Shop / General Store', prompt: 'I want a loan for a kirana shop or retail grocery store' },
+    { id: 'artisan', label: '🧵 Handicrafts & Handlooms / Weaver', prompt: 'I am an artisan or handloom weaver looking for Vishwakarma and Weaver Mudra schemes' },
+    { id: 'agri', label: '🌾 Agriculture & Allied / Dairy / KCC', prompt: 'I want an agriculture, farming, or dairy loan (KCC / AIF)' },
+    { id: 'textile', label: '👗 Textile & Garments / Tailoring Boutique', prompt: 'I want a loan for a tailoring boutique or textile garment manufacturing' },
+    { id: 'manufacturing', label: '🏭 Manufacturing & Fabrication / MSME', prompt: 'I want a loan to set up a small manufacturing or fabrication unit' },
+    { id: 'services', label: '🔧 Services / Repair Shop / Auto Garage', prompt: 'I want a loan for a repair shop, service center, or commercial vehicle' },
+    { id: 'vending', label: '🛍️ Street Vending / Pushcart / Thela', prompt: 'I am a street vendor looking for PM SVANidhi working capital loan' }
   ],
   Telugu: [
-    { id: 'auto', label: '🛺 వాణిజ్య వాహనం / ఆటో రిక్షా', prompt: 'నాకు కమర్షియల్ ఆటో రిక్షా / వాణిజ్య వాహనం కొనడానికి లోన్ కావాలి' },
-    { id: 'food', label: '🍲 ఫుడ్ బిజినెస్ / టిఫిన్ సెంటర్ / హోటల్', prompt: 'నాకు టిఫిన్ సెంటర్ లేదా ఫుడ్ బిజినెస్ కోసం లోన్ కావాలి' },
-    { id: 'retail', label: '🛒 కిరాణా దుకాణం / చిల్లర వ్యాపారం', prompt: 'నాకు కిరాణా షాప్ లేదా రిటైల్ వ్యాపారం కోసం లోన్ కావాలి' },
-    { id: 'agri', label: '🌾 వ్యవసాయం / పాడి పరిశ్రమ (KCC)', prompt: 'నాకు వ్యవసాయం లేదా పాడి పెంపకం కోసం కిసాన్ క్రెడిట్ కార్డ్ లోన్ కావాలి' },
-    { id: 'artisan', label: '🧵 చేతివృత్తులు / చేనేత (పీఎం విశ్వకర్మ)', prompt: 'నేను చేతివృత్తి కళాకారుడిని, నాకు పీఎం విశ్వకర్మ పథకం రుణం కావాలి' },
-    { id: 'msme', label: '🏭 చిన్న పరిశ్రమ / తయారీ యూనిట్', prompt: 'నాకు చిన్న పరిశ్రమ లేదా తయారీ యూనిట్ ప్రారంభించడానికి రుణ సహాయం కావాలి' },
-    { id: 'women', label: '👩‍💼 మహిళా పారిశ్రామికవేత్తల పథకాలు', prompt: 'మహిళా పారిశ్రామికవేత్తల కోసం ప్రభుత్వ ప్రత్యేక రాయితీ పథకాలు కావాలి' },
-    { id: 'divyang', label: '♿ దివ్యాంగుల స్వయం ఉపాధి రుణం (NHFDC)', prompt: 'దివ్యాంగుల స్వయం ఉపాధి కోసం తక్కువ వడ్డీతో కూడిన ప్రభుత్వ రుణం కావాలి' }
+    { id: 'food', label: '🍲 ఫుడ్ బిజినెస్ (హోటల్, క్యాటరింగ్, ఆహార వ్యాపారం)', prompt: 'నాకు టిఫిన్ సెంటర్ లేదా ఫుడ్ బిజినెస్ ప్రారంభించడానికి రుణం కావాలి' },
+    { id: 'retail', label: '🛒 రిటైల్ / కిరాణా షాప్ (కిరాణా, జనరల్ స్టోర్)', prompt: 'నాకు కిరాణా దుకాణం లేదా చిల్లర వ్యాపారం కోసం లోన్ కావాలి' },
+    { id: 'artisan', label: '🧵 చేనేత & చేతివృత్తులు (వీవర్ ముద్ర, విశ్వకర్మ)', prompt: 'నేను చేనేత లేదా చేతివృత్తి కళాకారుడిని, నాకు ప్రభుత్వ చేనేత సహాయ పథకాలు కావాలి' },
+    { id: 'agri', label: '🌾 వ్యవసాయం & పాడి పరిశ్రమ (కిసాన్ క్రెడిట్ కార్డ్)', prompt: 'నాకు వ్యవసాయం లేదా పాడి పెంపకం కోసం కిసాన్ క్రెడిట్ కార్డ్ లోన్ కావాలి' },
+    { id: 'textile', label: '👗 టైలరింగ్ & వస్త్ర వ్యాపారం (సమర్థ్, బుటిక్)', prompt: 'నాకు టైలరింగ్ లేదా వస్త్ర వ్యాపారం కోసం ప్రభుత్వ రుణ సహాయం కావాలి' },
+    { id: 'manufacturing', label: '🏭 చిన్న తయారీ పరిశ్రమ & ఫ్యాబ్రికేషన్', prompt: 'నాకు చిన్న తయారీ పరిశ్రమ లేదా తయారీ యూనిట్ ప్రారంభించడానికి రుణ సహాయం కావాలి' },
+    { id: 'services', label: '🔧 రిపేర్ & సర్వీస్ సెంటర్ (ఆటో గ్యారేజ్, వాహనం)', prompt: 'నాకు రిపేర్ షాప్, సర్వీస్ సెంటర్ లేదా వాణిజ్య వాహనం కోసం లోన్ కావాలి' },
+    { id: 'vending', label: '🛍️ వీధి వ్యాపారం (తోపుడు బండ్లు, పీఎం స్వనిధి)', prompt: 'నేను వీధి వ్యాపారిని, నాకు పీఎం స్వనిధి పథకం రుణం కావాలి' }
   ],
   Kannada: [
-    { id: 'auto', label: '🛺 ವಾಣಿಜ್ಯ ವಾಹನ / ಆಟೋ ರಿಕ್ಷಾ', prompt: 'ನನಗೆ ಕಮರ್ಷಿಯಲ್ ಆಟೋ ರಿಕ್ಷಾ ಅಥವಾ ಸರಕು ವಾಹನ ಖರೀದಿಸಲು ಸಾಲ ಬೇಕು' },
-    { id: 'food', label: '🍲 ಆಹಾರ ವ್ಯವಹಾರ / ಹೋಟೆಲ್ / ತಿಂಡಿ ಕೇಂದ್ರ', prompt: 'ನನಗೆ ಹೋಟೆಲ್ ಅಥವಾ ತಿಂಡಿ ಕೇಂದ್ರ ಪ್ರಾರಂಭಿಸಲು ಸಾಲ ಬೇಕು' },
-    { id: 'retail', label: '🛒 ಕಿರಾಣಿ ಅಂಗಡಿ / ಚಿಲ್ಲರೆ ವ್ಯಾಪಾರ', prompt: 'ನನಗೆ ಕಿರಾಣಿ ಅಂಗಡಿ ಅಥವಾ ಚಿಲ್ಲರೆ ವ್ಯಾಪಾರಕ್ಕಾಗಿ ಸಾಲ ಬೇಕು' },
-    { id: 'agri', label: '🌾 ಕೃಷಿ / ಹೈನುಗಾರಿಕೆ (ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್)', prompt: 'ನನಗೆ ಕೃಷಿ ಅಥವಾ ಹೈನುಗಾರಿಕೆಗಾಗಿ ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಸಾಲ ಬೇಕು' },
-    { id: 'artisan', label: '🧵 ಕುಶಲಕರ್ಮಿಗಳು / ನೇಕಾರರು (ವಿಶ್ವಕರ್ಮ)', prompt: 'ನಾನು ಕುಶಲಕರ್ಮಿ, ನನಗೆ ಪಿಎಂ ವಿಶ್ವಕರ್ಮ ಯೋಜನೆಯ ಸಾಲ ಬೇಕು' },
-    { id: 'msme', label: '🏭 ಸಣ್ಣ ಕೈಗಾರಿಕೆ / ಉತ್ಪಾದನಾ ಘಟಕ', prompt: 'ನನಗೆ ಸಣ್ಣ ಕೈಗಾರಿಕೆ ಅಥವಾ ಉತ್ಪಾದನಾ ಘಟಕ ಸ್ಥಾಪಿಸಲು ಸಾಲ ಬೇಕು' },
-    { id: 'women', label: '👩‍💼 ಮಹಿಳಾ ಉದ್ಯಮಿಗಳ ವಿಶೇಷ ಯೋಜನೆಗಳು', prompt: 'ಮಹಿಳಾ ಉದ್ಯಮಿಗಳಿಗಾಗಿ ಸರ್ಕಾರದ ವಿಶೇಷ ಸಾಲ ಮತ್ತು ಸಬ್ಸಿಡಿ ಯೋಜನೆಗಳು ಬೇಕು' },
-    { id: 'divyang', label: '♿ ವಿಕಲಚೇತನರ ಸ್ವಯಂ ಉದ್ಯೋಗ ಸಾಲ (NHFDC)', prompt: 'ವಿಕಲಚೇತನರ ಸ್ವಯಂ ಉದ್ಯೋಗಕ್ಕಾಗಿ ಕಡಿಮೆ ಬಡ್ಡಿಯ ಸರ್ಕಾರಿ ಸಾಲ ಬೇಕು' }
+    { id: 'food', label: '🍲 ಆಹಾರ ವ್ಯವಹಾರ (ಹೋಟೆಲ್, ಕ್ಯಾಟರಿಂಗ್, ತಿಂಡಿ)', prompt: 'ನನಗೆ ಹೋಟೆಲ್ ಅಥವಾ ತಿಂಡಿ ಕೇಂದ್ರ ಪ್ರಾರಂಭಿಸಲು ಸಾಲ ಬೇಕು' },
+    { id: 'retail', label: '🛒 ಚಿಲ್ಲರೆ / ಕಿರಾಣಿ ಅಂಗಡಿ (ಜನರಲ್ ಸ್ಟೋರ್)', prompt: 'ನನಗೆ ಕಿರಾಣಿ ಅಂಗಡಿ ಅಥವಾ ಚಿಲ್ಲರೆ ವ್ಯಾಪಾರಕ್ಕಾಗಿ ಸಾಲ ಬೇಕು' },
+    { id: 'artisan', label: '🧵 ಕರಕುಶಲ ಮತ್ತು ನೇಕಾರಿಕೆ (ವಿಶ್ವಕರ್ಮ, ನೇಕಾರ ಮುದ್ರಾ)', prompt: 'ನಾನು ನೇಕಾರ ಅಥವಾ ಕುಶಲಕರ್ಮಿ, ನನಗೆ ಸರ್ಕಾರದ ಸಾಲ ಬೇಕು' },
+    { id: 'agri', label: '🌾 ಕೃಷಿ ಮತ್ತು ಹೈನುಗಾರಿಕೆ (ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್)', prompt: 'ನನಗೆ ಕೃಷಿ ಅಥವಾ ಹೈನುಗಾರಿಕೆಗಾಗಿ ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಸಾಲ ಬೇಕು' },
+    { id: 'textile', label: '👗 ಜವಳಿ ಮತ್ತು ಗಾರ್ಮೆಂಟ್ಸ್ (ಟೈಲರಿಂಗ್, ಬುಟಿಕ್)', prompt: 'ನನಗೆ ಟೈಲರಿಂಗ್ ಅಥವಾ ಜವಳಿ ವ್ಯಾಪಾರಕ್ಕಾಗಿ ಸಾಲ ಬೇಕು' },
+    { id: 'manufacturing', label: '🏭 ಸಣ್ಣ ಕೈಗಾರಿಕೆ ಮತ್ತು ಉತ್ಪಾದನೆ', prompt: 'ನನಗೆ ಸಣ್ಣ ಉತ್ಪಾದನಾ ಘಟಕ ಸ್ಥಾಪಿಸಲು ಸಾಲ ಬೇಕು' },
+    { id: 'services', label: '🔧 ಸೇವೆ ಮತ್ತು ರಿಪೇರಿ ಅಂಗಡಿ (ವಾಹನ ಗ್ಯಾರೇಜ್)', prompt: 'ನನಗೆ ರಿಪೇರಿ ಅಂಗಡಿ ಅಥವಾ ವಾಣಿಜ್ಯ ವಾಹನಕ್ಕಾಗಿ ಸಾಲ ಬೇಕು' },
+    { id: 'vending', label: '🛍️ ಬೀದಿ ವ್ಯಾಪಾರ (ತಳ್ಳುವ ಗಾಡಿ, ಪಿಎಂ ಸ್ವನಿಧಿ)', prompt: 'ನಾನು ಬೀದಿ ವ್ಯಾಪಾರಿ, ನನಗೆ ಪಿಎಂ ಸ್ವನಿಧಿ ಸಾಲ ಬೇಕು' }
   ],
   Bengali: [
-    { id: 'auto', label: '🛺 বাণিজ্যিক যানবাহন / অটো-রিকশা', prompt: 'আমার বাণিজ্যিক অটো-রিকশা বা যানবাহন কেনার জন্য ঋণ প্রয়োজন' },
-    { id: 'food', label: '🍲 খাদ্য ব্যবসা / টিফিন / হোটেল', prompt: 'আমার খাদ্য ব্যবসা বা টিফিন সেন্টার খোলার জন্য ঋণ প্রয়োজন' },
-    { id: 'retail', label: '🛒 মুদি দোকান / খুচরা ব্যবসা / হকার', prompt: 'আমার মুদি দোকান বা খুচরা ব্যবসার জন্য ঋণ প্রয়োজন' },
-    { id: 'agri', label: '🌾 কৃষি / দুগ্ধ খামার (কিসান ক্রেডিট)', prompt: 'আমার কৃষি বা দুগ্ধ খামারের জন্য কিসান ক্রেডিট কার্ড ঋণ প্রয়োজন' },
-    { id: 'artisan', label: '🧵 ঐতিহ্যবাহী কারিগর / তাঁতি (বিশ্বকর্মা)', prompt: 'আমি একজন কারিগর, আমার প্রধানমন্ত্রী বিশ্বকর্মা ঋণ প্রয়োজন' },
-    { id: 'msme', label: '🏭 ক্ষুদ্র শিল্প / উৎপাদন ইউনিট', prompt: 'আমার ক্ষুদ্র শিল্প বা ম্যানুফ্যাকচারিং ইউনিট স্থাপনের জন্য ঋণ প্রয়োজন' },
-    { id: 'women', label: '👩‍💼 মহিলা উদ্যোক্তা বিশেষ প্রকল্প', prompt: 'মহিলা উদ্যোক্তাদের জন্য সরকারি বিশেষ অনুদান ও ঋণ প্রকল্প প্রয়োজন' },
-    { id: 'divyang', label: '♿ প্রতিবন্ধী স্বনির্ভর ঋণ (NHFDC)', prompt: 'প্রতিবন্ধী ব্যক্তিদের স্বনির্ভরতার জন্য কম সুদের সরকারি ঋণ প্রকল্প প্রয়োজন' }
+    { id: 'food', label: '🍲 খাদ্য ব্যবসা (হোটেল, ক্যাটারিং, টিফিন)', prompt: 'আমার খাদ্য ব্যবসা বা টিফিন সেন্টার খোলার জন্য ঋণ প্রয়োজন' },
+    { id: 'retail', label: '🛒 মুদি ও খুচরা দোকান (জেনারেল স্টোর)', prompt: 'আমার মুদি দোকান বা খুচরা ব্যবসার জন্য ঋণ প্রয়োজন' },
+    { id: 'artisan', label: '🧵 হস্তশিল্প ও তাঁত শিল্প (তাঁতি মুদ্রা, বিশ্বকর্মা)', prompt: 'আমি তাঁতি বা কারিগর, আমার সরকারি ঋণ ও অনুদান প্রয়োজন' },
+    { id: 'agri', label: '🌾 কৃষি ও দুগ্ধ খামার (কিসান ক্রেডিট কার্ড)', prompt: 'আমার কৃষি বা দুগ্ধ খামারের জন্য কিসান ক্রেডিট কার্ড ঋণ প্রয়োজন' },
+    { id: 'textile', label: '👗 বস্ত্র ও পোশাক শিল্প (দর্জি ও বুটিক)', prompt: 'আমার দর্জি দোকান বা বস্ত্র ব্যবসার জন্য ঋণ প্রয়োজন' },
+    { id: 'manufacturing', label: '🏭 ক্ষুদ্র ম্যানুফ্যাকচারিং ও উৎপাদন ইউনিট', prompt: 'আমার ক্ষুদ্র কারখানা বা উৎপাদন ইউনিট স্থাপনের জন্য ঋণ প্রয়োজন' },
+    { id: 'services', label: '🔧 পরিষেবা ও মেরামতের দোকান (গ্যারেজ, গাড়ি)', prompt: 'আমার মেরামতের দোকান বা বাণিজ্যিক যানবাহনের জন্য ঋণ প্রয়োজন' },
+    { id: 'vending', label: '🛍️ রাস্তার হকার ও ঠেলাগাড়ি (প্রধানমন্ত্রী স্বনিধি)', prompt: 'আমি ফুটপাতের হকার, আমার প্রধানমন্ত্রী স্বনিধি ঋণ প্রয়োজন' }
   ],
   Hindi: [
-    { id: 'auto', label: '🛺 वाणिज्यिक वाहन / ऑटो-रिक्शा', prompt: 'मुझे कमर्शियल ऑटो रिक्शा या कमर्शियल वाहन खरीदने के लिए लोन चाहिए' },
-    { id: 'food', label: '🍲 खाद्य व्यवसाय / टिफिन सेंटर / होटल', prompt: 'मुझे टिफिन सेंटर या खाद्य व्यवसाय शुरू करने के लिए लोन चाहिए' },
-    { id: 'retail', label: '🛒 किराना दुकान / खुदरा व्यापार / रेहड़ी', prompt: 'मुझे किराना दुकान या खुदरा व्यापार के लिए लोन चाहिए' },
-    { id: 'agri', label: '🌾 कृषि / डेयरी फार्मिंग (KCC)', prompt: 'मुझे कृषि या डेयरी फार्मिंग के लिए किसान क्रेडिट कार्ड लोन चाहिए' },
-    { id: 'artisan', label: '🧵 दस्तकार / कारीगर / बुनकर (विश्वकर्मा)', prompt: 'मैं एक कारीगर हूँ, मुझे पीएम विश्वकर्मा योजना के तहत लोन चाहिए' },
-    { id: 'msme', label: '🏭 लघु उद्योग / विनिर्माण इकाई', prompt: 'मुझे लघु उद्योग या विनिर्माण इकाई शुरू करने के लिए लोन चाहिए' },
-    { id: 'women', label: '👩‍💼 महिला उद्यमी विशेष योजनाएं', prompt: 'महिला उद्यमियों के लिए सरकारी विशेष ऋण और सब्सिडी योजनाएं चाहिए' },
-    { id: 'divyang', label: '♿ दिव्यांगजन स्वरोजगार ऋण (NHFDC)', prompt: 'दिव्यांगजनों के स्वरोजगार के लिए कम ब्याज वाला सरकारी लोन चाहिए' }
+    { id: 'food', label: '🍲 खाद्य व्यवसाय (होटल, कैटरिंग, टिफिन सेंटर)', prompt: 'मुझे टिफिन सेंटर या खाद्य व्यवसाय शुरू करने के लिए लोन चाहिए' },
+    { id: 'retail', label: '🛒 खुदरा व किराना दुकान (जनरल स्टोर)', prompt: 'मुझे किराना दुकान या खुदरा व्यापार के लिए लोन चाहिए' },
+    { id: 'artisan', label: '🧵 हस्तशिल्प एवं हथकरघा (बुनकर, विश्वकर्मा)', prompt: 'मैं एक बुनकर या कारीगर हूँ, मुझे सरकारी योजना का लोन चाहिए' },
+    { id: 'agri', label: '🌾 कृषि एवं डेयरी फार्मिंग (किसान क्रेडिट कार्ड)', prompt: 'मुझे कृषि या डेयरी फार्मिंग के लिए किसान क्रेडिट कार्ड लोन चाहिए' },
+    { id: 'textile', label: '👗 कपड़ा एवं परिधान (टेलरिंग, बुटीक)', prompt: 'मुझे सिलाई या कपड़ा व्यवसाय के लिए ऋण चाहिए' },
+    { id: 'manufacturing', label: '🏭 लघु विनिर्माण एवं फैब्रिकेशन उद्योग', prompt: 'मुझे विनिर्माण इकाई शुरू करने के लिए लोन चाहिए' },
+    { id: 'services', label: '🔧 मरम्मत व सेवा केंद्र (ऑटो गैरेज, वाहन)', prompt: 'मुझे रिपेयर शॉप या कमर्शियल वाहन के लिए लोन चाहिए' },
+    { id: 'vending', label: '🛍️ स्ट्रीट वेंडिंग (ठेला, रेहड़ी, पीएम स्वनिधि)', prompt: 'मैं रेहड़ी-पटरी विक्रेता हूँ, मुझे पीएम स्वनिधि लोन चाहिए' }
   ],
   Marathi: [
-    { id: 'auto', label: '🛺 व्यावसायिक वाहन / ऑटो-रिक्षा', prompt: 'मला व्यावसायिक ऑटो रिक्षा किंवा वाहन खरेदीसाठी कर्ज हवे आहे' },
-    { id: 'food', label: '🍲 खाद्य व्यवसाय / हॉटेल / टिफिन', prompt: 'मला हॉटेल किंवा खाद्य व्यवसाय सुरू करण्यासाठी कर्ज हवे आहे' },
-    { id: 'retail', label: '🛒 किराणा दुकान / किरकोळ व्यापार', prompt: 'मला किराणा दुकान किंवा किरकोळ व्यवसायासाठी कर्ज हवे आहे' },
-    { id: 'agri', label: '🌾 शेती / दुग्ध व्यवसाय (KCC)', prompt: 'मला शेती किंवा दुग्ध व्यवसायासाठी किसान क्रेडिट कार्ड कर्ज हवे आहे' },
-    { id: 'artisan', label: '🧵 कारागीर / विणकर (विश्वकर्मा)', prompt: 'मी एक कारागीर आहे, मला पीएम विश्वकर्मा योजनेचे कर्ज हवे आहे' },
-    { id: 'msme', label: '🏭 लहान उद्योग / मॅन्युफॅक्चरिंग', prompt: 'मला लहान उद्योग सुरू करण्यासाठी सरकारी कर्ज हवे आहे' },
-    { id: 'women', label: '👩‍💼 महिला उद्योजक विशेष योजना', prompt: 'महिला उद्योजकांसाठी सरकारी विशेष अनुदान आणि कर्ज हवे आहे' },
-    { id: 'divyang', label: '♿ दिव्यांगजन स्वयंरोजगार कर्ज (NHFDC)', prompt: 'दिव्यांगांच्या स्वयंरोजगारासाठी कमी व्याजाचे सरकारी कर्ज हवे आहे' }
+    { id: 'food', label: '🍲 खाद्य व्यवसाय (हॉटेल, केटरिंग, टिफिन सेंटर)', prompt: 'मला हॉटेल किंवा खाद्य व्यवसाय सुरू करण्यासाठी कर्ज हवे आहे' },
+    { id: 'retail', label: '🛒 किरकोळ व किराणा दुकान (जनरल स्टोअर)', prompt: 'मला किराणा दुकान किंवा किरकोळ व्यवसायासाठी कर्ज हवे आहे' },
+    { id: 'artisan', label: '🧵 हस्तकला आणि हातमाग (विणकर, विश्वकर्मा)', prompt: 'मी विणकर किंवा कारागीर आहे, मला सरकारी कर्ज हवे आहे' },
+    { id: 'agri', label: '🌾 शेती व दुग्ध व्यवसाय (किसान क्रेडिट कार्ड)', prompt: 'मला शेती किंवा दुग्ध व्यवसायासाठी किसान क्रेडिट कार्ड कर्ज हवे आहे' },
+    { id: 'textile', label: '👗 वस्त्रोद्योग आणि कपडे (टेलरिंग, बुटीक)', prompt: 'मला शिवणकाम किंवा कापड व्यवसायासाठी कर्ज हवे आहे' },
+    { id: 'manufacturing', label: '🏭 लहान उत्पादन उद्योग व फॅब्रिकेशन', prompt: 'मला उत्पादन उद्योग सुरू करण्यासाठी सरकारी कर्ज हवे आहे' },
+    { id: 'services', label: '🔧 दुरुस्ती व सेवा केंद्र (गॅरेज, वाहन)', prompt: 'मला रिपेअरिंग किंवा व्यावसायिक वाहनासाठी कर्ज हवे आहे' },
+    { id: 'vending', label: '🛍️ फेरीवाले व हातगाडी (पीएम स्वनिधी)', prompt: 'मी फेरीवाला आहे, मला पीएम स्वनिधी कर्ज हवे आहे' }
   ],
   Tamil: [
-    { id: 'auto', label: '🛺 வணிக வாகனம் / ஆட்டோ ரிக்ஷா', prompt: 'வணிக ஆட்டோ அல்லது வாகனம் வாங்க கடன் வேண்டும்' },
-    { id: 'food', label: '🍲 உணவு வணிகம் / ஹோட்டல் / டிபன்', prompt: 'உணவு வணிகம் அல்லது ஹோட்டல் தொடங்க கடன் வேண்டும்' },
-    { id: 'retail', label: '🛒 மளிகைக் கடை / சில்லறை வணிகம்', prompt: 'மளிகைக் கடை அல்லது சில்லறை வணிகத்திற்கு கடன் வேண்டும்' },
-    { id: 'agri', label: '🌾 விவசாயம் / பால் பண்ணை (KCC)', prompt: 'விவசாயம் அல்லது பால் பண்ணைக்கு கிசான் கடன் அட்டை வேண்டும்' },
-    { id: 'artisan', label: '🧵 கைவினைஞர்கள் / நெசவாளர்கள் (விஸ்வகர்மா)', prompt: 'கைவினைஞர் விஸ்வகர்மா கடன் உதவி வேண்டும்' },
-    { id: 'msme', label: '🏭 குறுந்தொழில் / உற்பத்தி பிரிவு', prompt: 'சிறு தொழில் தொடங்க கடன் உதவி வேண்டும்' },
-    { id: 'women', label: '👩‍💼 பெண் தொழில்முனைவோர் திட்டங்கள்', prompt: 'பெண் தொழில்முனைவோருக்கான அரசு மானிய திட்டங்கள் வேண்டும்' },
-    { id: 'divyang', label: '♿ மாற்றுத்திறனாளிகள் சுயதொழில் கடன் (NHFDC)', prompt: 'மாற்றுத்திறனாளிகளுக்கான குறைந்த வட்டி அரசு கடன் வேண்டும்' }
+    { id: 'food', label: '🍲 உணவு வணிகம் (ஹோட்டல், கேட்டரிங், டிபன்)', prompt: 'உணவு வணிகம் அல்லது ஹோட்டல் தொடங்க கடன் வேண்டும்' },
+    { id: 'retail', label: '🛒 மளிகை & சில்லறை வணிகம் (ஜெனரல் ஸ்டோர்)', prompt: 'மளிகைக் கடை அல்லது சில்லறை வணிகத்திற்கு கடன் வேண்டும்' },
+    { id: 'artisan', label: '🧵 கைவினைப்பொருட்கள் & கைத்தறி (விஸ்வகர்மா)', prompt: 'கைவினைஞர் அல்லது நெசவாளர் கடன் உதவி வேண்டும்' },
+    { id: 'agri', label: '🌾 விவசாயம் & பால் பண்ணை (கிசான் கடன் அட்டை)', prompt: 'விவசாயம் அல்லது பால் பண்ணைக்கு கிசான் கடன் அட்டை வேண்டும்' },
+    { id: 'textile', label: '👗 ஜவுளி & ஆடை உற்பத்தி (தையல், பூட்டிக்)', prompt: 'தையல் கடை அல்லது ஜவுளி வணிகத்திற்கு கடன் வேண்டும்' },
+    { id: 'manufacturing', label: '🏭 சிறு உற்பத்தி மற்றும் பட்டறை', prompt: 'சிறு தொழில் அல்லது உற்பத்தி பிரிவு தொடங்க கடன் உதவி வேண்டும்' },
+    { id: 'services', label: '🔧 பழுது & சேவை மையம் (வாகன கேரேஜ்)', prompt: 'பழுதுபார்க்கும் பட்டறை அல்லது வணிக வாகனத்திற்கு கடன் வேண்டும்' },
+    { id: 'vending', label: '🛍️ தெருவோர வியாபாரம் (தள்ளுவண்டி, ஸ்வநிதி)', prompt: 'தெருவோர வியாபாரிகள் பிரதம மந்திரி ஸ்வநிதி கடன் வேண்டும்' }
   ]
 };
 
@@ -253,75 +259,115 @@ function classifyUserSector(message = '', userProfile = null) {
 
   const text = (message + ' ' + (userProfile?.businessType || '')).toLowerCase();
 
-  // Commercial Vehicle / Transport / Logistics
-  if (
-    text.includes('commercial vehicle') || text.includes('vehicle') || text.includes('auto') ||
-    text.includes('rickshaw') || text.includes('lorry') || text.includes('truck') ||
-    text.includes('transport') || text.includes('taxi') || text.includes('cab') ||
-    text.includes('goods carriage') || text.includes('delivery van') || text.includes('driver') ||
-    text.includes('tempo') || text.includes('డ్రైవర్') || text.includes('ఆటో') || text.includes('వాహనం') ||
-    text.includes('లారీ') || text.includes('రవాణా') || text.includes('టాక్సీ') || text.includes('గాడీ') ||
-    text.includes('गाड़ी') || text.includes('ऑटो') || text.includes('रिक्शा') || text.includes('ट्रक') ||
-    text.includes('ट्रांसपोर्ट') || text.includes('ड्राइवर') || text.includes('वाहन') || text.includes('टैक्सी') ||
-    text.includes('ವಾಹನ') || text.includes('ಆಟೋ') || text.includes('ಲಾರಿ') || text.includes('ಟ್ಯಾಕ್ಸಿ') ||
-    text.includes('ಸಾರಿಗೆ') || text.includes('ಚಾಲಕ') || text.includes('ರಿಕ್ಷಾ') || text.includes('ಗೂಡ್ಸ್') ||
-    text.includes('গাড়ি') || text.includes('অটো') || text.includes('রিকশা') || text.includes('লরি') ||
-    text.includes('ট্রাক') || text.includes('পরিবহন') || text.includes('ড্রাইভার') || text.includes('ট্যাক্সি')
-  ) {
-    return 'Commercial Transport';
-  }
-
-  // Food Business & Catering
+  // 1. Food Business (హోటల్, క్యాటరింగ్, ఆహార వ్యాపారం)
   if (
     text.includes('food') || text.includes('tiffin') || text.includes('hotel') || text.includes('canteen') ||
     text.includes('restaurant') || text.includes('snack') || text.includes('tea stall') || text.includes('chai') ||
-    text.includes('bakery') || text.includes('catering') || text.includes('కిరాణా') || text.includes('టిఫిన్') ||
-    text.includes('హోటల్') || text.includes('భోజనం') || text.includes('ఆహారం') || text.includes('होटल') ||
-    text.includes('टिफिन') || text.includes('चाय') || text.includes('खाना') || text.includes('भोजन') ||
-    text.includes('ढाबा') || text.includes('नाश्ता') ||
-    text.includes('ಹೋಟೆಲ್') || text.includes('ತಿಂಡಿ') || text.includes('ಊಟ') || text.includes('ಚಹಾ') ||
-    text.includes('ಬೇಕರಿ') || text.includes('ಖಾದ್ಯ') || text.includes('ಆಹಾರ') ||
-    text.includes('হোটেল') || text.includes('টিফিন') || text.includes('খাবার') || text.includes('চা') ||
-    text.includes('বেকারি') || text.includes('রেস্তোরাঁ') || text.includes('ভোজন')
+    text.includes('bakery') || text.includes('catering') || text.includes('sweet shop') || text.includes('dhaba') ||
+    text.includes('టిఫిన్') || text.includes('హోటల్') || text.includes('భోజనం') || text.includes('ఆహారం') || text.includes('క్యాటరింగ్') ||
+    text.includes('होटल') || text.includes('टिफिन') || text.includes('चाय') || text.includes('खाना') || text.includes('भोजन') || text.includes('ढाबा') ||
+    text.includes('ಹೋಟೆಲ್') || text.includes('ತಿಂಡಿ') || text.includes('ಊಟ') || text.includes('ಚಹಾ') || text.includes('ಬೇಕರಿ') || text.includes('ಆಹಾರ') ||
+    text.includes('হোটেল') || text.includes('টিফিন') || text.includes('খাবার') || text.includes('চা') || text.includes('বেকারি') ||
+    text.includes('உணவு') || text.includes('ஹோட்டல்') || text.includes('டிபன்') || text.includes('கேட்டரிங்')
   ) {
     return 'Food Business';
   }
 
-  // Street Vendors
+  // 2. Retail / Kirana Shop (కిరాణా, జనరల్ స్టోర్)
   if (
-    text.includes('street vendor') || text.includes('thela') || text.includes('cart') || text.includes('hawker') ||
-    text.includes('footpath') || text.includes('roadside') || text.includes('తోపుడు బండి') || text.includes('బండి') ||
-    text.includes('ఫెరీవాలా') || text.includes('ठेला') || text.includes('रेहड़ी') || text.includes('पटरी') ||
-    text.includes('फेरीवाला') || text.includes('ತಳ್ಳುವ ಗಾಡಿ') || text.includes('ಬೀದಿ ಬದಿ') ||
-    text.includes('হকার') || text.includes('ঠেলাগাড়ি') || text.includes('ফুটপাত')
+    text.includes('kirana') || text.includes('grocery') || text.includes('general store') || text.includes('supermarket') ||
+    (text.includes('retail') && !text.includes('garment')) || (text.includes('shop') && !text.includes('repair') && !text.includes('tea')) ||
+    text.includes('కిరాణా') || text.includes('జనరల్ స్టోర్') || text.includes('దుకాణం') ||
+    text.includes('किराना') || text.includes('जनरल स्टोर') || text.includes('दुकान') || text.includes('खुदरा') ||
+    text.includes('ಕಿರಾಣಿ') || text.includes('ಅಂಗಡಿ') || text.includes('ಜನರಲ್ ಸ್ಟೋರ್') ||
+    text.includes('মুদি') || text.includes('দোকান') || text.includes('খুচরা') ||
+    text.includes('மளிகை') || text.includes('சில்லறை')
   ) {
-    return 'Street Vendors';
+    return 'Retail / Kirana Shop';
   }
 
-  // Agriculture & Allied
+  // 3. Street Vending (వీధి వ్యాపారం, తోపుడు బండ్లు)
+  if (
+    text.includes('street vendor') || text.includes('street vending') || text.includes('thela') || text.includes('cart') ||
+    text.includes('hawker') || text.includes('footpath') || text.includes('roadside') || text.includes('pushcart') ||
+    text.includes('తోపుడు బండి') || text.includes('తోపుడు') || text.includes('వీధి వ్యాపారం') || text.includes('ఫెరీవాలా') ||
+    text.includes('ठेला') || text.includes('रेहड़ी') || text.includes('पटरी') || text.includes('फेरीवाला') ||
+    text.includes('ತಳ್ಳುವ ಗಾಡಿ') || text.includes('ಬೀದಿ ವ್ಯಾಪಾರ') || text.includes('ಬೀದಿ ಬದಿ') ||
+    text.includes('হকার') || text.includes('ঠেলাগাড়ি') || text.includes('ফুটপাত') ||
+    text.includes('தள்ளுவண்டி') || text.includes('தெருவோர')
+  ) {
+    return 'Street Vending';
+  }
+
+  // 4. Textile & Garments (టైలరింగ్, వస్త్ర వ్యాపారం)
+  if (
+    text.includes('textile') || text.includes('garment') || text.includes('tailor') || text.includes('tailoring') ||
+    text.includes('boutique') || text.includes('dress') || text.includes('cloth') || text.includes('sewing') ||
+    text.includes('టైలరింగ్') || text.includes('వస్త్ర') || text.includes('దర్జీ') || text.includes('బట్టలు') ||
+    text.includes('टेलर') || text.includes('सिलाई') || text.includes('कपड़ा') || text.includes('दर्जी') || text.includes('परिधान') ||
+    text.includes('ಟೈಲರಿಂಗ್') || text.includes('ಜವಳಿ') || text.includes('ಬಟ್ಟೆ') || text.includes('ದರ್ಜಿ') ||
+    text.includes('দর্জি') || text.includes('পোশাক') || text.includes('বস্ত্র') || text.includes('সেলাই') ||
+    text.includes('தையல்') || text.includes('ஜவுளி') || text.includes('ஆடை')
+  ) {
+    return 'Textile & Garments';
+  }
+
+  // 5. Handicrafts & Handlooms (చేనేత, చేతివృత్తులు)
+  if (
+    text.includes('handicraft') || text.includes('handloom') || text.includes('artisan') || text.includes('weaver') ||
+    text.includes('potter') || text.includes('carpenter') || text.includes('blacksmith') || text.includes('coir') ||
+    text.includes('sculptor') || text.includes('vishwakarma') || text.includes('చేనేత') || text.includes('చేతివృత్తులు') ||
+    text.includes('వడ్రంగి') || text.includes('కమ్మరి') || text.includes('కుమ్మరి') ||
+    text.includes('हथकरघा') || text.includes('बुनकर') || text.includes('दस्तकार') || text.includes('कारीगर') || text.includes('बढ़ई') || text.includes('लोहार') || text.includes('कुम्हार') ||
+    text.includes('ನೇಕಾರ') || text.includes('ಕರಕುಶಲ') || text.includes('ಕುಂಬಾರ') || text.includes('ಕಮ್ಮಾರ') || text.includes('ಬಡಗಿ') ||
+    text.includes('তাঁতি') || text.includes('হস্তশিল্প') || text.includes('কারিগর') || text.includes('ছুতোর') || text.includes('কামার') || text.includes('কুমার') ||
+    text.includes('கைத்தறி') || text.includes('கைவினை') || text.includes('நெசவாளர்')
+  ) {
+    return 'Handicrafts & Handlooms';
+  }
+
+  // 6. Agriculture & Allied (వ్యవసాయం, పాడి పరిశ్రమ)
   if (
     text.includes('farm') || text.includes('agri') || text.includes('kisan') || text.includes('crop') ||
-    text.includes('tractor') || text.includes('dairy') || text.includes('cattle') || text.includes('fish') ||
-    text.includes('రైతు') || text.includes('వ్యవసాయం') || text.includes('పంట') || text.includes('శెతి') ||
-    text.includes('शेतकरी') || text.includes('खेती') || text.includes('किसान') ||
-    text.includes('ಕೃಷಿ') || text.includes('ರೈತ') || text.includes('ಬೆಳೆ') || text.includes('ಟ್ರಾಕ್ಟರ್') ||
-    text.includes('ಹಸು') || text.includes('ಹಾಲು') ||
-    text.includes('কৃষি') || text.includes('কৃষক') || text.includes('ফসল') || text.includes('ট্র্যাক্টর') ||
-    text.includes('গবাদি পশু') || text.includes('মৎস্য')
+    text.includes('tractor') || text.includes('dairy') || text.includes('cattle') || text.includes('cow') ||
+    text.includes('buffalo') || text.includes('milk') || text.includes('poultry') || text.includes('fish') ||
+    text.includes('aquaculture') || text.includes('రైతు') || text.includes('వ్యవసాయం') || text.includes('పంట') ||
+    text.includes('పాడి') || text.includes('చేపల') || text.includes('గొర్రెలు') || text.includes('ట్రాక్టర్') ||
+    text.includes('खेती') || text.includes('किसान') || text.includes('डेयरी') || text.includes('मत्स्य') || text.includes('पशुपालन') ||
+    text.includes('ಕೃಷಿ') || text.includes('ರೈತ') || text.includes('ಬೆಳೆ') || text.includes('ಹೈನುಗಾರಿಕೆ') || text.includes('ಹಾಲು') || text.includes('ಮೀನು') ||
+    text.includes('কৃষি') || text.includes('কৃষক') || text.includes('ফসল') || text.includes('দুগ্ধ') || text.includes('মাছ') ||
+    text.includes('விவசாயம்') || text.includes('பால் பண்ணை') || text.includes('பயிர்') || text.includes('மீன்')
   ) {
-    return 'Agriculture';
+    return 'Agriculture & Allied';
   }
 
-  // Education / Students
+  // 7. Services / Repair Shop & Commercial Transport
   if (
-    text.includes('student') || text.includes('college') || text.includes('education') || text.includes('study') ||
-    text.includes('degree') || text.includes('fee') || text.includes('university') ||
-    text.includes('చదువు') || text.includes('విద్య') || text.includes('शिक्षण') || text.includes('विद्यार्थी') ||
-    text.includes('पढ़ाई') || text.includes('छात्र') ||
-    text.includes('ಶಿಕ್ಷಣ') || text.includes('ವಿದ್ಯಾರ್ಥಿ') || text.includes('ಕಾಲೇಜು') || text.includes('ಶಾಲೆ') ||
-    text.includes('শিক্ষা') || text.includes('ছাত্র') || text.includes('কলেজ') || text.includes('বিশ্ববিদ্যালয়')
+    text.includes('repair') || text.includes('service center') || text.includes('garage') || text.includes('mechanic') ||
+    text.includes('auto') || text.includes('rickshaw') || text.includes('vehicle') || text.includes('lorry') ||
+    text.includes('truck') || text.includes('transport') || text.includes('taxi') || text.includes('driver') ||
+    text.includes('smartphone repair') || text.includes('electrical repair') ||
+    text.includes('రిపేర్') || text.includes('సర్వీస్') || text.includes('గ్యారేజ్') || text.includes('మెకానిక్') ||
+    text.includes('ఆటో') || text.includes('వాహనం') || text.includes('లారీ') || text.includes('రవాణా') || text.includes('డ్రైవర్') ||
+    text.includes('मरम्मत') || text.includes('गैरेज') || text.includes('सर्विस') || text.includes('गाड़ी') || text.includes('ऑटो') || text.includes('रिक्शा') || text.includes('ट्रक') ||
+    text.includes('ರಿಪೇರಿ') || text.includes('ಸೇವೆ') || text.includes('ಗ್ಯಾರೇಜ್') || text.includes('ವಾಹನ') || text.includes('ಆಟೋ') || text.includes('ಲಾರಿ') ||
+    text.includes('মেরামত') || text.includes('গ্যারেজ') || text.includes('গাড়ি') || text.includes('অটো') || text.includes('রিকশা') || text.includes('লরি') ||
+    text.includes('பழுது') || text.includes('கேரேஜ்') || text.includes('வாகனம்') || text.includes('ஆட்டோ')
   ) {
-    return 'Education / Youth';
+    return 'Services / Repair Shop';
+  }
+
+  // 8. Manufacturing & Fabrication (చిన్న తయారీ పరిశ్రమ)
+  if (
+    text.includes('manufacturing') || text.includes('fabrication') || text.includes('factory') || text.includes('workshop') ||
+    text.includes('industry') || text.includes('production') || text.includes('zed') || text.includes('unit') ||
+    text.includes('తయారీ పరిశ్రమ') || text.includes('ఫ్యాబ్రికేషన్') || text.includes('పరిశ్రమ') ||
+    text.includes('विनिर्माण') || text.includes('उद्योग') || text.includes('कारखाना') || text.includes('फैब्रिकेशन') ||
+    text.includes('ಉತ್ಪಾದನೆ') || text.includes('ಕೈಗಾರಿಕೆ') ||
+    text.includes('ম্যানুফ্যাকচারিং') || text.includes('কারখানা') || text.includes('উৎপাদন') ||
+    text.includes('உற்பத்தி') || text.includes('தொழிற்சாலை')
+  ) {
+    return 'Manufacturing & Fabrication';
   }
 
   // Differently Abled / Divyangjan
@@ -330,10 +376,23 @@ function classifyUserSector(message = '', userProfile = null) {
     text.includes('దివ్యాంగుల') || text.includes('వైకల్యం') || text.includes('వికలాంగ') ||
     text.includes('दिव्यांग') || text.includes('विकलांग') ||
     text.includes('ವಿಕಲಚೇತನ') || text.includes('ಅಂಗವಿಕಲ') || text.includes('ದಿವ್ಯಾಂಗ') ||
-    text.includes('প্রতিবন্ধী') || text.includes('দিব্যাঙ্গ') || text.includes('শারীরিক প্রতিবন্ধী') ||
+    text.includes('প্রতিবন্ধী') || text.includes('দিব্যাঙ্গ') ||
+    text.includes('மாற்றுத்திறனாளி') ||
     userProfile?.hasDisability
   ) {
     return 'Differently Abled / Divyangjan';
+  }
+
+  // Education / Students
+  if (
+    text.includes('student') || text.includes('college') || text.includes('education') || text.includes('study') ||
+    text.includes('degree') || text.includes('fee') || text.includes('university') ||
+    text.includes('చదువు') || text.includes('విద్య') || text.includes('शिक्षण') || text.includes('विद्यार्थी') || text.includes('पढ़ाई') || text.includes('छात्र') ||
+    text.includes('ಶಿಕ್ಷಣ') || text.includes('ವಿದ್ಯಾರ್ಥಿ') ||
+    text.includes('শিক্ষা') || text.includes('ছাত্র') ||
+    text.includes('கல்வி') || text.includes('மாணவர்')
+  ) {
+    return 'Education / Youth';
   }
 
   // Women Entrepreneur
@@ -342,27 +401,13 @@ function classifyUserSector(message = '', userProfile = null) {
     text.includes('మహిళ') || text.includes('ఆడ') || text.includes('महिला') ||
     text.includes('ಮಹಿಳೆ') || text.includes('ಸ್ತ್ರೀ') ||
     text.includes('মহিলা') || text.includes('নারী') ||
+    text.includes('பெண்') ||
     userProfile?.category === 'Women Entrepreneur'
   ) {
     return 'Women Entrepreneur';
   }
 
-  // Artisans & Weavers
-  if (
-    text.includes('artisan') || text.includes('weaver') || text.includes('carpenter') || text.includes('potter') ||
-    text.includes('blacksmith') || text.includes('tailor') || text.includes('handloom') || text.includes('craft') ||
-    text.includes('చేతివృత్తి') || text.includes('చేనేత') || text.includes('వడ్రంగి') || text.includes('కమ్మరి') ||
-    text.includes('కుమ్మరి') || text.includes('దర్జీ') || text.includes('कारागीर') || text.includes('हातमाग') ||
-    text.includes('बढ़ई') || text.includes('लोहार') || text.includes('दर्जी') ||
-    text.includes('ಕುಂಬಾರ') || text.includes('ಕಮ್ಮಾರ') || text.includes('ಬಡಗಿ') || text.includes('ದರ್ಜಿ') ||
-    text.includes('ನೇಯ್ಗೆ') || text.includes('ಕರಕುಶಲ') ||
-    text.includes('কারিগর') || text.includes('তাঁতি') || text.includes('ছুতোর') || text.includes('কামার') ||
-    text.includes('কুমার') || text.includes('দর্জি') || text.includes('হস্তশিল্প')
-  ) {
-    return 'Artisans & Weavers';
-  }
-
-  return 'MSME / Small Business';
+  return 'Retail / Kirana Shop';
 }
 
 /**
@@ -377,34 +422,38 @@ async function retrieveRelevantSchemes(query, userProfile = null) {
     return [];
   }
 
-  // Strict domain candidate filtering to prevent hallucinated cross-sector suggestions
+  // Strict domain candidate filtering for each of the 8 business types
   let candidateCodes = [];
 
-  if (detectedSector === 'Commercial Transport') {
-    // Stand-Up India (Vehicles/Transport), Mudra Tarun/Kishor, PMEGP (Transport Services), CGTMSE
-    // Strictly NO PM-SVANIDHI, NO KCC, NO SMAM, NO AIF
-    candidateCodes = ['PMMY', 'STAND-UP', 'PMEGP', 'CGTMSE'];
-  } else if (detectedSector === 'Food Business') {
-    // Mudra, PM-SVANIDHI (Food vendors), PMEGP (Food processing)
-    // Strictly NO KCC, NO SMAM, NO Education
-    candidateCodes = ['PMMY', 'PM-SVANIDHI', 'PMEGP'];
-  } else if (detectedSector === 'Street Vendors') {
-    // PM SVANidhi, Mudra Shishu
-    candidateCodes = ['PM-SVANIDHI', 'PMMY'];
-  } else if (detectedSector === 'Agriculture') {
-    // KCC, SMAM (Tractor subsidy), AIF (Cold store), PMMSY (Fisheries)
-    // Strictly NO PM-SVANIDHI
-    candidateCodes = ['KCC', 'SMAM', 'AIF', 'PMMSY'];
+  if (detectedSector === 'Food Business') {
+    candidateCodes = ['PMFME', 'PMMY', 'PMEGP'];
+  } else if (detectedSector === 'Retail / Kirana Shop') {
+    candidateCodes = ['PMMY', 'CGTMSE'];
+  } else if (detectedSector === 'Handicrafts & Handlooms') {
+    candidateCodes = ['PM-VISHWAKARMA', 'WEAVER-MUDRA', 'PMEGP', 'MCY'];
+  } else if (detectedSector === 'Agriculture & Allied') {
+    candidateCodes = ['KCC', 'AIF', 'SMAM', 'PMMSY', 'AHIDF'];
+  } else if (detectedSector === 'Textile & Garments') {
+    candidateCodes = ['SAMARTH-TEXTILE', 'PM-VISHWAKARMA', 'PMEGP', 'PMMY'];
+  } else if (detectedSector === 'Manufacturing & Fabrication') {
+    candidateCodes = ['MSME-ZED', 'PMEGP', 'CGTMSE', 'STAND-UP'];
+  } else if (detectedSector === 'Services / Repair Shop') {
+    candidateCodes = ['PMEGP-SERVICE', 'PMMY', 'STAND-UP', 'CGTMSE'];
+  } else if (detectedSector === 'Street Vending') {
+    candidateCodes = ['PM-SVANIDHI', 'DAY-NULM', 'PMMY'];
   } else if (detectedSector === 'Education / Youth') {
     candidateCodes = ['PM-VIDYALAXMI', 'CSIS'];
   } else if (detectedSector === 'Differently Abled / Divyangjan') {
-    candidateCodes = ['NHFDC-DSY', 'PMEGP', 'PMMY', 'STAND-UP'];
+    candidateCodes = ['NHFDC-DSY', 'PMEGP', 'PMMY'];
   } else if (detectedSector === 'Women Entrepreneur') {
-    candidateCodes = ['STAND-UP', 'MCY', 'PMEGP', 'PMMY'];
-  } else if (detectedSector === 'Artisans & Weavers') {
-    candidateCodes = ['PM-VISHWAKARMA', 'MCY', 'PMEGP', 'PMMY'];
+    candidateCodes = ['STAND-UP', 'MCY', 'SAMARTH-TEXTILE', 'PMFME', 'PMEGP'];
   } else {
-    candidateCodes = ['PMMY', 'PMEGP', 'CGTMSE', 'STAND-UP'];
+    candidateCodes = ['PMMY', 'CGTMSE', 'PMEGP'];
+  }
+
+  // If user has disability, always add NHFDC-DSY to top
+  if (userProfile?.hasDisability && !candidateCodes.includes('NHFDC-DSY')) {
+    candidateCodes.unshift('NHFDC-DSY');
   }
 
   const filteredSchemes = allSchemes.filter(s => candidateCodes.includes(s.shortCode || s.schemeId));
@@ -414,23 +463,43 @@ async function retrieveRelevantSchemes(query, userProfile = null) {
     let score = 50;
     const code = scheme.shortCode || scheme.schemeId;
 
-    if (detectedSector === 'Commercial Transport') {
-      if (code === 'PMMY') score += 35; // Ideal for Auto/Lorry/Commercial Vehicle up to 10 Lakhs
-      if (code === 'STAND-UP') score += 30; // Ideal for Women/SC/ST commercial fleet
-      if (code === 'PMEGP') score += 20; // 35% subsidy on service transport units
-    }
-
     if (detectedSector === 'Food Business') {
-      if (queryLower.includes('street') || queryLower.includes('cart') || queryLower.includes('బండి') || queryLower.includes('ठेला')) {
-        if (code === 'PM-SVANIDHI') score += 35;
-      } else {
-        if (code === 'PMMY') score += 30;
-        if (code === 'PMEGP') score += 25;
-      }
+      if (code === 'PMFME') score += 40;
+      if (code === 'PMMY') score += 30;
+      if (code === 'PMEGP') score += 25;
+    } else if (detectedSector === 'Retail / Kirana Shop') {
+      if (code === 'PMMY') score += 40;
+      if (code === 'CGTMSE') score += 35;
+    } else if (detectedSector === 'Handicrafts & Handlooms') {
+      if (code === 'PM-VISHWAKARMA') score += 40;
+      if (code === 'WEAVER-MUDRA') score += 38;
+      if (code === 'MCY') score += 30;
+    } else if (detectedSector === 'Agriculture & Allied') {
+      if (queryLower.includes('tractor') && code === 'SMAM') score += 40;
+      else if (queryLower.includes('fish') && code === 'PMMSY') score += 40;
+      else if (queryLower.includes('dairy') && code === 'AHIDF') score += 40;
+      else if (code === 'KCC') score += 38;
+      else if (code === 'AIF') score += 35;
+    } else if (detectedSector === 'Textile & Garments') {
+      if (code === 'SAMARTH-TEXTILE') score += 40;
+      if (code === 'PM-VISHWAKARMA') score += 38;
+      if (code === 'PMEGP') score += 30;
+    } else if (detectedSector === 'Manufacturing & Fabrication') {
+      if (code === 'MSME-ZED') score += 40;
+      if (code === 'PMEGP') score += 38;
+      if (code === 'CGTMSE') score += 35;
+    } else if (detectedSector === 'Services / Repair Shop') {
+      if (code === 'PMEGP-SERVICE') score += 40;
+      if (code === 'PMMY') score += 35;
+      if (code === 'STAND-UP' && (queryLower.includes('auto') || queryLower.includes('vehicle') || queryLower.includes('lorry'))) score += 35;
+    } else if (detectedSector === 'Street Vending') {
+      if (code === 'PM-SVANIDHI') score += 40;
+      if (code === 'DAY-NULM') score += 35;
+      if (code === 'PMMY') score += 30;
     }
 
-    if (userProfile?.hasDisability && code === 'NHFDC-DSY') score += 40;
-    if (userProfile?.category === 'Women Entrepreneur' && (code === 'STAND-UP' || code === 'MCY')) score += 30;
+    if (userProfile?.hasDisability && code === 'NHFDC-DSY') score += 50;
+    if (userProfile?.category === 'Women Entrepreneur' && (code === 'STAND-UP' || code === 'MCY' || code === 'SAMARTH-TEXTILE')) score += 30;
     if ((userProfile?.category === 'SC' || userProfile?.category === 'ST') && code === 'STAND-UP') score += 30;
 
     return { scheme, score };
@@ -1032,14 +1101,14 @@ BEHAVIOR RULES:
    - DO NOT recommend schemes directly! Set "type": "business_selection" and "schemes": [].
    - In "message", politely greet the user, explain that to guide them to the right schemes, you need to know who they are and what business they run or plan to start.
    - In "business_options", provide 6 to 8 concise business category choices (keep labels and prompts under 10 words) in pure script of ${effectiveLang}:
-     1. Commercial Vehicle / Auto-rickshaw / Transport
-     2. Food Business / Tiffin / Hotel / Catering
-     3. Retail Shop / Kirana / Street Vendor (Thela)
-     4. Agriculture / Dairy Farming / Kisan Credit Card
-     5. Traditional Artisan / Weaver / Crafts (Vishwakarma)
-     6. Small Industry / MSME Manufacturing
-     7. Women Entrepreneur Special Schemes
-     8. Differently Abled / Divyangjan Loan (NHFDC)
+     1. Food Business / Tiffin / Hotel / Catering
+     2. Retail / Kirana Shop / General Store
+     3. Handicrafts & Handlooms / Weaver / Artisan
+     4. Agriculture & Allied / Farming / Dairy / KCC
+     5. Textile & Garments / Tailoring Boutique
+     6. Manufacturing & Fabrication / Small Industry
+     7. Services / Repair Shop / Auto Garage / Transport
+     8. Street Vending / Thela / Pushcart Vendor
 2. LANGUAGE:
    - Detect and respond in the requested language: ${effectiveLang}.
    ${languageRules}

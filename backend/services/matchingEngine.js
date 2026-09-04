@@ -70,11 +70,22 @@ function matchSchemesForUser(userProfile, allSchemes) {
 
     // --- Hard Constraint 4: Business Type Match ---
     const eligibleBusinesses = scheme.eligibleBusinessTypes || ['All'];
+    const isExactSectorMatch = eligibleBusinesses.includes(businessType);
+    const isPrimaryMatch = scheme.primaryBusinessType === businessType;
+    const isAllMatch = eligibleBusinesses.includes('All');
+
     const isBusinessEligible =
-      eligibleBusinesses.includes('All') ||
-      eligibleBusinesses.includes(businessType) ||
-      (businessType.includes('Food') && eligibleBusinesses.some(b => b.includes('Food') || b.includes('Agriculture') || b.includes('Manufacturing'))) ||
-      (businessType.includes('Retail') && eligibleBusinesses.some(b => b.includes('Retail') || b.includes('Services') || b.includes('Vending')));
+      isExactSectorMatch ||
+      isPrimaryMatch ||
+      isAllMatch ||
+      (businessType.includes('Food') && eligibleBusinesses.some(b => b.includes('Food'))) ||
+      (businessType.includes('Retail') && eligibleBusinesses.some(b => b.includes('Retail') || b.includes('Kirana'))) ||
+      (businessType.includes('Street') && eligibleBusinesses.some(b => b.includes('Street') || b.includes('Vending'))) ||
+      (businessType.includes('Handicraft') && eligibleBusinesses.some(b => b.includes('Handicraft') || b.includes('Handloom'))) ||
+      (businessType.includes('Agriculture') && eligibleBusinesses.some(b => b.includes('Agriculture') || b.includes('Allied'))) ||
+      (businessType.includes('Textile') && eligibleBusinesses.some(b => b.includes('Textile') || b.includes('Garment'))) ||
+      (businessType.includes('Fabrication') && eligibleBusinesses.some(b => b.includes('Fabrication') || b.includes('Manufacturing'))) ||
+      (businessType.includes('Services') && eligibleBusinesses.some(b => b.includes('Service') || b.includes('Repair')));
 
     if (!isBusinessEligible) {
       continue; // Disqualified by business domain
@@ -94,7 +105,7 @@ function matchSchemesForUser(userProfile, allSchemes) {
         score += 25;
         bonuses.push('100% Dedicated Divyangjan Swavalamban Empowerment Priority');
         reasons.push(`Qualified under Divyangjan Category (${disabilityType !== 'None' ? disabilityType : 'PwD'}, ${disabilityPercentage} benchmark disability)`);
-      } else if (scheme.shortCode === 'PMEGP') {
+      } else if (scheme.shortCode === 'PMEGP' || scheme.shortCode === 'PMEGP-SERVICE') {
         score += 18;
         bonuses.push('PMEGP Special Category 35% Capital Subsidy for Persons with Disabilities');
         reasons.push('Eligible for highest 35% non-repayable government capital grant as Divyangjan');
@@ -121,7 +132,7 @@ function matchSchemesForUser(userProfile, allSchemes) {
     }
 
     // 4. Rural Area Higher Subsidy Benefit
-    if (isRural && (scheme.subsidyPercentage >= 25 || scheme.shortCode === 'PMEGP')) {
+    if (isRural && (scheme.subsidyPercentage >= 25 || scheme.shortCode?.startsWith('PMEGP'))) {
       score += 8;
       bonuses.push('Rural enterprise location qualifies for maximum 35% capital subsidy');
       reasons.push('Rural jurisdiction grants higher subsidy tier than urban centers');
@@ -137,12 +148,16 @@ function matchSchemesForUser(userProfile, allSchemes) {
       score += 4;
     }
 
-    // 6. Business Type Specificity bonus
-    if (eligibleBusinesses.includes(businessType)) {
-      score += 8;
+    // 6. Business Type Specificity Bonus (Direct Sector Alignment)
+    if (isPrimaryMatch) {
+      score += 15;
+      bonuses.push(`Primary designated scheme for ${businessType}`);
+      reasons.push(`Tailored specifically for ${businessType} enterprise development`);
+    } else if (isExactSectorMatch) {
+      score += 10;
       bonuses.push(`Direct sector match for ${businessType}`);
     } else {
-      score += 4;
+      score += 3;
     }
 
     // 7. Low-Income / Marginalized Empowerment Bonus
@@ -184,10 +199,15 @@ function matchSchemesForUser(userProfile, allSchemes) {
     });
   }
 
-  // Sort descending by matchPercentage, then by maxGrantLoanAmount
+  // Sort descending by matchPercentage, prioritizing schemes whose primaryBusinessType matches user.businessType, then by maxGrantLoanAmount
   results.sort((a, b) => {
     if (b.matchPercentage !== a.matchPercentage) {
       return b.matchPercentage - a.matchPercentage;
+    }
+    const aPrimary = a.scheme.primaryBusinessType === businessType ? 1 : 0;
+    const bPrimary = b.scheme.primaryBusinessType === businessType ? 1 : 0;
+    if (bPrimary !== aPrimary) {
+      return bPrimary - aPrimary;
     }
     return (b.scheme.maxGrantLoanAmount || 0) - (a.scheme.maxGrantLoanAmount || 0);
   });

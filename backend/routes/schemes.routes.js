@@ -14,8 +14,10 @@ router.get('/', async (req, res) => {
     }
     if (businessType) {
       schemes = schemes.filter(s => 
-        s.eligibleBusinessTypes.includes('All') || 
-        s.eligibleBusinessTypes.includes(businessType)
+        s.eligibleBusinessTypes && (
+          s.eligibleBusinessTypes.includes('All') || 
+          s.eligibleBusinessTypes.includes(businessType)
+        )
       );
     }
     if (search) {
@@ -31,6 +33,32 @@ router.get('/', async (req, res) => {
       success: true,
       count: schemes.length,
       schemes
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET /api/schemes/by-business-type - get schemes categorized across all 8 enterprise types
+router.get('/by-business-type', async (req, res) => {
+  try {
+    const allSchemes = await dataStore.getSchemes();
+    const businessTypes = dataStore.getBusinessTypesCatalog();
+    
+    const catalog = {};
+    for (const type of businessTypes) {
+      catalog[type] = allSchemes.filter(s =>
+        s.eligibleBusinessTypes && (
+          s.eligibleBusinessTypes.includes(type) ||
+          s.eligibleBusinessTypes.includes('All')
+        )
+      );
+    }
+
+    return res.json({
+      success: true,
+      businessTypes,
+      catalog
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
