@@ -9,8 +9,35 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
-  int _currentPage = 0;
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.92, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
+    );
+
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,190 +46,146 @@ class _SplashScreenState extends State<SplashScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 24),
-            // Header Logo & Badge
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppTheme.lightGreen,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Text(
-                'SIH 2026 • PS ID: 92',
-                style: TextStyle(
-                  color: AppTheme.primaryGreen,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-            // App Emblem / Sprout Icon
-            Container(
-              width: 110,
-              height: 110,
-              decoration: BoxDecoration(
-                color: AppTheme.lightGreen,
-                shape: BoxShape.circle,
-                border: Border.all(color: AppTheme.primaryGreen.withOpacity(0.2), width: 3),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.primaryGreen.withOpacity(0.12),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  )
-                ],
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.eco_rounded,
-                  size: 60,
-                  color: AppTheme.primaryGreen,
-                ),
-              ),
-            ),
             const SizedBox(height: 20),
-            // App Title
-            const Text(
-              'Udyam Setu',
-              style: TextStyle(
-                fontSize: 34,
-                fontWeight: FontWeight.w800,
-                color: AppTheme.darkGreen,
-                letterSpacing: -0.5,
-              ),
-            ),
-            const SizedBox(height: 10),
-            // Tagline
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 36),
-              child: Text(
-                'AI-Powered Scheme Matching\nfor Every Entrepreneur',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey.shade700,
-                  height: 1.4,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
+            
+
+
             const Spacer(),
-            // Rural / Agricultural Scenic Banner Card
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Container(
-                height: 180,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFA5D6A7), Color(0xFF66BB6A), Color(0xFF2E7D32)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.green.withOpacity(0.2),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    )
-                  ],
-                ),
-                child: Stack(
+
+            // Centered Clean Logo & Tagline (Animated)
+            FadeTransition(
+              opacity: _fadeAnimation,
+              child: ScaleTransition(
+                scale: _scaleAnimation,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Positioned(
-                      top: 16,
-                      left: 20,
-                      child: Row(
-                        children: [
-                          Icon(Icons.wind_power, color: Colors.white.withOpacity(0.85), size: 28),
-                          const SizedBox(width: 8),
-                          Icon(Icons.solar_power_outlined, color: Colors.white.withOpacity(0.85), size: 28),
-                        ],
+                    // Cropped Official Logo (Displays Emblem + Udyamsetú Brand Name cleanly & completely)
+                    SizedBox(
+                      width: 220,
+                      height: 168,
+                      child: ClipRect(
+                        clipper: LogoTopClipper(),
+                        child: Image.asset(
+                          'assets/images/udyamsetu_logo.png',
+                          width: 220,
+                          fit: BoxFit.cover,
+                          alignment: Alignment.topCenter,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.eco_rounded, size: 70, color: AppTheme.primaryGreen),
+                                SizedBox(height: 8),
+                                Text(
+                                  'Udyamsetú',
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.darkGreen,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                       ),
                     ),
-                    Positioned(
-                      bottom: 20,
-                      left: 20,
-                      right: 20,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+
+                    const SizedBox(height: 20),
+
+                    // Tagline with Spacing: RIGHT SCHEME.     RIGHT GUIDANCE.     RIGHT GROWTH.
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final double gap = constraints.maxWidth < 360 ? 8 : 14;
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text(
-                                'Right Scheme • Right Growth',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                'Empowering Marginalized Businesses',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.9),
-                                  fontSize: 12,
-                                ),
-                              ),
+                              _buildTaglineText('RIGHT SCHEME.'),
+                              SizedBox(width: gap),
+                              _buildTaglineText('RIGHT GUIDANCE.'),
+                              SizedBox(width: gap),
+                              _buildTaglineText('RIGHT GROWTH.'),
                             ],
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.agriculture, color: AppTheme.primaryGreen, size: 24),
-                          )
-                        ],
+                          );
+                        },
                       ),
-                    )
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // Supporting Subtitle Line
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        'AI-powered scheme matching for marginalized entrepreneurs',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF64748B),
+                          height: 1.35,
+                          letterSpacing: 0.1,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 24),
-            // Carousel Dots
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildDot(0),
-                const SizedBox(width: 8),
-                _buildDot(1),
-                const SizedBox(width: 8),
-                _buildDot(2),
-              ],
+
+            const Spacer(),
+
+            // Subtle Progress Bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 120),
+              child: SizedBox(
+                height: 3,
+                child: LinearProgressIndicator(
+                  backgroundColor: const Color(0xFFE2E8F0),
+                  color: AppTheme.primaryGreen.withValues(alpha: 0.7),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
             ),
-            const SizedBox(height: 28),
-            // Get Started / Continue Button
+
+            const SizedBox(height: 32),
+
+            // Full Width Get Started Button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (_) => const AuthScreen()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryGreen,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Get Started',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                    SizedBox(width: 8),
-                    Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
-                  ],
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (_) => const AuthScreen()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryGreen,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Get Started',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(width: 8),
+                      Icon(Icons.arrow_forward_rounded, size: 20),
+                    ],
+                  ),
                 ),
               ),
             ),
+
             const SizedBox(height: 24),
           ],
         ),
@@ -210,16 +193,27 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 
-  Widget _buildDot(int index) {
-    bool isActive = _currentPage == index;
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      width: isActive ? 22 : 8,
-      height: 8,
-      decoration: BoxDecoration(
-        color: isActive ? AppTheme.primaryGreen : Colors.grey.shade300,
-        borderRadius: BorderRadius.circular(4),
+  Widget _buildTaglineText(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 9.5,
+        fontWeight: FontWeight.w800,
+        color: Color(0xFF1B4D2E),
+        letterSpacing: 0.5,
       ),
     );
   }
+}
+
+/// Custom Clipper to crop only the top portion (Emblem + Udyamsetú Brand Name) from logo asset
+class LogoTopClipper extends CustomClipper<Rect> {
+  @override
+  Rect getClip(Size size) {
+    // Clips top 76% of the 1024x1024 poster image (ensures Udyamsetú text is 100% complete)
+    return Rect.fromLTWH(0, 0, size.width, size.height * 0.76);
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Rect> oldClipper) => false;
 }

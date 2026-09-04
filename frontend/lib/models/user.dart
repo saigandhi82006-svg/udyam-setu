@@ -36,6 +36,7 @@ class UserProfile {
   int age;
   String category; // 'General', 'OBC', 'SC', 'ST', 'Women Entrepreneur', etc.
   num annualIncome;
+  num neededInvestment; // Needed investment / required loan amount
   String businessType;
   int experienceYears;
   UserLocation location;
@@ -49,6 +50,7 @@ class UserProfile {
     this.age = 28,
     this.category = 'OBC',
     this.annualIncome = 240000,
+    this.neededInvestment = 500000,
     this.businessType = 'Food Business',
     this.experienceYears = 2,
     UserLocation? location,
@@ -65,6 +67,7 @@ class UserProfile {
       age: json['age'] ?? 28,
       category: json['category'] ?? 'OBC',
       annualIncome: json['annualIncome'] ?? 240000,
+      neededInvestment: json['neededInvestment'] ?? json['projectCost'] ?? 500000,
       businessType: json['businessType'] ?? 'Food Business',
       experienceYears: json['experienceYears'] ?? 2,
       location: json['location'] != null ? UserLocation.fromJson(json['location']) : UserLocation(),
@@ -80,6 +83,7 @@ class UserProfile {
     'age': age,
     'category': category,
     'annualIncome': annualIncome,
+    'neededInvestment': neededInvestment,
     'businessType': businessType,
     'experienceYears': experienceYears,
     'location': location.toJson(),
