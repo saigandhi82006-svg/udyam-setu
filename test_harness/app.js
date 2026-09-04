@@ -1268,9 +1268,30 @@ async function runSchemeMatching(shouldNavigate = true) {
   }
 }
 
+function getSchemeSectorEmoji(scheme) {
+  const name = ((scheme && scheme.schemeName) || '').toLowerCase();
+  const sector = ((scheme && scheme.sector) || '').toLowerCase();
+  if (name.includes('food') || name.includes('pmfme') || sector.includes('food')) return { emoji: '🍲', bg: '#FEF3C7' };
+  if (name.includes('agri') || name.includes('kcc') || name.includes('farm') || sector.includes('agri')) return { emoji: '🌾', bg: '#DCFCE7' };
+  if (name.includes('vishwakarma') || name.includes('artisan') || name.includes('craft') || sector.includes('artisan')) return { emoji: '🧵', bg: '#F3E8FF' };
+  if (name.includes('mudra') || name.includes('retail') || name.includes('kirana') || sector.includes('retail')) return { emoji: '🛒', bg: '#E0F2FE' };
+  if (name.includes('textile') || name.includes('garment') || sector.includes('textile')) return { emoji: '👗', bg: '#FCE7F3' };
+  if (name.includes('pmegp') || name.includes('manufacturing') || name.includes('fabrication')) return { emoji: '🏭', bg: '#F1F5F9' };
+  if (name.includes('stand-up') || name.includes('women') || sector.includes('women')) return { emoji: '👩', bg: '#FCE7F3' };
+  if (name.includes('divyang') || name.includes('nhfdc') || sector.includes('differently')) return { emoji: '♿', bg: '#E0F2FE' };
+  return { emoji: '💼', bg: '#F1F5F9' };
+}
+
 function renderSchemeCards(matches) {
   const container = document.getElementById('schemeListContainer');
+  if (!container) return;
   container.innerHTML = '';
+  
+  const bannerText = document.getElementById('matchSuccessBannerText');
+  if (bannerText) {
+    bannerText.innerText = `Great! We found ${matches.length} schemes that match your profile.`;
+  }
+
   const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
 
   matches.forEach((item, idx) => {
@@ -1298,19 +1319,21 @@ function renderSchemeCards(matches) {
       ? window.UdyamI18n.localizeTags(rawTags, curLang)
       : rawTags;
 
-    const viewDetailsText = (typeof t === 'function') ? t('common.view_details', (t('screen4.view_details', 'View Details ›'))) : 'View Details ›';
+    const sectorIcon = getSchemeSectorEmoji(scheme);
+    const displayTagsArr = tagsArr.slice(0, 3);
 
     card.innerHTML = `
-      <div class="scheme-card-top">
-        <div>
+      <div class="scheme-card-header">
+        <div class="sector-icon-box" style="background: ${sectorIcon.bg}">${sectorIcon.emoji}</div>
+        <div class="scheme-title-col">
           <div class="scheme-card-title">${displayName}</div>
-          <div class="scheme-loan-amount">${loanAmt}</div>
         </div>
         <span class="match-badge">${badgeText}</span>
       </div>
-      <div class="scheme-tags">
-        <span>${tagsArr.join(' • ')}</span>
-        <strong style="color: var(--primary-green);">${viewDetailsText}</strong>
+      <div class="scheme-main-benefit">${loanAmt}</div>
+      <div class="scheme-card-footer">
+        <span class="scheme-tags-text">${displayTagsArr.map(t => '• ' + t).join(' ')}</span>
+        <span class="scheme-action-text">View Details →</span>
       </div>
     `;
     container.appendChild(card);
