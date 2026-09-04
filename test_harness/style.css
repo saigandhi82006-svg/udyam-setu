@@ -328,54 +328,93 @@ body {
 
 /* Screen 1: Splash */
 #screen-1 {
-  background: white;
+  background: #FFFFFF;
   text-align: center;
   align-items: center;
   justify-content: space-between;
-  padding: 36px 16px 24px;
+  padding: 20px 16px 20px;
 }
 
-.sih-chip {
+.splash-top-badge {
+  margin-bottom: 12px;
+}
+
+.sih-badge-tag {
   background: var(--light-green);
   color: var(--primary-green);
   font-size: 11px;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-weight: 700;
-}
-
-.sprout-badge {
-  font-size: 48px;
-  width: 84px;
-  height: 84px;
-  background: var(--light-green);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 16px auto 10px;
-  border: 2px solid rgba(30, 111, 56, 0.2);
-}
-
-.app-brand-name {
-  font-size: 28px;
+  padding: 5px 14px;
+  border-radius: 16px;
   font-weight: 800;
-  color: var(--dark-green);
+  display: inline-block;
+  border: 1px solid rgba(30, 111, 56, 0.2);
+  letter-spacing: 0.5px;
 }
 
-.app-tagline {
-  font-size: 13px;
-  color: var(--muted-text);
-  margin-top: 6px;
-  line-height: 1.4;
+.splash-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: auto 0;
 }
 
-.scenic-banner {
-  background: linear-gradient(180deg, #A5D6A7 0%, #2E7D32 100%);
-  border-radius: 18px;
-  padding: 16px;
-  color: white;
-  width: 100%;
+.logo-crop-wrapper {
+  width: 220px;
+  height: 168px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.clean-cropped-logo {
+  width: 220px;
+  height: auto;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.tagline-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 18px;
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #1B4D2E;
+  letter-spacing: 0.5px;
+}
+
+.supporting-subtitle {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748B;
+  margin-top: 10px;
+  max-width: 280px;
+  line-height: 1.35;
+}
+
+.splash-progress-container {
+  width: 120px;
+  height: 3px;
+  background: #E2E8F0;
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 16px auto;
+}
+
+.progress-bar-line {
+  width: 60%;
+  height: 100%;
+  background: var(--primary-green);
+  border-radius: 2px;
+  animation: pulse-bar 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse-bar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
 }
 
 .scenic-top {
@@ -1069,7 +1108,7 @@ body {
 
 /* Screen 5: Profiling */
 .step-indicator {
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
 .step-indicator span {
@@ -1090,6 +1129,46 @@ body {
 .progress-fill {
   height: 100%;
   background: var(--primary-green);
+  transition: width 0.3s ease;
+}
+
+.prof-pills-row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.prof-pill {
+  flex: 1;
+  text-align: center;
+  padding: 5px 2px;
+  border-radius: 8px;
+  font-size: 9.5px;
+  font-weight: 700;
+  background: #F1F5F9;
+  color: #64748B;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.prof-pill.active {
+  background: var(--primary-green);
+  color: white;
+}
+
+.prof-pill.done {
+  background: #E8F5E9;
+  color: var(--primary-green);
+  border-color: rgba(30, 111, 56, 0.3);
+}
+
+.prof-step-card {
+  background: white;
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 }
 
 .form-group {
@@ -1112,6 +1191,26 @@ body {
   font-size: 13px;
   background: white;
   outline: none;
+}
+
+.field-hint {
+  display: block;
+  font-size: 10px;
+  color: #64748B;
+  margin-top: 3px;
+}
+
+.step-actions {
+  margin-top: 18px;
+}
+
+.row-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.row-actions .pill-btn {
+  flex: 1;
 }
 
 /* Screen 6: Scheme Results */
