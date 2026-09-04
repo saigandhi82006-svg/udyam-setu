@@ -1203,8 +1203,33 @@ function updateAgeCategoryBadge() {
 }
 window.updateAgeCategoryBadge = updateAgeCategoryBadge;
 
+let currentProfStep = 1;
+
+function setProfStep(step) {
+  if (step < 1 || step > 4) return;
+  currentProfStep = step;
+  
+  for (let i = 1; i <= 4; i++) {
+    const stepEl = document.getElementById(`prof-step-${i}`);
+    const pillEl = document.getElementById(`prof-pill-${i}`);
+    if (stepEl) stepEl.style.display = (i === step) ? 'block' : 'none';
+    if (pillEl) {
+      if (i === step) pillEl.className = 'prof-pill active';
+      else if (i < step) pillEl.className = 'prof-pill done';
+      else pillEl.className = 'prof-pill';
+    }
+  }
+
+  const indicatorText = document.getElementById('profStepIndicatorText');
+  const fillEl = document.getElementById('profStepProgressFill');
+  if (indicatorText) indicatorText.innerText = `Step ${step} of 4`;
+  if (fillEl) fillEl.style.width = `${(step / 4) * 100}%`;
+}
+window.setProfStep = setProfStep;
+
 // 3. Profiling & Rule-Based Matching (Screen 5 & 6)
 async function runSchemeMatching(shouldNavigate = true) {
+  currentProfile.name = document.getElementById('profName')?.value || 'Ravi Kumar';
   currentProfile.age = parseInt(document.getElementById('profAge')?.value) || 28;
   currentProfile.gender = document.getElementById('profGender')?.value || 'Male';
   const disabilityVal = document.getElementById('profDisability')?.value || 'No';
@@ -1215,6 +1240,7 @@ async function runSchemeMatching(shouldNavigate = true) {
   currentProfile.category = document.getElementById('profCategory')?.value || 'OBC';
   currentProfile.locationType = document.getElementById('profLocationType')?.value || 'Rural';
   currentProfile.annualIncome = parseInt(document.getElementById('profIncome')?.value) || 240000;
+  currentProfile.neededInvestment = parseInt(document.getElementById('profInvestment')?.value) || 500000;
   currentProfile.businessType = document.getElementById('profBusiness')?.value || 'Food Business';
   currentProfile.experienceYears = parseInt(document.getElementById('profExperience')?.value) || 2;
   currentProfile.education = document.getElementById('profEducation')?.value || '8th Pass or Above';
