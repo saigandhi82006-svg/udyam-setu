@@ -621,6 +621,8 @@ function fallbackSpeechSynthesis(cleanText, langCode, btnElement) {
   else if (langCode === 'te') targetLocale = 'te-IN';
   else if (langCode === 'ta') targetLocale = 'ta-IN';
   else if (langCode === 'mr') targetLocale = 'mr-IN';
+  else if (langCode === 'kn') targetLocale = 'kn-IN';
+  else if (langCode === 'bn') targetLocale = 'bn-IN';
 
   utterance.lang = targetLocale;
   const bestVoice = findBestIndianVoice(targetLocale);
@@ -650,6 +652,12 @@ function onLanguageChanged() {
   } else if (lang === 'Marathi') {
     input.placeholder = 'मराठीत विचारा...';
     voiceText.innerText = '🎙️ बोला (Tap to Speak in Marathi)';
+  } else if (lang === 'Kannada') {
+    input.placeholder = 'ಕನ್ನಡದಲ್ಲಿ ಕೇಳಿ ಅಥವಾ ಮಾತನಾಡಿ...';
+    voiceText.innerText = '🎙️ ಮಾತನಾಡಿ (Tap to Speak in Kannada)';
+  } else if (lang === 'Bengali') {
+    input.placeholder = 'বাংলায় জিজ্ঞাসা করুন বা কথা বলুন...';
+    voiceText.innerText = '🎙️ বলুন (Tap to Speak in Bengali)';
   } else {
     input.placeholder = 'Ask or speak in your language...';
     voiceText.innerText = '🎙️ Tap to Speak in your Language';
@@ -672,6 +680,8 @@ function triggerBhashiniSpeechInput() {
     else if (lang.includes('telugu')) recognition.lang = 'te-IN';
     else if (lang.includes('tamil')) recognition.lang = 'ta-IN';
     else if (lang.includes('marathi')) recognition.lang = 'mr-IN';
+    else if (lang.includes('kannada')) recognition.lang = 'kn-IN';
+    else if (lang.includes('bengali')) recognition.lang = 'bn-IN';
     else recognition.lang = 'en-IN';
 
     recognition.interimResults = false;
@@ -729,6 +739,10 @@ function fallbackSimulatedSpeech(langSelect) {
       input.value = 'எனக்கு சிறு தொழில் தொடங்க கடன் வேண்டும்.';
     } else if (langSelect === 'Marathi') {
       input.value = 'मला व्यवसाय सुरू करण्यासाठी कर्ज हवे आहे.';
+    } else if (langSelect === 'Kannada') {
+      input.value = 'ನನಗೆ ಹೊಸ ವ್ಯಾಪಾರಕ್ಕಾಗಿ ಸರ್ಕಾರಿ ಸಾಲ ಬೇಕು.';
+    } else if (langSelect === 'Bengali') {
+      input.value = 'আমার নতুন ব্যবসা শুরু করার জন্য সরকারি ঋণ প্রয়োজন।';
     } else {
       input.value = 'I want a loan for starting a small food business.';
     }
@@ -787,22 +801,85 @@ async function sendChatMessage(autoSpeak = false) {
     if (data.type === 'greeting') {
       const isTe = lang === 'Telugu';
       const isHi = lang === 'Hindi';
+      const isKn = lang === 'Kannada';
+      const isBn = lang === 'Bengali';
+
+      const promptAuto = isTe ? "నాకు కమర్షియల్ ఆటో కొనడానికి లోన్ కావాలి"
+        : (isHi ? "मुझे कमर्शियल ऑटो रिक्शा खरीदने के लिए लोन चाहिए"
+        : (isKn ? "ನನಗೆ ಕಮರ್ಷಿಯಲ್ ಆಟೋ ರಿಕ್ಷಾ ಖರೀದಿಸಲು ಸಾಲ ಬೇಕು"
+        : (isBn ? "আমার বাণিজ্যিক অটো রিকশা কেনার জন্য ঋণ প্রয়োজন"
+        : "I want a commercial auto-rickshaw loan")));
+
+      const labelAuto = isTe ? "కమర్షియల్ ఆటో రుణం"
+        : (isHi ? "कमर्शियल ऑटो लोन"
+        : (isKn ? "ಕಮರ್ಷಿಯಲ್ ಆಟೋ ಸಾಲ"
+        : (isBn ? "বাণিজ্যিক অটো লোন"
+        : "Commercial Auto Loan")));
+
+      const promptFood = isTe ? "నాకు టిఫిన్ సెంటర్ / ఫుడ్ బిజినెస్ లోన్ కావాలి"
+        : (isHi ? "मुझे टिफिन सेंटर / फूड बिजनेस लोन चाहिए"
+        : (isKn ? "ನನಗೆ ಹೋಟೆಲ್ / ತಿಂಡಿ ಕೇಂದ್ರಕ್ಕಾಗಿ ಸಾಲ ಬೇಕು"
+        : (isBn ? "আমার টিফিন সেন্টার / খাবার ব্যবসার জন্য ঋণ প্রয়োজন"
+        : "I want a food business / tiffin loan")));
+
+      const labelFood = isTe ? "టిఫిన్ సెంటర్ / ఫుడ్ లోన్"
+        : (isHi ? "टिफिन सेंटर / फ़ूड लोन"
+        : (isKn ? "ಹೋಟೆಲ್ / ತಿಂಡಿ ಕೇಂದ್ರ"
+        : (isBn ? "টিফিন সেন্টার / খাবার ব্যবসা"
+        : "Food / Tiffin Center")));
+
+      const promptKcc = isTe ? "నాకు కిసాన్ క్రెడిట్ కార్డ్ వ్యవసాయ లోన్ కావాలి"
+        : (isHi ? "मुझे किसान क्रेडिट कार्ड कृषि लोन चाहिए"
+        : (isKn ? "ನನಗೆ ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಕೃಷಿ ಸಾಲ ಬೇಕು"
+        : (isBn ? "আমার কিসান ক্রেডিট কার্ড কৃষি ঋণ প্রয়োজন"
+        : "I want Kisan Credit Card agri loan")));
+
+      const labelKcc = isTe ? "వ్యవసాయ రుణం (KCC)"
+        : (isHi ? "कृषि लोन (KCC)"
+        : (isKn ? "ಕೃಷಿ ಸಾಲ (KCC)"
+        : (isBn ? "কৃষি ঋণ (KCC)"
+        : "Kisan Credit Card")));
+
+      const promptArtisan = isTe ? "చేతివృత్తుల కోసం పీఎం విశ్వకర్మ లోన్ కావాలి"
+        : (isHi ? "दस्तکاروں के लिए पीएम विश्वकर्मा लोन चाहिए"
+        : (isKn ? "ಕುಶಲಕರ್ಮಿಗಳಿಗಾಗಿ ಪಿಎಂ ವಿಶ್ವಕರ್ಮ ಸಾಲ ಬೇಕು"
+        : (isBn ? "কারিগরদের জন্য প্রধানমন্ত্রী বিশ্বকর্মা ঋণ চাই"
+        : "PM Vishwakarma artisan loan")));
+
+      const labelArtisan = isTe ? "చేతివృత్తుల లోన్ (విశ్వకర్మ)"
+        : (isHi ? "विश्वकर्मा योजना"
+        : (isKn ? "ವಿಶ್ವಕರ್ಮ ಯೋಜನೆ"
+        : (isBn ? "বিশ্বকর্মা যোজনা"
+        : "Artisan Vishwakarma")));
+
+      const promptPwd = isTe ? "దివ్యాంగుల స్వయం ఉపాధి రుణ పథకం"
+        : (isHi ? "दिव्यांगजन स्वरोजगार ऋण योजना"
+        : (isKn ? "ವಿಕಲಚೇತನರ ಸ್ವಯಂ ಉದ್ಯೋಗ ಸಾಲ ಯೋಜನೆ"
+        : (isBn ? "প্রতিবন্ধী ব্যক্তিদের স্বনির্ভর কর্মসংস্থান ঋণ প্রকল্প"
+        : "Divyangjan PwD loan")));
+
+      const labelPwd = isTe ? "దివ్యాంగుల రుణం (NHFDC)"
+        : (isHi ? "दिव्यांगजन ऋण"
+        : (isKn ? "ವಿಕಲಚೇತನರ ಸಾಲ"
+        : (isBn ? "প্রতিবন্ধী ঋণ (NHFDC)"
+        : "Divyangjan Loan")));
+
       interactiveContentHtml = `
         <div class="greeting-chips">
-          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${isTe ? "నాకు కమర్షియల్ ఆటో కొనడానికి లోన్ కావాలి" : (isHi ? "मुझे कमर्शियल ऑटो रिक्शा खरीदने के लिए लोन चाहिए" : "I want a commercial auto-rickshaw loan")}')">
-            🛺 ${isTe ? "కమర్షియల్ ఆటో రుణం" : (isHi ? "कमर्शियल ऑटो लोन" : "Commercial Auto Loan")}
+          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${promptAuto}')">
+            🛺 ${labelAuto}
           </button>
-          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${isTe ? "నాకు టిఫిన్ సెంటర్ / ఫుడ్ బిజినెస్ లోన్ కావాలి" : (isHi ? "मुझे टिफिन सेंटर / फूड बिजनेस लोन चाहिए" : "I want a food business / tiffin loan")}')">
-            🍲 ${isTe ? "టిఫిన్ సెంటర్ / ఫుడ్ లోన్" : (isHi ? "टिफिन सेंटर / फ़ूड लोन" : "Food / Tiffin Center")}
+          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${promptFood}')">
+            🍲 ${labelFood}
           </button>
-          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${isTe ? "నాకు కిసాన్ క్రెడిట్ కార్డ్ వ్యవసాయ లోన్ కావాలి" : (isHi ? "मुझे किसान क्रेडिट कार्ड कृषि लोन चाहिए" : "I want Kisan Credit Card agri loan")}')">
-            🌾 ${isTe ? "వ్యవసాయ రుణం (KCC)" : (isHi ? "कृषि लोन (KCC)" : "Kisan Credit Card")}
+          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${promptKcc}')">
+            🌾 ${labelKcc}
           </button>
-          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${isTe ? "చేతివృత్తుల కోసం పీఎం విశ్వకర్మ లోన్ కావాలి" : (isHi ? "दस्तकारों के लिए पीएम विश्वकर्मा लोन चाहिए" : "PM Vishwakarma artisan loan")}')">
-            🧵 ${isTe ? "చేతివృత్తుల లోన్ (విశ్వకర్మ)" : (isHi ? "विश्वकर्मा योजना" : "Artisan Vishwakarma")}
+          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${promptArtisan}')">
+            🧵 ${labelArtisan}
           </button>
-          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${isTe ? "దివ్యాంగుల స్వయం ఉపాధి రుణ పథకం" : (isHi ? "दिव्यांगजन स्वरोजगार ऋण योजना" : "Divyangjan PwD loan")}')">
-            ♿ ${isTe ? "దివ్యాంగుల రుణం (NHFDC)" : (isHi ? "दिव्यांगजन ऋण" : "Divyangjan Loan")}
+          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${promptPwd}')">
+            ♿ ${labelPwd}
           </button>
         </div>
       `;
@@ -850,13 +927,19 @@ async function sendChatMessage(autoSpeak = false) {
 
     const displayText = data.message || data.reply;
 
+    const listenBtnLabel = lang === 'Telugu' ? '🔊 వినండి (Listen)'
+      : (lang === 'Hindi' ? '🔊 सुनिए (Listen)'
+      : (lang === 'Kannada' ? '🔊 ಕೇಳಿ (Listen)'
+      : (lang === 'Bengali' ? '🔊 শুনুন (Listen)'
+      : '🔊 Listen / వినండి')));
+
     const aiBubble = document.createElement('div');
     aiBubble.className = 'chat-bubble ai';
     aiBubble.innerHTML = `
       ${sectorBadge}
       <div>${displayText.replace(/\n/g, '<br>')}</div>
       ${interactiveContentHtml}
-      <button class="listen-btn" onclick="speakBhashiniVoice('${escapeTextForAttr(displayText)}', '${lang}', this)">🔊 Suniye / వినండి (Listen)</button>
+      <button class="listen-btn" onclick="speakBhashiniVoice('${escapeTextForAttr(displayText)}', '${lang}', this)">${listenBtnLabel}</button>
       <small class="ai-credit">✨ Source: ${data.source || 'Udyam Setu AI Engine'} • Digital India BHASHINI RAG</small>
     `;
     chatContainer.appendChild(aiBubble);
@@ -874,13 +957,23 @@ async function sendChatMessage(autoSpeak = false) {
       ? 'పీఎం ముద్ర యోజన కింద ₹50,000 నుండి ₹10 లక్షల వరకు పూచీకత్తు లేని లోన్ లభిస్తుంది.'
       : (lang === 'Hindi' 
         ? 'पीएम मुद्रा योजना के तहत ₹50,000 से ₹10 लाख तक बिना गारंटी लोन मिलता है।'
-        : 'PM Mudra Yojana offers up to ₹10 Lakh collateral-free credit for small enterprises.');
+        : (lang === 'Kannada'
+          ? 'ಪಿಎಂ ಮುದ್ರಾ ಯೋಜನೆ ಅಡಿಯಲ್ಲಿ ₹50,000 ದಿಂದ ₹10 ಲಕ್ಷದವರೆಗೆ ಯಾವುದೇ ಅಡಮಾನವಿಲ್ಲದ ಸಾಲ ಲಭ್ಯವಿದೆ.'
+          : (lang === 'Bengali'
+            ? 'প্রধানমন্ত্রী মুদ্রা যোজনায় ₹৫০,০০০ থেকে ₹১০ লাখ পর্যন্ত কোনো গ্যারান্টি ছাড়া ঋণ পাওয়া যায়।'
+            : 'PM Mudra Yojana offers up to ₹10 Lakh collateral-free credit for small enterprises.')));
+
+    const listenBtnLabel = lang === 'Telugu' ? '🔊 వినండి (Listen)'
+      : (lang === 'Hindi' ? '🔊 सुनिए (Listen)'
+      : (lang === 'Kannada' ? '🔊 ಕೇಳಿ (Listen)'
+      : (lang === 'Bengali' ? '🔊 শুনুন (Listen)'
+      : '🔊 Listen / వినండి')));
 
     const aiBubble = document.createElement('div');
     aiBubble.className = 'chat-bubble ai';
     aiBubble.innerHTML = `
       <div>${fallbackText}</div>
-      <button class="listen-btn" onclick="speakBhashiniVoice('${escapeTextForAttr(fallbackText)}', '${lang}', this)">🔊 Suniye / వినండి (Listen)</button>
+      <button class="listen-btn" onclick="speakBhashiniVoice('${escapeTextForAttr(fallbackText)}', '${lang}', this)">${listenBtnLabel}</button>
       <small class="ai-credit">✨ Digital India Bhashini Knowledge</small>
     `;
     chatContainer.appendChild(aiBubble);

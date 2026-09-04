@@ -1,7 +1,7 @@
 /**
  * Udyam Setu - Dynamic RAG (Retrieval-Augmented Generation) & Scheme Intelligence Service
  * Combines Deterministic Sector/Demographic Retrieval with Gemini 2.5 Flash Multilingual Reasoning.
- * Supports: Telugu (తెలుగు), Marathi (मराठी), Hindi (हिन्दी), and English.
+ * Supports: Telugu (తెలుగు), Marathi (मराठी), Hindi (हिन्दी), Tamil (தமிழ்), Kannada (ಕನ್ನಡ), Bengali (বাংলা), and English.
  */
 
 const { GoogleGenAI } = require('@google/genai');
@@ -21,14 +21,14 @@ function getGenAIClient() {
 }
 
 /**
- * Check if the message is primarily a greeting (e.g. "hi", "hello", "నమస్కారం", "नमस्ते").
+ * Check if the message is primarily a greeting (e.g. "hi", "hello", "నమస్కారం", "नमस्ते", "ನಮಸ್ಕಾರ", "নমস্কার").
  * If user includes any business/loan/scheme inquiry, returns false.
  */
 function isGreetingMessage(message = '') {
   if (!message) return false;
   const clean = message.trim().toLowerCase().replace(/[!.,?।]/g, '');
 
-  const hasBusinessIntent = /(loan|scheme|business|auto|vehicle|lorry|truck|food|shop|kirana|tiffin|farm|crop|kisan|student|artisan|money|subsidy|transport|ricshaw|rickshaw|రుణం|లోన్|వ్యాపారం|పథకం|ఆటో|వాహనం|సబ్సిడీ|లోన్లు|పథకాలు|రైతు|పంట|కిరాణా|హోటల్|లారీ|లోహార్|లోహా|लोन|योजना|व्यापार|दुकान|गाड़ी|सब्सिडी|ऑटो|रिक्शा|ट्रक|किसान|खेती)/i.test(message);
+  const hasBusinessIntent = /(loan|scheme|business|auto|vehicle|lorry|truck|food|shop|kirana|tiffin|farm|crop|kisan|student|artisan|money|subsidy|transport|ricshaw|rickshaw|రుణం|లోన్|వ్యాపారం|పథకం|ఆటో|వాహనం|సబ్సిడీ|లోన్లు|పథకాలు|రైతు|పంట|కిరాణా|హోటల్|లారీ|లోహార్|లోహా|लोन|योजना|व्यापार|दुकान|गाड़ी|सब्सिडी|ऑटो|रिक्शा|ट्रक|किसान|खेती|ಸಾಲ|ಯೋಜನೆ|ವ್ಯವಹಾರ|ಉದ್ಯಮ|ವಾಹನ|ಆಟೋ|ಲಾರಿ|ಸಾರಿಗೆ|ಸಬ್ಸಿಡಿ|ರೈತ|ಕೃಷಿ|ಅಂಗಡಿ|ಹೋಟೆಲ್|ತಿಂಡಿ|ಋಣ|ঋণ|লোন|যোজনা|পরিকল্পনা|ব্যবসা|গাড়ি|অটো|রিকশা|লরি|ভর্তুকি|কৃষক|কৃষি|দোকান|হোটেল|টিফিন)/i.test(message);
   if (hasBusinessIntent) return false;
 
   const greetingExact = [
@@ -36,7 +36,9 @@ function isGreetingMessage(message = '') {
     'good morning', 'good afternoon', 'good evening', 'greetings',
     'నమస్కారం', 'నమస్తే', 'హలో', 'హాయ్', 'బాగున్నారా',
     'नमस्ते', 'प्रणाम', 'नमस्कार', 'राम राम', 'जय श्री राम', 'राधे राधे',
-    'வணக்கம்', 'नमस्कार'
+    'வணக்கம்', 'नमस्कार',
+    'ನಮಸ್ಕಾರ', 'ನಮಸ್ಕಾರಗಳು', 'ನಮಸ್ತೆ', 'ಹಲೋ', 'ಹಾಯ್', 'ಶುಭೋದಯ', 'ಶುಭ ಸಂಜೆ', 'ಹೇಗಿದ್ದೀರ', 'ಹೇಗಿದ್ದೀರಿ',
+    'নমস্কার', 'নমস্তে', 'হ্যালো', 'হাই', 'প্রণাম', 'কেমন আছেন', 'শুভ সকাল', 'শুভ সন্ধ্যা', 'কেমন আছো'
   ];
 
   const words = clean.split(/\s+/).filter(Boolean);
@@ -56,6 +58,10 @@ function buildGreetingResponse(language = 'English') {
   let message = '';
   if (lang.includes('telugu') || lang === 'te') {
     message = 'నమస్కారం! నేను ఉద్యమ్ సేతు ఏఐ ప్రభుత్వ పథకాల సలహాదారుని. మీకు నూతన వ్యాపార స్థాపనకు, వాణిజ్య వాహనం కొనుగోలుకు లేదా వ్యాపార విస్తరణకు అవసరమైన పూచీకత్తు లేని రుణాలు, ప్రభుత్వ రాయితీలు (సబ్సిడీలు) మరియు సంక్షేమ పథకాల గురించి పూర్తిగా మార్గదర్శనం చేస్తాను. మీకు ఏ వ్యాపారం, వాహనం లేదా ప్రాజెక్ట్ కోసం రుణ సహాయం కావాలో తెలియజేయండి.';
+  } else if (lang.includes('kannada') || lang === 'kn') {
+    message = 'ನಮಸ್ಕಾರ! ನಾನು ಉದ್ಯಮ್ ಸೇತು ಎಐ ಸರ್ಕಾರಿ ಯೋಜನೆಗಳ ಸಲಹೆಗಾರ. ಹೊಸ ವ್ಯಾಪಾರ, ಅಂಗಡಿ, ವಾಣಿಜ್ಯ ವಾಹನ (ಆಟೋ/ಲಾರಿ) ಅಥವಾ ಉದ್ಯಮಕ್ಕೆ ಅಗತ್ಯವಿರುವ ಯಾವುದೇ ಅಡಮಾನವಿಲ್ಲದ ಸಾಲಗಳು, ಸರ್ಕಾರಿ ಸಬ್ಸಿಡಿಗಳು ಮತ್ತು ಕಲ್ಯಾಣ ಯೋಜನೆಗಳ ಬಗ್ಗೆ ನಿಮಗೆ ಸಂಪೂರ್ಣ ಮಾರ್ಗದರ್ಶನ ನೀಡುತ್ತೇನೆ. ನಿಮಗೆ ಯಾವ ವ್ಯಾಪಾರ, ವಾಹನ ಅಥವಾ ಯೋಜನೆಗೆ ಸಾಲದ ನೆರವು ಬೇಕು?';
+  } else if (lang.includes('bengali') || lang === 'bn') {
+    message = 'নমস্কার! আমি উদ্যম সেতু এআই সরকারি প্রকল্পের পরামর্শদাতা। নতুন ব্যবসা শুরু, দোকান, বাণিজ্যিক যানবাহন (অটো/লরি) বা প্রকল্পের জন্য বিনা গ্যারান্টির সরকারি ঋণ, ভর্তুকি (সাবসিডি) এবং কল্যাণমূলক প্রকল্পের সম্পূর্ণ তথ্য এখানে পাবেন। আপনি কোন ব্যবসা, গাড়ি বা কাজের জন্য আর্থিক সহায়তা চান?';
   } else if (lang.includes('hindi') || lang === 'hi') {
     message = 'नमस्ते! मैं उद्यम सेतु एआई सरकारी योजना सलाहकार हूँ। आपको नए व्यवसाय, दुकान, वाणिज्यिक वाहन या उद्योग के लिए सरकारी ऋण, सब्सिडी और योजनाओं की पूरी जानकारी यहाँ मिलेगी। आप किस व्यवसाय या कार्य के लिए सहायता चाहते हैं?';
   } else if (lang.includes('marathi') || lang === 'mr') {
@@ -97,7 +103,11 @@ function classifyUserSector(message = '', userProfile = null) {
     text.includes('tempo') || text.includes('డ్రైవర్') || text.includes('ఆటో') || text.includes('వాహనం') ||
     text.includes('లారీ') || text.includes('రవాణా') || text.includes('టాక్సీ') || text.includes('గాడీ') ||
     text.includes('गाड़ी') || text.includes('ऑटो') || text.includes('रिक्शा') || text.includes('ट्रक') ||
-    text.includes('ट्रांसपोर्ट') || text.includes('ड्राइवर') || text.includes('वाहन') || text.includes('टैक्सी')
+    text.includes('ट्रांसपोर्ट') || text.includes('ड्राइवर') || text.includes('वाहन') || text.includes('टैक्सी') ||
+    text.includes('ವಾಹನ') || text.includes('ಆಟೋ') || text.includes('ಲಾರಿ') || text.includes('ಟ್ಯಾಕ್ಸಿ') ||
+    text.includes('ಸಾರಿಗೆ') || text.includes('ಚಾಲಕ') || text.includes('ರಿಕ್ಷಾ') || text.includes('ಗೂಡ್ಸ್') ||
+    text.includes('গাড়ি') || text.includes('অটো') || text.includes('রিকশা') || text.includes('লরি') ||
+    text.includes('ট্রাক') || text.includes('পরিবহন') || text.includes('ড্রাইভার') || text.includes('ট্যাক্সি')
   ) {
     return 'Commercial Transport';
   }
@@ -109,7 +119,11 @@ function classifyUserSector(message = '', userProfile = null) {
     text.includes('bakery') || text.includes('catering') || text.includes('కిరాణా') || text.includes('టిఫిన్') ||
     text.includes('హోటల్') || text.includes('భోజనం') || text.includes('ఆహారం') || text.includes('होटल') ||
     text.includes('टिफिन') || text.includes('चाय') || text.includes('खाना') || text.includes('भोजन') ||
-    text.includes('ढाबा') || text.includes('नाश्ता')
+    text.includes('ढाबा') || text.includes('नाश्ता') ||
+    text.includes('ಹೋಟೆಲ್') || text.includes('ತಿಂಡಿ') || text.includes('ಊಟ') || text.includes('ಚಹಾ') ||
+    text.includes('ಬೇಕರಿ') || text.includes('ಖಾದ್ಯ') || text.includes('ಆಹಾರ') ||
+    text.includes('হোটেল') || text.includes('টিফিন') || text.includes('খাবার') || text.includes('চা') ||
+    text.includes('বেকারি') || text.includes('রেস্তোরাঁ') || text.includes('ভোজন')
   ) {
     return 'Food Business';
   }
@@ -119,7 +133,8 @@ function classifyUserSector(message = '', userProfile = null) {
     text.includes('street vendor') || text.includes('thela') || text.includes('cart') || text.includes('hawker') ||
     text.includes('footpath') || text.includes('roadside') || text.includes('తోపుడు బండి') || text.includes('బండి') ||
     text.includes('ఫెరీవాలా') || text.includes('ठेला') || text.includes('रेहड़ी') || text.includes('पटरी') ||
-    text.includes('फेरीवाला')
+    text.includes('फेरीवाला') || text.includes('ತಳ್ಳುವ ಗಾಡಿ') || text.includes('ಬೀದಿ ಬದಿ') ||
+    text.includes('হকার') || text.includes('ঠেলাগাড়ি') || text.includes('ফুটপাত')
   ) {
     return 'Street Vendors';
   }
@@ -129,7 +144,11 @@ function classifyUserSector(message = '', userProfile = null) {
     text.includes('farm') || text.includes('agri') || text.includes('kisan') || text.includes('crop') ||
     text.includes('tractor') || text.includes('dairy') || text.includes('cattle') || text.includes('fish') ||
     text.includes('రైతు') || text.includes('వ్యవసాయం') || text.includes('పంట') || text.includes('శెతి') ||
-    text.includes('शेतकरी') || text.includes('खेती') || text.includes('किसान')
+    text.includes('शेतकरी') || text.includes('खेती') || text.includes('किसान') ||
+    text.includes('ಕೃಷಿ') || text.includes('ರೈತ') || text.includes('ಬೆಳೆ') || text.includes('ಟ್ರಾಕ್ಟರ್') ||
+    text.includes('ಹಸು') || text.includes('ಹಾಲು') ||
+    text.includes('কৃষি') || text.includes('কৃষক') || text.includes('ফসল') || text.includes('ট্র্যাক্টর') ||
+    text.includes('গবাদি পশু') || text.includes('মৎস্য')
   ) {
     return 'Agriculture';
   }
@@ -139,7 +158,9 @@ function classifyUserSector(message = '', userProfile = null) {
     text.includes('student') || text.includes('college') || text.includes('education') || text.includes('study') ||
     text.includes('degree') || text.includes('fee') || text.includes('university') ||
     text.includes('చదువు') || text.includes('విద్య') || text.includes('शिक्षण') || text.includes('विद्यार्थी') ||
-    text.includes('पढ़ाई') || text.includes('छात्र')
+    text.includes('पढ़ाई') || text.includes('छात्र') ||
+    text.includes('ಶಿಕ್ಷಣ') || text.includes('ವಿದ್ಯಾರ್ಥಿ') || text.includes('ಕಾಲೇಜು') || text.includes('ಶಾಲೆ') ||
+    text.includes('শিক্ষা') || text.includes('ছাত্র') || text.includes('কলেজ') || text.includes('বিশ্ববিদ্যালয়')
   ) {
     return 'Education / Youth';
   }
@@ -148,7 +169,10 @@ function classifyUserSector(message = '', userProfile = null) {
   if (
     text.includes('disability') || text.includes('pwd') || text.includes('divyang') || text.includes('handicap') ||
     text.includes('దివ్యాంగుల') || text.includes('వైకల్యం') || text.includes('వికలాంగ') ||
-    text.includes('दिव्यांग') || text.includes('विकलांग') || userProfile?.hasDisability
+    text.includes('दिव्यांग') || text.includes('विकलांग') ||
+    text.includes('ವಿಕಲಚೇತನ') || text.includes('ಅಂಗವಿಕಲ') || text.includes('ದಿವ್ಯಾಂಗ') ||
+    text.includes('প্রতিবন্ধী') || text.includes('দিব্যাঙ্গ') || text.includes('শারীরিক প্রতিবন্ধী') ||
+    userProfile?.hasDisability
   ) {
     return 'Differently Abled / Divyangjan';
   }
@@ -156,7 +180,10 @@ function classifyUserSector(message = '', userProfile = null) {
   // Women Entrepreneur
   if (
     text.includes('women') || text.includes('mahila') || text.includes('shg') || text.includes('female') ||
-    text.includes('మహిళ') || text.includes('ఆడ') || text.includes('महिला') || userProfile?.category === 'Women Entrepreneur'
+    text.includes('మహిళ') || text.includes('ఆడ') || text.includes('महिला') ||
+    text.includes('ಮಹಿಳೆ') || text.includes('ಸ್ತ್ರೀ') ||
+    text.includes('মহিলা') || text.includes('নারী') ||
+    userProfile?.category === 'Women Entrepreneur'
   ) {
     return 'Women Entrepreneur';
   }
@@ -167,7 +194,11 @@ function classifyUserSector(message = '', userProfile = null) {
     text.includes('blacksmith') || text.includes('tailor') || text.includes('handloom') || text.includes('craft') ||
     text.includes('చేతివృత్తి') || text.includes('చేనేత') || text.includes('వడ్రంగి') || text.includes('కమ్మరి') ||
     text.includes('కుమ్మరి') || text.includes('దర్జీ') || text.includes('कारागीर') || text.includes('हातमाग') ||
-    text.includes('बढ़ई') || text.includes('लोहार') || text.includes('दर्जी')
+    text.includes('बढ़ई') || text.includes('लोहार') || text.includes('दर्जी') ||
+    text.includes('ಕುಂಬಾರ') || text.includes('ಕಮ್ಮಾರ') || text.includes('ಬಡಗಿ') || text.includes('ದರ್ಜಿ') ||
+    text.includes('ನೇಯ್ಗೆ') || text.includes('ಕರಕುಶಲ') ||
+    text.includes('কারিগর') || text.includes('তাঁতি') || text.includes('ছুতোর') || text.includes('কামার') ||
+    text.includes('কুমার') || text.includes('দর্জি') || text.includes('হস্তশিল্প')
   ) {
     return 'Artisans & Weavers';
   }
@@ -363,6 +394,196 @@ function formatSchemeForSchema(scheme, detectedSector, language = 'English') {
     }
   }
 
+  // KANNADA LOCALIZATION (100% Pure Kannada, Zero English)
+  if (lang.includes('kannada') || lang === 'kn') {
+    if (code === 'PMMY') {
+      const isTransport = detectedSector === 'Commercial Transport';
+      return {
+        scheme_id: schemeId,
+        title: isTransport ? 'ಪ್ರಧಾನಮಂತ್ರಿ ಮುದ್ರಾ ಯೋಜನೆ (ವಾಣಿಜ್ಯ ವಾಹನ & ಆಟೋ ಸಾಲ)' : 'ಪ್ರಧಾನಮಂತ್ರಿ ಮುದ್ರಾ ಯೋಜನೆ (PMMY)',
+        sector: isTransport ? 'ವಾಣಿಜ್ಯ ಸಾರಿಗೆ / ಸಣ್ಣ ವ್ಯಾಪಾರ' : 'ಸಣ್ಣ ಮತ್ತು ಮಧ್ಯಮ ಉದ್ಯಮ',
+        max_amount: '₹10,00,000 ವರೆಗೆ',
+        benefit_tag: 'ಯಾವುದೇ ಅಡಮಾನವಿಲ್ಲದ ಸಾಲ (ಕೊಲ್ಯಾಟರಲ್-ಮುಕ್ತ)',
+        description: isTransport 
+          ? 'ವಾಣಿಜ್ಯ ಆಟೋ ರಿಕ್ಷಾ, ಸಣ್ಣ ಸರಕು ಸಾಗಣೆ ವಾಹನ ಅಥವಾ ಟ್ಯಾಕ್ಸಿ ಖರೀದಿಸಲು ಮುದ್ರಾ ಕಿಶೋರ್ ಮತ್ತು ತರುಣ್ ಸಾಲಗಳು ಯಾವುದೇ ಆಸ್ತಿ ಅಡಮಾನವಿಲ್ಲದೆ ಲಭ್ಯವಿವೆ. ಸುಲಭ ಮಾಸಿಕ ಕಂತುಗಳ ಮೂಲಕ ಬ್ಯಾಂಕ್ ಸಾಲವನ್ನು ಮರುಪಾವತಿಸಬಹುದು.'
+          : 'ಸಣ್ಣ ವ್ಯಾಪಾರಿಗಳು ಮತ್ತು ಅಂಗಡಿಕಾರರು ಯಾವುದೇ ಆಸ್ತಿ ಅಡಮಾನವಿಲ್ಲದೆ ₹10 ಲಕ್ಷದವರೆಗೆ ಸುಲಭ ಸಾಲ ಪಡೆಯಬಹುದು. ಬ್ಯಾಂಕುಗಳ ಮೂಲಕ ಸುಲಭ ಕಂತುಗಳಲ್ಲಿ ಈ ಸಾಲ ಲಭ್ಯವಿದೆ.',
+        redirect_url
+      };
+    }
+    if (code === 'STAND-UP') {
+      return {
+        scheme_id: schemeId,
+        title: 'ಸ್ಟ್ಯಾಂಡಪ್ ಇಂಡಿಯಾ ಯೋಜನೆ (ವಾಣಿಜ್ಯ ವಾಹನಗಳು & ಸಾರಿಗೆ)',
+        sector: 'ಮಹಿಳೆಯರು & ಪರಿಶಿಷ್ಟ ಜಾತಿ/ಪಂಗಡದ ಉದ್ಯಮಿಗಳು',
+        max_amount: '₹10 ಲಕ್ಷದಿಂದ ₹1 ಕೋಟಿವರೆಗೆ',
+        benefit_tag: 'ದೀರ್ಘಾವಧಿ ಸಾಲ ಸೌಲಭ್ಯ & ಸರ್ಕಾರಿ ಗ್ಯಾರಂಟಿ',
+        description: 'ಮಹಿಳೆಯರು ಮತ್ತು ಎಸ್‌ಸಿ/ಎಸ್‌ಟಿ ಉದ್ಯಮಿಗಳು ವಾಣಿಜ್ಯ ವಾಹನಗಳು, ಲಾರಿಗಳು ಅಥವಾ ಸಾರಿಗೆ ವ್ಯವಹಾರ ಸ್ಥಾಪಿಸಲು ₹1 ಕೋಟಿವರೆಗೆ ಬ್ಯಾಂಕ್ ಸಾಲ ಪಡೆಯಬಹುದು. ಇದು ಉದ್ಯಮಶೀಲತೆಯನ್ನು ನೇರವಾಗಿ ಪ್ರೋತ್ಸಾಹಿಸುತ್ತದೆ.',
+        redirect_url
+      };
+    }
+    if (code === 'PMEGP') {
+      return {
+        scheme_id: schemeId,
+        title: 'ಪ್ರಧಾನಮಂತ್ರಿ ಉದ್ಯೋಗ ಸೃಜನ ಕಾರ್ಯಕ್ರಮ (PMEGP)',
+        sector: 'ಉತ್ಪಾದನೆ & ಸೇವಾ ರಂಗ',
+        max_amount: '₹20 ಲಕ್ಷದಿಂದ ₹50 ಲಕ್ಷವರೆಗೆ',
+        benefit_tag: '35% ವರೆಗೆ ಸರ್ಕಾರಿ ನಗದು ಸಬ್ಸಿಡಿ (ಅನುದಾನ)',
+        description: 'ಸಾರಿಗೆ ಸೇವೆಗಳು ಅಥವಾ ಹೊಸ ಉತ್ಪಾದನಾ ಕೈಗಾರಿಕೆಗಳ ಸ್ಥಾಪನೆಗೆ ಸರ್ಕಾರವು 35% ವರೆಗೆ ಮರುಪಾವತಿಸಬೇಕಿಲ್ಲದ ನಗದು ಸಬ್ಸಿಡಿಯನ್ನು ನೀಡುತ್ತದೆ. ಗ್ರಾಮೀಣ ನಿರುದ್ಯೋಗಿ ಯುವಕರು ಮತ್ತು ಮಹಿಳೆಯರಿಗೆ ಇದು ಅತ್ಯುತ್ತಮ ಯೋಜನೆ.',
+        redirect_url
+      };
+    }
+    if (code === 'PM-SVANIDHI') {
+      return {
+        scheme_id: schemeId,
+        title: 'ಪಿಎಂ ಸ್ವನಿಧಿ ಯೋಜನೆ (ಬೀದಿ ಬದಿ ವ್ಯಾಪಾರಿಗಳ ಮೈಕ್ರೋ ಕ್ರೆಡಿಟ್)',
+        sector: 'ಬೀದಿ ಬದಿ ವ್ಯಾಪಾರಿಗಳು & ತಳ್ಳುವ ಗಾಡಿಗಳು',
+        max_amount: '₹10,000 ದಿಂದ ₹50,000 ವರೆಗೆ',
+        benefit_tag: '7% ಬಡ್ಡಿ ಸಬ್ಸಿಡಿ & ಡಿಜಿಟಲ್ ಕ್ಯಾಶ್‌ಬ್ಯಾಕ್',
+        description: 'ಬೀದಿ ಬದಿ ವ್ಯಾಪಾರಿಗಳು, ತಳ್ಳುವ ಗಾಡಿ ವ್ಯಾಪಾರಿಗಳು ಯಾವುದೇ ಗ್ಯಾರಂಟಿ ಇಲ್ಲದೆ ಆರಂಭಿಕ ಬಂಡವಾಳ ಸಾಲ ಪಡೆಯಬಹುದು. ಸಕಾಲದಲ್ಲಿ ಮರುಪಾವತಿಸಿದರೆ 7% ಬಡ್ಡಿ ಸಬ್ಸಿಡಿ ಸಿಗುತ್ತದೆ.',
+        redirect_url
+      };
+    }
+    if (code === 'KCC') {
+      return {
+        scheme_id: schemeId,
+        title: 'ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ (KCC) ಯೋಜನೆ',
+        sector: 'ಕೃಷಿ & ಪಶುಸಂಗೋಪನೆ',
+        max_amount: '₹3,00,000 ವರೆಗೆ',
+        benefit_tag: 'ಕೇವಲ 4% ರಿಯಾಯಿತಿ ಬಡ್ಡಿ ದರ',
+        description: 'ರೈತರು, ಹೈನುಗಾರಿಕೆ ಮತ್ತು ಮೀನುಗಾರರಿಗೆ ಬೆಳೆ ಹೂಡಿಕೆ ಹಾಗೂ ಜಾನುವಾರು ಪೋಷಣೆಗಾಗಿ ರಿಯಾಯಿತಿ ಬಡ್ಡಿ ದರದಲ್ಲಿ ಸುಲಭ ಸಾಲ ಲಭ್ಯವಿದೆ. ಸಕಾಲದಲ್ಲಿ ಪಾವತಿಸಿದರೆ ಸರ್ಕಾರವು 3% ಬಡ್ಡಿ ರಿಯಾಯಿತಿ ನೀಡುತ್ತದೆ.',
+        redirect_url
+      };
+    }
+    if (code === 'SMAM') {
+      return {
+        scheme_id: schemeId,
+        title: 'ಕೃಷಿ ಯಾಂತ್ರೀಕರಣ ಸಬ್ಸಿಡಿ ಯೋಜನೆ (ಟ್ರಾಕ್ಟರ್ ಸಬ್ಸಿಡಿ)',
+        sector: 'ಕೃಷಿ',
+        max_amount: '40% ರಿಂದ 50% ಸರ್ಕಾರಿ ಸಬ್ಸಿಡಿ',
+        benefit_tag: 'ಟ್ರಾಕ್ಟರ್ & ಆಧುನಿಕ ಕೃಷಿ ಉಪಕರಣಗಳ ಖರೀದಿ',
+        description: 'ರೈತರು ಹೊಸ ಟ್ರಾಕ್ಟರ್‌ಗಳು, ಕೊಯ್ಲು ಯಂತ್ರಗಳು ಮತ್ತು ಆಧುನಿಕ ಕೃಷಿ ಉಪಕರಣಗಳನ್ನು ಖರೀದಿಸಲು ಸರ್ಕಾರವು 50% ವರೆಗೆ ನಗದು ಸಬ್ಸಿಡಿ ನೀಡುತ್ತದೆ.',
+        redirect_url
+      };
+    }
+    if (code === 'PM-VISHWAKARMA') {
+      return {
+        scheme_id: schemeId,
+        title: 'ಪಿಎಂ ವಿಶ್ವಕರ್ಮ ಯೋಜನೆ (ಸಾಂಪ್ರದಾಯಿಕ ಕುಶಲಕರ್ಮಿಗಳು)',
+        sector: 'ಕುಶಲಕರ್ಮಿಗಳು & ಕರಕುಶಲ ಕಲಾವಿದರು',
+        max_amount: '₹15,000 ಟೂಲ್‌ಕಿಟ್ ಅನುದಾನ + ₹3 ಲಕ್ಷ ಸಾಲ',
+        benefit_tag: 'ಕೇವಲ 5% ಕಡಿಮೆ ಬಡ್ಡಿ ದರ & ಉಚಿತ ತರಬೇತಿ',
+        description: 'ಬಡಗಿಗಳು, ಕಮ್ಮಾರರು, ಕುಂಬಾರರು, ದರ್ಜಿಗಳು ಮತ್ತು ನೇಕಾರರಿಗೆ ಉಚಿತ ಆಧುನಿಕ ಉಪಕರಣಗಳು ಮತ್ತು ಕಡಿಮೆ ಬಡ್ಡಿದರದಲ್ಲಿ ಆರ್ಥಿಕ ಸಾಲ ಲಭ್ಯವಿದೆ. ದಿನನಿತ್ಯದ ಭತ್ಯೆಯೊಂದಿಗೆ ಕೌಶಲ್ಯ ತರಬೇತಿಯನ್ನು ಸರ್ಕಾರ ನೀಡುತ್ತದೆ.',
+        redirect_url
+      };
+    }
+    if (code === 'NHFDC-DSY') {
+      return {
+        scheme_id: schemeId,
+        title: 'ದಿವ್ಯಾಂಗಜನ ಸ್ವಾವಲಂಬನ ಯೋಜನೆ (NHFDC)',
+        sector: 'ವಿಕಲಚೇತನರ ಸಬಲೀಕರಣ (PwD)',
+        max_amount: '₹50,00,000 ವರೆಗೆ',
+        benefit_tag: 'ಕೇವಲ 5% ರಿಂದ 8% ರಿಯಾಯಿತಿ ಬಡ್ಡಿ ದರ',
+        description: '40% ಅಥವಾ ಹೆಚ್ಚಿನ ವಿಕಲಚೇತನ ಹೊಂದಿರುವ ನಾಗರಿಕರಿಗೆ ಸ್ವಯಂ ಉದ್ಯೋಗ ಮತ್ತು ವ್ಯಾಪಾರ ಸ್ಥಾಪನೆಗೆ ವಿಶೇಷ ರಿಯಾಯಿತಿ ಸಾಲ ದೊರೆಯುತ್ತದೆ. ಮಹಿಳಾ ವಿಕಲಚೇತನರಿಗೆ ಹೆಚ್ಚುವರಿ 1% ಬಡ್ಡಿ ರಿಯಾಯಿತಿ ಸಿಗುತ್ತದೆ.',
+        redirect_url
+      };
+    }
+  }
+
+  // BENGALI LOCALIZATION (100% Pure Bengali, Zero English)
+  if (lang.includes('bengali') || lang === 'bn') {
+    if (code === 'PMMY') {
+      const isTransport = detectedSector === 'Commercial Transport';
+      return {
+        scheme_id: schemeId,
+        title: isTransport ? 'প্রধানমন্ত্রী মুদ্রা যোজনা (বাণিজ্যিক যানবাহন ও অটো ঋণ)' : 'প্রধানমন্ত্রী মুদ্রা যোজনা (PMMY)',
+        sector: isTransport ? 'বাণিজ্যিক পরিবহন / ক্ষুদ্র ব্যবসা' : 'ক্ষুদ্র ও মাঝারি ব্যবসা',
+        max_amount: '₹১০,০০,০০০ পর্যন্ত',
+        benefit_tag: 'কোনো গ্যারান্টি ছাড়া (কোল্যাটারাল-মুক্ত ঋণ)',
+        description: isTransport 
+          ? 'বাণিজ্যিক অটো-রিকশা, ছোট পণ্যবাহী গাড়ি বা ট্যাক্সি কেনার জন্য মুদ্রা কিশোর ও তরুণ ঋণ কোনো সম্পত্তি বন্ধক ছাড়াই পাওয়া যায়। ব্যাংকের মাধ্যমে সহজ মাসিক কিস্তিতে এই ঋণ পরিশোধ করা যায়।'
+          : 'ছোট ব্যবসায়ী এবং দোকানদাররা কোনো সম্পত্তি বন্ধক ছাড়াই ₹১০ লাখ পর্যন্ত সহজ ঋণ পেতে পারেন। ব্যাংকের মাধ্যমে সহজ কিস্তিতে এই ঋণ দেওয়া হয়।',
+        redirect_url
+      };
+    }
+    if (code === 'STAND-UP') {
+      return {
+        scheme_id: schemeId,
+        title: 'স্ট্যান্ড-আপ ইন্ডিয়া প্রকল্প (বাণিজ্যিক পরিবহন ও যানবাহন)',
+        sector: 'মহিলা এবং এসসি/এসটি উদ্যোক্তা',
+        max_amount: '₹১০ লাখ থেকে ₹১ কোটি পর্যন্ত',
+        benefit_tag: 'দীর্ঘমেয়াদী ঋণ সুবিধা ও সরকারি গ্যারান্টি',
+        description: 'মহিলা এবং তফশিলি জাতি/উপজাতির উদ্যোক্তারা বাণিজ্যিক গাড়ি, ট্রাক বা পরিবহন ব্যবসা শুরু করার জন্য ₹১ কোটি পর্যন্ত ব্যাংক ঋণ পেতে পারেন। এটি স্বনির্ভরতা বাড়াতে অত্যন্ত সহায়ক।',
+        redirect_url
+      };
+    }
+    if (code === 'PMEGP') {
+      return {
+        scheme_id: schemeId,
+        title: 'প্রধানমন্ত্রী কর্মসংস্থান সৃষ্টি কর্মসূচি (PMEGP)',
+        sector: 'উৎপাদন ও সেবা খাত',
+        max_amount: '₹২০ লাখ থেকে ₹৫০ লাখ পর্যন্ত',
+        benefit_tag: '৩৫% পর্যন্ত সরকারি নগদ ভর্তুকি (সাবসিডি)',
+        description: 'পরিবহন পরিষেবা বা নতুন শিল্প স্থাপনের জন্য সরকার ৩৫% পর্যন্ত অফেরতযোগ্য নগদ ভর্তুকি প্রদান করে। গ্রামীণ বেকার যুবক এবং মহিলা উদ্যোক্তাদের জন্য এটি একটি সেরা প্রকল্প।',
+        redirect_url
+      };
+    }
+    if (code === 'PM-SVANIDHI') {
+      return {
+        scheme_id: schemeId,
+        title: 'পিএম স্বনিধি প্রকল্প (রাস্তার বিক্রেতাদের মাইক্রো ক্রেডিট)',
+        sector: 'পথচলতি হকার ও ঠেলাগাড়ি বিক্রেতা',
+        max_amount: '₹১০,০০০ থেকে ₹৫০,০০০ পর্যন্ত',
+        benefit_tag: '৭% সুদ ভর্তুকি ও ডিজিটাল ক্যাশব্যাক',
+        description: 'রাস্তার ধারের ক্ষুদ্র বিক্রেতা ও টিফিন বিক্রেতারা কোনো গ্যারান্টি ছাড়াই ব্যবসার পুঁজির জন্য ঋণ পেতে পারেন। সময়মতো ঋণ শোধ করলে ৭% সুদ ছাড় এবং ক্যাশব্যাক পাওয়া যায়।',
+        redirect_url
+      };
+    }
+    if (code === 'KCC') {
+      return {
+        scheme_id: schemeId,
+        title: 'কিসান ক্রেডিট কার্ড (KCC) প্রকল্প',
+        sector: 'কৃষি ও পশুপালন',
+        max_amount: '₹৩,০০,০০০ পর্যন্ত',
+        benefit_tag: 'মাত্র ৪% কার্যকর সুদের হার',
+        description: 'কৃষক, ডেয়ারি খামারি এবং মৎস্যজীবীদের ফসলের উৎপাদন ও গবাদি পশু পালনের জন্য সহজ শর্তে কম সুদে ঋণ দেওয়া হয়। সময়মতো পরিশোধে ৩% সরকারি সুদ ছাড় পাওয়া যায়।',
+        redirect_url
+      };
+    }
+    if (code === 'SMAM') {
+      return {
+        scheme_id: schemeId,
+        title: 'কৃষি যান্ত্রিকীকরণ প্রকল্প (ট্র্যাক্টর সাবসিডি)',
+        sector: 'কৃষি',
+        max_amount: '৪০% থেকে ৫০% সরকারি ভর্তুকি',
+        benefit_tag: 'ট্র্যাক্টর ও আধুনিক কৃষি যন্ত্রপাতি ক্রয়',
+        description: 'কৃষকদের নতুন ট্র্যাক্টর, ফসল কাটার মেশিন ও আধুনিক কৃষি যন্ত্রপাতি কেনার জন্য সরকার ৫০% পর্যন্ত নগদ অনুদান প্রদান করে।',
+        redirect_url
+      };
+    }
+    if (code === 'PM-VISHWAKARMA') {
+      return {
+        scheme_id: schemeId,
+        title: 'পিএম বিশ্বকর্মা যোজনা (ঐতিহ্যবাহী কারিগর প্রকল্প)',
+        sector: 'হস্তশিল্প ও ঐতিহ্যবাহী কারিগর',
+        max_amount: '₹১৫,০০০ টুলকিট অনুদান + ₹৩ লাখ পর্যন্ত ঋণ',
+        benefit_tag: 'মাত্র ৫% কম সুদের হার ও বিনামূল্যে প্রশিক্ষণ',
+        description: 'ছুতোর, কামার, কুমার, দর্জি এবং তাঁতিদের বিনামূল্যে আধুনিক যন্ত্রপাতি এবং কম সুদে আর্থিক ঋণ দেওয়া হয়। সাথে প্রতিদিনের ভাতাসহ সরকারি প্রশিক্ষণ প্রদান করা হয়।',
+        redirect_url
+      };
+    }
+    if (code === 'NHFDC-DSY') {
+      return {
+        scheme_id: schemeId,
+        title: 'দিব্যাঙ্গজন স্বাবলম্বন যোজনা (NHFDC)',
+        sector: 'প্রতিবন্ধী ক্ষমতায়ন (PwD)',
+        max_amount: '₹৫০,০০,০০০ পর্যন্ত',
+        benefit_tag: 'মাত্র ৫% থেকে ৮% বিশেষ ছাড়যুক্ত সুদের হার',
+        description: '৪০% বা তার বেশি প্রতিবন্ধকতাযুক্ত ব্যক্তিদের স্বনির্ভরতা ও নতুন ব্যবসা শুরু করার জন্য কম সুদে বিশেষ ঋণ দেওয়া হয়। মহিলা প্রতিবন্ধীদের জন্য অতিরিক্ত ১% সুদের ছাড় রয়েছে।',
+        redirect_url
+      };
+    }
+  }
+
   // HINDI LOCALIZATION (100% Pure Hindi, Zero English)
   if (lang.includes('hindi') || lang === 'hi') {
     if (code === 'PMMY') {
@@ -474,6 +695,26 @@ function buildVernacularResponse(message, schemes, language = 'English', userPro
     } else {
       conversationalMessage = 'మీ ప్రశ్న మరియు వ్యాపార వివరాల ఆధారంగా ప్రభుత్వం నుండి మీకు అత్యంత అనువైన పథకాలు ఇక్కడ ఉన్నాయి:';
     }
+  } else if (lang.includes('kannada') || lang === 'kn' || /[\u0C80-\u0CFF]/.test(message)) {
+    if (detectedSector === 'Commercial Transport') {
+      conversationalMessage = 'ವಾಣಿಜ್ಯ ವಾಹನ (ಆಟೋ ರಿಕ್ಷಾ / ಲಾರಿ / ಟ್ಯಾಕ್ಸಿ) ಖರೀದಿಸಲು ಸರ್ಕಾರದಿಂದ ಲಭ್ಯವಿರುವ ಅತ್ಯಂತ ಸೂಕ್ತ ಯೋಜನೆಗಳು ಇಲ್ಲಿವೆ:';
+    } else if (detectedSector === 'Food Business') {
+      conversationalMessage = 'ಆಹಾರ ವ್ಯಾಪಾರ, ಹೋಟೆಲ್ ಅಥವಾ ತಿಂಡಿ ಕೇಂದ್ರಕ್ಕಾಗಿ ಸರ್ಕಾರದ ಅತ್ಯುತ್ತಮ ಸಾಲ ಮತ್ತು ಸಬ್ಸಿಡಿ ಯೋಜನೆಗಳು ಇಲ್ಲಿವೆ:';
+    } else if (detectedSector === 'Agriculture') {
+      conversationalMessage = 'ನಿಮ್ಮ ಕೃಷಿ ಮತ್ತು ಬೆಳೆ ಹೂಡಿಕೆಗಾಗಿ ಅತ್ಯಂತ ಕಡಿಮೆ ಬಡ್ಡಿದರದಲ್ಲಿ ಲಭ್ಯವಿರುವ ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು ಇಲ್ಲಿವೆ:';
+    } else {
+      conversationalMessage = 'ನಿಮ್ಮ ಪ್ರಶ್ನೆ ಮತ್ತು ವ್ಯಾಪಾರದ ಅಗತ್ಯಕ್ಕೆ ತಕ್ಕಂತೆ ಅತ್ಯಂತ ಸೂಕ್ತವಾದ ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು ಇಲ್ಲಿವೆ:';
+    }
+  } else if (lang.includes('bengali') || lang === 'bn' || /[\u0980-\u09FF]/.test(message)) {
+    if (detectedSector === 'Commercial Transport') {
+      conversationalMessage = 'বাণিজ্যিক যানবাহন (অটো-রিকশা / লরি / ট্যাক্সি) কেনার জন্য সরকারের সবচেয়ে উপযুক্ত ঋণ ও ভর্তুকি প্রকল্পগুলি নিচে দেওয়া হলো:';
+    } else if (detectedSector === 'Food Business') {
+      conversationalMessage = 'খাদ্য ব্যবসা, হোটেল বা টিফিন সেন্টারের জন্য সরকারি ঋণ এবং অনুদান প্রকল্পগুলি নিচে দেওয়া হলো:';
+    } else if (detectedSector === 'Agriculture') {
+      conversationalMessage = 'আপনার কৃষি ও ফসলের জন্য সবচেয়ে কম সুদের সরকারি ঋণ প্রকল্পগুলি নিচে দেওয়া হলো:';
+    } else {
+      conversationalMessage = 'আপনার প্রশ্ন ও ব্যবসায়ের প্রয়োজনীয়তা অনুযায়ী সবচেয়ে উপযুক্ত সরকারি প্রকল্পগুলি নিচে দেওয়া হলো:';
+    }
   } else if (lang.includes('hindi') || lang === 'hi' || /[\u0900-\u097F]/.test(message)) {
     if (detectedSector === 'Commercial Transport') {
       conversationalMessage = 'वाणिज्यिक वाहन (ऑटो-रिक्शा / ट्रक / टैक्सी) खरीदने के लिए भारत सरकार की सबसे उपयुक्त योजनाएं निम्नलिखित हैं:';
@@ -493,8 +734,17 @@ function buildVernacularResponse(message, schemes, language = 'English', userPro
   }
 
   // Construct backward-compatible text reply for speech synthesis & older clients
+  const isKn = lang.includes('kannada') || lang === 'kn' || /[\u0C80-\u0CFF]/.test(message);
+  const isBn = lang.includes('bengali') || lang === 'bn' || /[\u0980-\u09FF]/.test(message);
+  const isTe = lang.includes('telugu') || lang === 'te' || /[\u0C00-\u0C7F]/.test(message);
+  const isHi = lang.includes('hindi') || lang === 'hi' || /[\u0900-\u097F]/.test(message);
+
+  const amountLabel = isKn ? 'ಗರಿಷ್ಠ ಮೊತ್ತ:' : (isBn ? 'সর্বোচ্চ পরিমাণ:' : (isTe ? 'ఆర్థిక సహాయం:' : (isHi ? 'अधिकतम राशि:' : 'Max Amount:')));
+  const benefitLabel = isKn ? 'ಪ್ರಯೋಜನ:' : (isBn ? 'সুবিধা:' : (isTe ? 'ప్రయోజనం:' : (isHi ? 'लाभ:' : 'Benefit:')));
+  const detailsLabel = isKn ? 'ವಿವರಗಳು:' : (isBn ? 'বিবরণ:' : (isTe ? 'వివరాలు:' : (isHi ? 'विवरण:' : 'Details:')));
+
   const backwardCompatibleReply = `${conversationalMessage}\n\n` + formattedSchemes.map((s, idx) => 
-    `${idx + 1}. **${s.title}**\n   - **ఆర్థిక సహాయం:** ${s.max_amount}\n   - **ప్రయోజనం:** ${s.benefit_tag}\n   - **వివరాలు:** ${s.description}`
+    `${idx + 1}. **${s.title}**\n   - **${amountLabel}** ${s.max_amount}\n   - **${benefitLabel}** ${s.benefit_tag}\n   - **${detailsLabel}** ${s.description}`
   ).join('\n\n');
 
   return {
@@ -529,10 +779,13 @@ async function handleRAGConversationalChat({
   userProfile = null
 }) {
   let effectiveLang = language || 'English';
-  if (/[\u0C00-\u0C7F]/.test(message)) effectiveLang = 'Telugu';
-  else if (/[\u0B80-\u0BFF]/.test(message)) effectiveLang = 'Tamil';
-  else if (/[\u0900-\u097F]/.test(message)) {
-    effectiveLang = (language || '').toLowerCase().includes('marathi') ? 'Marathi' : 'Hindi';
+  const l = (language || '').toLowerCase();
+  if (/[\u0C80-\u0CFF]/.test(message) || l.includes('kannada') || l === 'kn') effectiveLang = 'Kannada';
+  else if (/[\u0980-\u09FF]/.test(message) || l.includes('bengali') || l === 'bn') effectiveLang = 'Bengali';
+  else if (/[\u0C00-\u0C7F]/.test(message) || l.includes('telugu') || l === 'te') effectiveLang = 'Telugu';
+  else if (/[\u0B80-\u0BFF]/.test(message) || l.includes('tamil') || l === 'ta') effectiveLang = 'Tamil';
+  else if (/[\u0900-\u097F]/.test(message) || l.includes('marathi') || l === 'mr' || l.includes('hindi') || l === 'hi') {
+    effectiveLang = (l.includes('marathi') || l === 'mr') ? 'Marathi' : 'Hindi';
   }
 
   // 1. Check for pure greeting query
@@ -560,7 +813,15 @@ async function handleRAGConversationalChat({
 - description: ${s.description}
 `).join('\n---\n');
 
-      const languageRules = effectiveLang === 'Telugu' ? `
+      const languageRules = effectiveLang === 'Kannada' ? `
+🚨 ABSOLUTE MANDATORY: 100% PURE KANNADA (ಕನ್ನಡ) SCRIPT ONLY!
+- Every single word, message, title, and description MUST be in pure Kannada script.
+- Zero English words or English code-switching.
+` : effectiveLang === 'Bengali' ? `
+🚨 ABSOLUTE MANDATORY: 100% PURE BENGALI (বাংলা) SCRIPT ONLY!
+- Every single word, message, title, and description MUST be in pure Bengali script.
+- Zero English words or English code-switching.
+` : effectiveLang === 'Telugu' ? `
 🚨 ABSOLUTE MANDATORY: 100% PURE TELUGU (తెలుగు) SCRIPT ONLY!
 - Every single word, message, title, and description MUST be in pure Telugu script.
 - Zero English words or English code-switching.
@@ -647,8 +908,17 @@ USER'S MESSAGE: "${message}"
             redirect_url: `/schemes/${s.scheme_id || 'PMMY'}`
           }));
 
+          const isKn = effectiveLang === 'Kannada';
+          const isBn = effectiveLang === 'Bengali';
+          const isTe = effectiveLang === 'Telugu';
+          const isHi = effectiveLang === 'Hindi';
+
+          const amountLabel = isKn ? 'ಗರಿಷ್ಠ ಮೊತ್ತ:' : (isBn ? 'সর্বোচ্চ পরিমাণ:' : (isTe ? 'ఆర్థిక సహాయం:' : (isHi ? 'अधिकतम राशि:' : 'Max Amount:')));
+          const benefitLabel = isKn ? 'ಪ್ರಯೋಜನ:' : (isBn ? 'সুবিধা:' : (isTe ? 'ప్రయోజనం:' : (isHi ? 'लाभ:' : 'Benefit:')));
+          const detailsLabel = isKn ? 'ವಿವರಗಳು:' : (isBn ? 'বিবরণ:' : (isTe ? 'వివరాలు:' : (isHi ? 'विवरण:' : 'Details:')));
+
           const backwardCompatibleReply = `${parsed.message}\n\n` + parsed.schemes.map((s, idx) => 
-            `${idx + 1}. **${s.title}**\n   - **ఆర్థిక సహాయం:** ${s.max_amount}\n   - **ప్రయోజనం:** ${s.benefit_tag}\n   - **వివరాలు:** ${s.description}`
+            `${idx + 1}. **${s.title}**\n   - **${amountLabel}** ${s.max_amount}\n   - **${benefitLabel}** ${s.benefit_tag}\n   - **${detailsLabel}** ${s.description}`
           ).join('\n\n');
 
           return {
