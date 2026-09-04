@@ -160,6 +160,10 @@ function getVernacularSchemeDetails(scheme, lang) {
       loan = 'రూ. 15,000 ఉచిత ఆధునిక పనిముట్ల గ్రాంట్ + రూ. 3 లక్షల వరకు రుణం';
       benefit = 'కేవలం 5% తక్కువ వడ్డీతో పాటు ఉచిత ఆధునిక పనిముట్లు మరియు ఉచిత శిక్షణ.';
       eligibility = 'చేతివృత్తుల వారు, చేనేత కార్మికులు, వడ్రంగులు, కమ్మరులు, కుమ్మరులు, దర్జీలు.';
+    } else if (id.includes('nhfdc') || name.includes('divyang') || name.includes('దివ్యాంగుల')) {
+      loan = 'రూ. 50 లక్షల వరకు రాయితీ రుణం (కేవలం 5% నుండి 8% తక్కువ వడ్డీ రేటు)';
+      benefit = 'దివ్యాంగుల కోసం ప్రత్యేక రాయితీ. మహిళా దివ్యాంగులకు అదనంగా 1% వడ్డీ రాయితీ. రూ. 50,000 వరకు తాకట్టు లేదా పూచీకత్తు అవసరం లేదు.';
+      eligibility = '40% లేదా అంతకంటే ఎక్కువ వైకల్యం ఉన్న 18 నుండి 65 సంవత్సరాల భారతీయ పౌరులు అర్హులు.';
     }
 
     return { loan, benefit, eligibility };
@@ -186,6 +190,10 @@ function getVernacularSchemeDetails(scheme, lang) {
       loan = '₹3 लाख तक आसान कृषि ऋण';
       benefit = 'समय पर अदायगी पर केवल 4% प्रभावी ब्याज दर।';
       eligibility = 'किसान, पशुपालक और डेयरी किसान।';
+    } else if (id.includes('nhfdc') || name.includes('divyang')) {
+      loan = '₹50 लाख तक रियायती स्वरोजगार ऋण (केवल 5% से 8% ब्याज दर)';
+      benefit = 'दिव्यांगजनों के लिए विशेष सब्सिडी एवं महिला दिव्यांगजनों को 1% अतिरिक्त ब्याज छूट। 50,000 तक बिना गारंटी ऋण।';
+      eligibility = '40% या अधिक दिव्यांगता वाले 18 से 65 वर्ष के भारतीय नागरिक।';
     }
 
     return { loan, benefit, eligibility };
@@ -350,10 +358,15 @@ You are having a continuous natural conversation with a user.
 ${languageGuidance}
 
 USER PROFILE:
+- Age: ${userProfile?.age ? userProfile.age + ' Years' : '28 Years'}
+- Gender: ${userProfile?.gender || 'Male'}
+- Differently Abled / Divyangjan (PwD): ${userProfile?.hasDisability || (userProfile?.disabilityType && userProfile?.disabilityType !== 'None') ? `Yes (${userProfile?.disabilityType || 'PwD'}, ${userProfile?.disabilityPercentage || '40%+'} Disability, UDID: ${userProfile?.hasUdidCard ? 'Certified' : 'In Process'})` : 'No (General Ability)'}
 - Business / Occupation: ${userProfile?.businessType || 'Not specified'}
 - Demographic Category: ${userProfile?.category || 'Not specified'}
+- Enterprise Location: ${userProfile?.locationType || 'Rural'}
 - Annual Income: ₹${userProfile?.annualIncome || 'Not specified'}
 - Experience: ${userProfile?.experienceYears || 0} Years
+- Education: ${userProfile?.education || '8th Pass or Above'}
 
 GROUND TRUTH GOVERNMENT SCHEME FACTS:
 ${schemesFactualContext}

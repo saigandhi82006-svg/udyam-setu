@@ -4,10 +4,17 @@ const API_BASE = '/api';
 let currentSelectedScheme = null;
 let currentProfile = {
   age: 28,
+  gender: 'Male',
+  hasDisability: false,
+  disabilityType: 'None',
+  disabilityPercentage: 'None',
+  hasUdidCard: false,
   category: 'OBC',
   annualIncome: 240000,
   businessType: 'Food Business',
-  experienceYears: 2
+  locationType: 'Rural',
+  experienceYears: 2,
+  education: '8th Pass or Above'
 };
 
 let currentDocuments = [
@@ -844,13 +851,54 @@ function escapeTextForAttr(text) {
   return (text || '').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
 }
 
+// Helpers for Screen 5 User Details
+function toggleDisabilityFields() {
+  const val = document.getElementById('profDisability')?.value;
+  const container = document.getElementById('disabilityFieldsContainer');
+  if (container) {
+    container.style.display = val === 'Yes' ? 'block' : 'none';
+  }
+}
+
+function updateAgeCategoryBadge() {
+  const ageInput = document.getElementById('profAge');
+  const badge = document.getElementById('profAgeBadge');
+  if (!ageInput || !badge) return;
+  const age = parseInt(ageInput.value) || 0;
+  if (age < 18) {
+    badge.className = 'form-badge-pill';
+    badge.style.background = '#FEE2E2';
+    badge.style.color = '#991B1B';
+    badge.innerText = '⚠️ Minimum age for government schemes is 18 years';
+  } else if (age <= 35) {
+    badge.className = 'form-badge-pill youth';
+    badge.innerText = '⚡ Youth (18-35) • High Subsidy Priority';
+  } else if (age <= 55) {
+    badge.className = 'form-badge-pill mature';
+    badge.innerText = '💼 Prime Entrepreneur (36-55) • Full Credit Eligibility';
+  } else {
+    badge.className = 'form-badge-pill';
+    badge.style.background = '#F3E8FF';
+    badge.style.color = '#6B21A8';
+    badge.innerText = '🌟 Senior Entrepreneur (56+) • Special Advisory Support';
+  }
+}
+
 // 3. Profiling & Rule-Based Matching (Screen 5 & 6)
 async function runSchemeMatching(shouldNavigate = true) {
-  currentProfile.age = parseInt(document.getElementById('profAge').value) || 28;
-  currentProfile.category = document.getElementById('profCategory').value || 'OBC';
-  currentProfile.annualIncome = parseInt(document.getElementById('profIncome').value) || 240000;
-  currentProfile.businessType = document.getElementById('profBusiness').value || 'Food Business';
-  currentProfile.experienceYears = parseInt(document.getElementById('profExperience').value) || 2;
+  currentProfile.age = parseInt(document.getElementById('profAge')?.value) || 28;
+  currentProfile.gender = document.getElementById('profGender')?.value || 'Male';
+  const disabilityVal = document.getElementById('profDisability')?.value || 'No';
+  currentProfile.hasDisability = disabilityVal === 'Yes';
+  currentProfile.disabilityType = currentProfile.hasDisability ? (document.getElementById('profDisabilityType')?.value || 'Locomotor / Physical') : 'None';
+  currentProfile.disabilityPercentage = currentProfile.hasDisability ? (document.getElementById('profDisabilityPercent')?.value || '40% - 70%') : 'None';
+  currentProfile.hasUdidCard = currentProfile.hasDisability && document.getElementById('profHasUdid')?.value === 'Yes';
+  currentProfile.category = document.getElementById('profCategory')?.value || 'OBC';
+  currentProfile.locationType = document.getElementById('profLocationType')?.value || 'Rural';
+  currentProfile.annualIncome = parseInt(document.getElementById('profIncome')?.value) || 240000;
+  currentProfile.businessType = document.getElementById('profBusiness')?.value || 'Food Business';
+  currentProfile.experienceYears = parseInt(document.getElementById('profExperience')?.value) || 2;
+  currentProfile.education = document.getElementById('profEducation')?.value || '8th Pass or Above';
 
   try {
     const res = await fetch(`${API_BASE}/schemes/match`, {
@@ -862,7 +910,8 @@ async function runSchemeMatching(shouldNavigate = true) {
 
     if (data.success && data.matches) {
       renderSchemeCards(data.matches);
-      logTerminal(`[POST /api/schemes/match] Processed profile: Age ${currentProfile.age}, Cat ${currentProfile.category}, Income ₹${currentProfile.annualIncome}\nMatched ${data.matchedCount} schemes.`);
+      const disInfo = currentProfile.hasDisability ? ` | Divyangjan: ${currentProfile.disabilityType} (${currentProfile.disabilityPercentage})` : '';
+      logTerminal(`[POST /api/schemes/match] Processed profile: Age ${currentProfile.age} (${currentProfile.gender}), Cat ${currentProfile.category}${disInfo}, Area ${currentProfile.locationType}\nMatched ${data.matchedCount} schemes.`);
     }
   } catch (e) {
     console.warn('API Match failed, using fallback schemes');

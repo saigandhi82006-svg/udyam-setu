@@ -46,7 +46,13 @@ router.post('/match', async (req, res) => {
       annualIncome = 240000,
       businessType = 'Food Business',
       experienceYears = 2,
-      gender = 'Any'
+      gender = 'Male',
+      hasDisability = false,
+      disabilityType = 'None',
+      disabilityPercentage = 'None',
+      hasUdidCard = false,
+      locationType = 'Rural',
+      education = '8th Pass or Above'
     } = req.body;
 
     const allSchemes = await dataStore.getSchemes();
@@ -57,7 +63,13 @@ router.post('/match', async (req, res) => {
         annualIncome: Number(annualIncome),
         businessType,
         experienceYears: Number(experienceYears),
-        gender
+        gender,
+        hasDisability,
+        disabilityType,
+        disabilityPercentage,
+        hasUdidCard,
+        locationType,
+        education
       },
       allSchemes
     );
@@ -69,7 +81,14 @@ router.post('/match', async (req, res) => {
         category,
         annualIncome: Number(annualIncome),
         businessType,
-        experienceYears: Number(experienceYears)
+        experienceYears: Number(experienceYears),
+        gender,
+        hasDisability,
+        disabilityType,
+        disabilityPercentage,
+        hasUdidCard,
+        locationType,
+        education
       },
       matchedCount: matches.length,
       matches

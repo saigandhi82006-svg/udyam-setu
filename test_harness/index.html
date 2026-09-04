@@ -310,46 +310,149 @@
             </div>
 
             <div class="form-body">
-              <div class="form-group">
-                <label>Age</label>
-                <input type="number" id="profAge" value="28">
-              </div>
-              <div class="form-group">
-                <label>Category</label>
-                <select id="profCategory">
-                  <option value="OBC" selected>OBC</option>
-                  <option value="SC">SC</option>
-                  <option value="ST">ST</option>
-                  <option value="General">General</option>
-                  <option value="Women Entrepreneur">Women Entrepreneur</option>
-                  <option value="Minority">Minority</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Annual Income</label>
-                <div class="input-with-prefix">
-                  <span class="prefix">₹</span>
-                  <input type="number" id="profIncome" value="240000">
-                </div>
-              </div>
-              <div class="form-group">
-                <label>Business Type / Activity</label>
-                <select id="profBusiness">
-                  <option value="Food Business" selected>Food Business</option>
-                  <option value="Retail / Kirana Shop">Retail / Kirana Shop</option>
-                  <option value="Handicrafts & Handlooms">Handicrafts & Handlooms</option>
-                  <option value="Agriculture & Allied">Agriculture & Allied</option>
-                  <option value="Textile & Garments">Textile & Garments</option>
-                  <option value="Manufacturing & Fabrication">Manufacturing & Fabrication</option>
-                  <option value="Services / Repair Shop">Services / Repair Shop</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Experience</label>
-                <input type="text" id="profExperience" value="2 Years">
+              <!-- Section 1: Personal & Demographics -->
+              <div class="form-section-header">
+                <span class="sec-icon">👤</span>
+                <strong>Personal & Demographic Details</strong>
               </div>
 
-              <button class="pill-btn primary mt-4" onclick="runSchemeMatching()">Next →</button>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label>Age (వయస్సు / उम्र) <span class="required">*</span></label>
+                  <input type="number" id="profAge" min="18" max="95" value="28" oninput="updateAgeCategoryBadge()">
+                  <small class="form-badge-pill youth" id="profAgeBadge">⚡ Youth (18-35) • High Subsidy</small>
+                </div>
+                <div class="form-group">
+                  <label>Gender (లింగం / लिंग)</label>
+                  <select id="profGender">
+                    <option value="Male" selected>Male (పురుషుడు)</option>
+                    <option value="Female">Female (మహిళ - 35% Special Grant)</option>
+                    <option value="Transgender / Other">Transgender / Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Social Category (సామాజిక వర్గం / सामाजिक वर्ग)</label>
+                <select id="profCategory">
+                  <option value="OBC" selected>OBC (Other Backward Classes - 35% Subsidy)</option>
+                  <option value="SC">SC (Scheduled Caste - 35% Subsidy)</option>
+                  <option value="ST">ST (Scheduled Tribe - 35% Subsidy)</option>
+                  <option value="General">General (సాధారణ / सामान्य)</option>
+                  <option value="Women Entrepreneur">Women Entrepreneur (మహిళా పారిశ్రామికవేత్త)</option>
+                  <option value="Minority">Minority (మైనారిటీ / अल्पसंख्यक)</option>
+                  <option value="Differently Abled (Divyangjan)">Differently Abled (దివ్యాంగులు)</option>
+                  <option value="Ex-Servicemen">Ex-Servicemen (మాజీ సైనికులు)</option>
+                </select>
+              </div>
+
+              <!-- Section 2: Differently Abled / Divyangjan Details -->
+              <div class="form-section-header highlight-blue">
+                <span class="sec-icon">♿</span>
+                <div>
+                  <strong>Differently Abled / Divyangjan (దివ్యాంగుల వివరాలు)</strong>
+                  <small class="sec-sub">Special 35% PMEGP subsidy & NHFDC 5% low-interest loans</small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Person with Disability (దివ్యాంగులా?) <span class="required">*</span></label>
+                <select id="profDisability" onchange="toggleDisabilityFields()">
+                  <option value="No" selected>No (కాదు / सामान्य)</option>
+                  <option value="Yes">Yes (అవును - దివ్యాంగులు / दिव्यांगजन - PwD)</option>
+                </select>
+              </div>
+
+              <!-- Conditional Disability Fields -->
+              <div id="disabilityFieldsContainer" class="conditional-card" style="display: none;">
+                <div class="form-group">
+                  <label>Type of Disability (వైకల్యం రకం / प्रकार)</label>
+                  <select id="profDisabilityType">
+                    <option value="Locomotor / Physical" selected>Locomotor / Orthopedic (చలన వైకల్యం)</option>
+                    <option value="Visual Impairment">Visual Impairment / Blindness (దృష్టి లోపం)</option>
+                    <option value="Hearing / Speech Impairment">Hearing or Speech (వినికిడి / వాక్ లోపం)</option>
+                    <option value="Intellectual / Mental">Intellectual Disability (మేధోపరమైన)</option>
+                    <option value="Multiple Disabilities">Multiple Disabilities (బహుళ వైకల్యాలు)</option>
+                    <option value="Other PwD Category">Other Certified Disability</option>
+                  </select>
+                </div>
+
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label>Disability % (శాతం)</label>
+                    <select id="profDisabilityPercent">
+                      <option value="40% - 70%" selected>40% - 70% (Benchmark PwD)</option>
+                      <option value="Above 70%">Above 70% (Severe)</option>
+                      <option value="Below 40%">Below 40% (Mild)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>UDID Card? (కార్డ్ ఉందా?)</label>
+                    <select id="profHasUdid">
+                      <option value="Yes" selected>Yes, have UDID Card</option>
+                      <option value="In-Process">Applied / In Process</option>
+                      <option value="No">No / Not yet applied</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="divyang-benefit-badge">
+                  <span>💡 Eligible for Divyangjan Swavalamban Yojana (Up to ₹50L @ 5% interest) & PMEGP 35% Grant!</span>
+                </div>
+              </div>
+
+              <!-- Section 3: Business & Financial Information -->
+              <div class="form-section-header">
+                <span class="sec-icon">🏢</span>
+                <strong>Business & Financial Details</strong>
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label>Enterprise Location (ప్రాంతం)</label>
+                  <select id="profLocationType">
+                    <option value="Rural" selected>Rural (గ్రామీణ - 35% Subsidy)</option>
+                    <option value="Urban">Urban (పట్టణ - 25% Subsidy)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Annual Family Income</label>
+                  <div class="input-with-prefix">
+                    <span class="prefix">₹</span>
+                    <input type="number" id="profIncome" value="240000">
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Business Type / Activity (వ్యాపార రంగం)</label>
+                <select id="profBusiness">
+                  <option value="Food Business" selected>Food Business (హోటల్, క్యాటరింగ్, ఆహార వ్యాపారం)</option>
+                  <option value="Retail / Kirana Shop">Retail / Kirana Shop (కిరాణా, జనరల్ స్టోర్)</option>
+                  <option value="Handicrafts & Handlooms">Handicrafts & Handlooms (చేనేత, చేతివృత్తులు)</option>
+                  <option value="Agriculture & Allied">Agriculture & Allied (వ్యవసాయం, పాడి పరిశ్రమ)</option>
+                  <option value="Textile & Garments">Textile & Garments (టైలరింగ్, వస్త్ర వ్యాపారం)</option>
+                  <option value="Manufacturing & Fabrication">Manufacturing & Fabrication (చిన్న తయారీ పరిశ్రమ)</option>
+                  <option value="Services / Repair Shop">Services / Repair Shop (రిపేర్, సర్వీస్ సెంటర్)</option>
+                  <option value="Street Vending">Street Vending (వీధి వ్యాపారం, తోపుడు బండ్లు)</option>
+                </select>
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label>Experience (అనుభవం)</label>
+                  <input type="text" id="profExperience" value="2 Years">
+                </div>
+                <div class="form-group">
+                  <label>Education (విద్యార్హత)</label>
+                  <select id="profEducation">
+                    <option value="8th Pass or Above" selected>8th Pass or Above (₹50L Limit)</option>
+                    <option value="Below 8th Pass">Below 8th Pass</option>
+                    <option value="Graduate / ITI / Diploma">Graduate / ITI / Diploma</option>
+                  </select>
+                </div>
+              </div>
+
+              <button class="pill-btn primary mt-4" onclick="runSchemeMatching()">Find Matching Schemes ➔</button>
             </div>
           </div>
 

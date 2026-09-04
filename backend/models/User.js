@@ -23,10 +23,41 @@ const UserSchema = new mongoose.Schema({
     max: 100,
     default: 28
   },
+  gender: {
+    type: String,
+    enum: ['Male', 'Female', 'Transgender / Other'],
+    default: 'Male'
+  },
+  hasDisability: {
+    type: Boolean,
+    default: false
+  },
+  disabilityType: {
+    type: String,
+    enum: ['None', 'Locomotor / Physical', 'Visual Impairment', 'Hearing / Speech Impairment', 'Intellectual / Mental', 'Multiple Disabilities', 'Other PwD Category'],
+    default: 'None'
+  },
+  disabilityPercentage: {
+    type: String,
+    default: 'None'
+  },
+  hasUdidCard: {
+    type: Boolean,
+    default: false
+  },
   category: {
     type: String,
-    enum: ['General', 'OBC', 'SC', 'ST', 'Women Entrepreneur', 'Minority', 'Ex-Servicemen / Differently Abled'],
+    enum: ['General', 'OBC', 'SC', 'ST', 'Women Entrepreneur', 'Minority', 'Ex-Servicemen', 'Differently Abled (Divyangjan)'],
     default: 'OBC'
+  },
+  locationType: {
+    type: String,
+    enum: ['Rural', 'Urban'],
+    default: 'Rural'
+  },
+  education: {
+    type: String,
+    default: '8th Pass or Above'
   },
   annualIncome: {
     type: Number,

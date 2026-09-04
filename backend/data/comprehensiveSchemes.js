@@ -229,11 +229,10 @@ const COMPREHENSIVE_GOVT_SCHEMES = [
     repaymentPeriod: "Up to 7 Years (Moratorium 6 - 12 Months)",
     repaymentPeriodYears: 7,
     minAge: 18,
-    maxIncome: 0,
-    eligibleCategories: ["OBC", "SC", "ST", "Women Entrepreneur", "Minority", "Ex-Servicemen", "General"],
+    eligibleCategories: ["OBC", "SC", "ST", "Women Entrepreneur", "Minority", "Ex-Servicemen", "Differently Abled (Divyangjan)", "General"],
     eligibleBusinessTypes: ["Manufacturing & Fabrication", "Services / Repair Shop", "Food Business", "Textile & Garments", "Handicrafts & Handlooms"],
     minExperienceYears: 0,
-    subsidyPercentage: 35, // 35% in rural areas for special categories (OBC, SC, ST, Women), 25% urban
+    subsidyPercentage: 35, // 35% in rural areas for special categories (OBC, SC, ST, Women, Divyangjan), 25% urban
     whoCanApply: "Individuals above 18 years (minimum 8th class pass for projects > ₹10L manufacturing or > ₹5L service)",
     purpose: "Setting up new manufacturing units, engineering workshops, bakeries, or commercial service centers",
     benefits: [
@@ -539,6 +538,49 @@ const COMPREHENSIVE_GOVT_SCHEMES = [
     ],
     applicationUrl: "https://pmsvanidhi.mohua.gov.in",
     tags: ["Street Vendors", "7% Interest Subsidy", "UPI Cashback"]
+  },
+  {
+    schemeName: "Divyangjan Swavalamban Yojana (NHFDC Concessional Loan for PwD)",
+    shortCode: "NHFDC-DSY",
+    category: "Central Government",
+    targetSector: "Differently Abled / Divyangjan",
+    tagline: "Concessional loans up to ₹50 Lakhs at 5% to 8% interest with special rebate for women with disabilities",
+    vernacularNames: {
+      te: "దివ్యాంగుల స్వయం ఉపాధి రుణ పథకం (దివ్యాంజన్ స్వావలంబన)",
+      hi: "दिव्यांगजन स्वावलंबन योजना (कम ब्याज पर स्वरोजगार ऋण)",
+      mr: "दिव्यांगजन स्वावलंबन योजना (कमी व्याजाचे व्यवसाय कर्ज)"
+    },
+    description: "Flagship central government scheme implemented by DEPwD & NHFDC providing concessional credit to Indian citizens with 40% or more disability for establishing micro-enterprises, shops, service units, agricultural ventures, or professional setups.",
+    maxGrantLoanAmount: 5000000,
+    loanAmountFormatted: "Up to ₹50 Lakhs (Concessional 5% - 8% Interest)",
+    interestRate: "Concessional (5.0% - 8.0% p.a., 1% rebate for women)",
+    interestRateNumeric: 5.0,
+    repaymentPeriod: "Up to 10 Years (Moratorium up to 1 Year)",
+    repaymentPeriodYears: 10,
+    minAge: 18,
+    maxAge: 65,
+    maxIncome: 0,
+    eligibleCategories: ["All", "Differently Abled (Divyangjan)", "Women Entrepreneur", "OBC", "SC", "ST", "General"],
+    eligibleBusinessTypes: ["All", "Food Business", "Retail / Kirana Shop", "Handicrafts & Handlooms", "Agriculture & Allied", "Textile & Garments", "Manufacturing & Fabrication", "Services / Repair Shop", "IT & Digital Services"],
+    minExperienceYears: 0,
+    subsidyPercentage: 35,
+    whoCanApply: "Indian citizens aged 18-65 with minimum 40% disability certified by medical authority or UDID Card",
+    purpose: "Setting up small business, retail shops, trading, agricultural units, vehicle purchase, or assistive equipment",
+    benefits: [
+      "Ultra-low interest rate starting at 5% p.a. for loans up to ₹50,000, and 6%-8% for higher amounts",
+      "Special 1% additional interest rebate for women entrepreneurs with disabilities",
+      "Collateral-free micro-credit loans up to ₹50,000 for rural and cottage enterprises",
+      "Long repayment tenure up to 10 years with flexible moratorium up to 12 months",
+      "Skill training grant up to ₹2,000/month during government vocational orientation"
+    ],
+    requiredDocuments: [
+      { docName: "Aadhaar Card & PAN Card", description: "Identity & Tax KYC", isMandatory: true },
+      { docName: "Disability Certificate / UDID Card", description: "Proof of 40% or more disability issued by medical board", isMandatory: true },
+      { docName: "Project Quotation / Business Plan", description: "Estimate of machinery, raw materials, or shop setup", isMandatory: true },
+      { docName: "Bank Passbook", description: "Direct Benefit Transfer account linked to Aadhaar", isMandatory: true }
+    ],
+    applicationUrl: "https://nhfdc.nic.in",
+    tags: ["Divyangjan Priority", "5% Low Interest", "High Loan Limit", "Special Category"]
   }
 ];
 

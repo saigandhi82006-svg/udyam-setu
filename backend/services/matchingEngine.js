@@ -10,8 +10,23 @@ function matchSchemesForUser(userProfile, allSchemes) {
     annualIncome = 240000,
     businessType = 'Food Business',
     experienceYears = 2,
-    gender = 'Any'
+    gender = 'Male',
+    hasDisability = false,
+    disabilityType = 'None',
+    disabilityPercentage = 'None',
+    hasUdidCard = false,
+    locationType = 'Rural',
+    education = '8th Pass or Above'
   } = userProfile;
+
+  const isDivyangjan = hasDisability === true || 
+    hasDisability === 'Yes' || 
+    String(hasDisability).toLowerCase() === 'true' || 
+    category === 'Differently Abled (Divyangjan)' ||
+    (disabilityType && disabilityType !== 'None');
+
+  const isWomen = gender === 'Female' || category === 'Women Entrepreneur';
+  const isRural = (locationType || 'Rural').toLowerCase().includes('rural');
 
   const results = [];
 
@@ -26,10 +41,9 @@ function matchSchemesForUser(userProfile, allSchemes) {
     if (!isAgeEligible) {
       continue; // Disqualified by hard rule
     }
-    reasons.push(`Meets age requirement (${minAge}-${maxAge} years)`);
+    reasons.push(`Meets age criteria (${minAge}-${maxAge} yrs, applicant is ${age} yrs)`);
 
     // --- Hard Constraint 2: Income Ceiling Check ---
-    // If scheme.maxIncome is 0 or undefined, no upper income cap applies
     const isIncomeEligible = !scheme.maxIncome || scheme.maxIncome === 0 || annualIncome <= scheme.maxIncome;
     if (!isIncomeEligible) {
       continue; // Disqualified by income cap
@@ -40,12 +54,13 @@ function matchSchemesForUser(userProfile, allSchemes) {
       reasons.push('No restrictive income ceiling');
     }
 
-    // --- Hard Constraint 3: Social Category Match ---
+    // --- Hard Constraint 3: Social Category & Disability Match ---
     const eligibleCats = scheme.eligibleCategories || ['All'];
     const isCategoryEligible =
       eligibleCats.includes('All') ||
       eligibleCats.includes(category) ||
-      (category === 'Women Entrepreneur' && eligibleCats.some(c => c.toLowerCase().includes('women'))) ||
+      (isWomen && eligibleCats.some(c => c.toLowerCase().includes('women'))) ||
+      (isDivyangjan && eligibleCats.some(c => c.toLowerCase().includes('differently') || c.toLowerCase().includes('divyang'))) ||
       (eligibleCats.includes('Marginalized') && ['SC', 'ST', 'OBC'].includes(category));
 
     if (!isCategoryEligible) {
@@ -66,38 +81,77 @@ function matchSchemesForUser(userProfile, allSchemes) {
     }
     reasons.push(`Eligible for ${businessType} activity`);
 
-    // --- Dynamic Match Score Computation (Normalized 60 - 95%) ---
-    let score = 65; // Base score for clearing all 4 hard constraints
+    // --- Dynamic Match Score Computation (Normalized 60 - 98%) ---
+    let score = 65; // Base score for clearing all hard constraints
 
-    // 1. Specific category prioritization bonus
+    // 1. Differently Abled / Divyangjan High-Priority Boost
+    if (isDivyangjan) {
+      const isDirectDivyangScheme = scheme.targetSector?.toLowerCase().includes('differently') || 
+        scheme.targetSector?.toLowerCase().includes('divyang') ||
+        scheme.shortCode === 'NHFDC-DSY';
+
+      if (isDirectDivyangScheme) {
+        score += 25;
+        bonuses.push('100% Dedicated Divyangjan Swavalamban Empowerment Priority');
+        reasons.push(`Qualified under Divyangjan Category (${disabilityType !== 'None' ? disabilityType : 'PwD'}, ${disabilityPercentage} benchmark disability)`);
+      } else if (scheme.shortCode === 'PMEGP') {
+        score += 18;
+        bonuses.push('PMEGP Special Category 35% Capital Subsidy for Persons with Disabilities');
+        reasons.push('Eligible for highest 35% non-repayable government capital grant as Divyangjan');
+      } else {
+        score += 8;
+        bonuses.push('Special priority consideration under Divyangjan financial inclusion');
+      }
+    }
+
+    // 2. Age Bracket & Youth Priority
+    if (age >= 18 && age <= 35) {
+      score += 6;
+      bonuses.push('Youth Entrepreneur (18-35) high employability priority');
+    } else if (age >= 50) {
+      score += 4;
+      bonuses.push('Experienced mature entrepreneur demographic boost');
+    }
+
+    // 3. Women Entrepreneurship Boost
+    if (isWomen) {
+      score += 10;
+      bonuses.push('Women Entrepreneur special concession & interest rebate');
+      reasons.push('Eligible for priority women quotas across credit-guarantee schemes');
+    }
+
+    // 4. Rural Area Higher Subsidy Benefit
+    if (isRural && (scheme.subsidyPercentage >= 25 || scheme.shortCode === 'PMEGP')) {
+      score += 8;
+      bonuses.push('Rural enterprise location qualifies for maximum 35% capital subsidy');
+      reasons.push('Rural jurisdiction grants higher subsidy tier than urban centers');
+    }
+
+    // 5. Specific category prioritization bonus
     if (!eligibleCats.includes('All')) {
       if (eligibleCats.includes(category)) {
-        score += 10;
+        score += 8;
         bonuses.push(`Special demographic priority for ${category}`);
       }
-      if (category === 'Women Entrepreneur' && eligibleCats.some(c => c.toLowerCase().includes('women'))) {
-        score += 12;
-        bonuses.push('Women Entrepreneur special concession');
-      }
     } else {
-      score += 5;
+      score += 4;
     }
 
-    // 2. Business Type Specificity bonus
+    // 6. Business Type Specificity bonus
     if (eligibleBusinesses.includes(businessType)) {
-      score += 10;
+      score += 8;
       bonuses.push(`Direct sector match for ${businessType}`);
     } else {
-      score += 5;
+      score += 4;
     }
 
-    // 3. Low-Income / Marginalized Empowerment Bonus
+    // 7. Low-Income / Marginalized Empowerment Bonus
     if (annualIncome <= 300000) {
       score += 5;
-      bonuses.push('Low-income priority bracket');
+      bonuses.push('Low-income priority bracket (Subsidies favored)');
     }
 
-    // 4. Experience validation bonus
+    // 8. Experience validation bonus
     if (experienceYears >= (scheme.minExperienceYears || 0)) {
       if (experienceYears >= 2) {
         score += 5;
@@ -105,12 +159,14 @@ function matchSchemesForUser(userProfile, allSchemes) {
       }
     }
 
-    // Normalization clamp between 60% and 95%
-    score = Math.min(95, Math.max(60, score));
+    // Normalization clamp between 60% and 98%
+    score = Math.min(98, Math.max(60, score));
 
     // Dynamic tag assignment
     let highlightTag = 'Eligible Scheme';
-    if (score >= 90) {
+    if (isDivyangjan && (scheme.shortCode === 'NHFDC-DSY' || scheme.shortCode === 'PMEGP')) {
+      highlightTag = 'Divyangjan Priority (35% Subsidy)';
+    } else if (score >= 90) {
       highlightTag = 'Best Match (90%+)';
     } else if (scheme.subsidyPercentage && scheme.subsidyPercentage >= 25) {
       highlightTag = `High Subsidy (${scheme.subsidyPercentage}%)`;

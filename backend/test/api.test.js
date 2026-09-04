@@ -68,6 +68,29 @@ console.log(`  Calculated EMI: ₹ ${calculatedEmi.toLocaleString('en-IN')} / mo
 assert(calculatedEmi >= 16000 && calculatedEmi <= 16200, `EMI ${calculatedEmi} should be approximately ₹16,109 matching Screen 8`);
 console.log('  ✅ Test 4 Passed: EMI formula computed with precision (approx ₹16,109)!\n');
 
+// Test 6: Divyangjan / Differently Abled Entrepreneur Matching (Disability 40%+, Age 29)
+console.log('▶ Test 6: Divyangjan / Differently Abled Entrepreneur Matching (Disability 40%+, Age 29, Rural)');
+const userProfileDivyang = {
+  age: 29,
+  gender: 'Female',
+  hasDisability: true,
+  disabilityType: 'Locomotor / Physical',
+  disabilityPercentage: '40% - 70%',
+  hasUdidCard: true,
+  category: 'Differently Abled (Divyangjan)',
+  annualIncome: 150000,
+  businessType: 'Retail / Kirana Shop',
+  locationType: 'Rural',
+  experienceYears: 1
+};
+
+const matchesDivyang = matchSchemesForUser(userProfileDivyang, SEED_SCHEMES);
+assert(matchesDivyang.length > 0, 'Divyangjan entrepreneur should match schemes');
+const topDivyang = matchesDivyang[0];
+console.log(`  Top Match for Divyangjan: ${topDivyang.scheme.schemeName} (${topDivyang.matchPercentage}%)`);
+assert(topDivyang.matchPercentage >= 85, 'Divyangjan match score should be >= 85%');
+console.log('  ✅ Test 6 Passed: Divyangjan empowerment priorities accurately assigned!\n');
+
 // Test 5: AI Vernacular Guidance Fallback
 console.log('▶ Test 5: AI Assistant Query Handling');
 handleAIChat({ message: 'How can I start a small food stall loan?', language: 'English' })
