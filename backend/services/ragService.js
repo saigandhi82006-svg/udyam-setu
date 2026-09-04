@@ -88,10 +88,169 @@ function buildGreetingResponse(language = 'English') {
 }
 
 /**
+ * Check if the message is an unspecified or discovery inquiry (e.g. "ask", "loan", "schemes", "help", "how to get loan").
+ * When true, the AI must NOT dump schemes directly. It must ask who the user is and what business they run or want to start.
+ */
+function isDiscoveryOrUnspecifiedQuery(message = '', userProfile = null) {
+  if (!message) return true;
+  const clean = message.trim().toLowerCase().replace(/[!.,?।]/g, '');
+
+  const explicitDiscoveryWords = [
+    'ask', 'help', 'scheme', 'schemes', 'loan', 'loans', 'tell me', 'guide me',
+    'find schemes', 'show schemes', 'government schemes', 'what schemes', 'how to get loan',
+    'start business', 'start a business', 'new business', 'start', 'which scheme',
+    'sahaayam', 'yojana', 'yojanayein', 'sarkaari yojana', 'pradhan mantri yojana',
+    'అడగండి', 'పథకాలు', 'లోన్', 'రుణం', 'పథకం', 'సహాయం', 'ఏ పథకం', 'రుణాలు', 'ప్రభుత్వ పథకాలు',
+    'ಕೇಳಿ', 'ಯೋಜನೆಗಳು', 'ಸಾಲ', 'ಯೋಜನೆ', 'ಸಹಾಯ', 'ಯಾವ ಯೋಜನೆ', 'ಸಾಲಗಳು', 'ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು',
+    'জিজ্ঞাসা', 'জিজ্ঞেস', 'প্রকল্প', 'ঋণ', 'যোজনা', 'সাহায্য', 'কী প্রকল্প', 'সরকারি প্রকল্প',
+    'पूछें', 'पूछो', 'योजनाएं', 'लोन', 'ऋण', 'योजना', 'मदद', 'सहायता', 'सरकारी योजना',
+    'கேளுங்கள்', 'திட்டங்கள்', 'கடன்', 'திட்டம்', 'உதவி',
+    'विचारा', 'योजना', 'कर्ज', 'मदत'
+  ];
+
+  if (explicitDiscoveryWords.includes(clean)) return true;
+
+  // Check if message mentions any specific domain/business sector
+  const hasSpecificDomain = /(auto|vehicle|lorry|truck|cab|transport|car|tempo|rickshaw|food|tiffin|hotel|canteen|restaurant|tea stall|chai|bakery|catering|kirana|shop|grocery|thela|vendor|cart|hawker|farm|crop|kisan|cattle|dairy|tractor|fish|student|college|study|school|handicap|disability|divyang|pwd|women|mahila|female|shg|artisan|weaver|carpenter|potter|blacksmith|tailor|craft|vishwakarma|industry|factory|manufacturing|msme|ఆటో|వాహనం|లారీ|ఫుడ్|టిఫిన్|హోటల్|కిరాణా|షాప్|తోపుడు బండి|రైతు|వ్యవసాయం|పంట|పాడి|చదువు|విద్య|దివ్యాంగ|వైకల్యం|మహిళ|చేతివృత్తి|చేనేత|పరిశ్రమ|ಆಟೋ|ವಾಹನ|ಲಾರಿ|ಆಹಾರ|ತಿಂಡಿ|ಹೋಟೆಲ್|ಕಿರಾಣಿ|ಅಂಗಡಿ|ತಳ್ಳುವ ಗಾಡಿ|ಕೃಷಿ|ರೈತ|ಬೆಳೆ|ಹಾಲು|ಹೈನುಗಾರಿಕೆ|ಶಿಕ್ಷಣ|ವಿಕಲಚೇತನ|ದಿವ್ಯಾಂಗ|ಮಹಿಳೆ|ಕುಶಲಕರ್ಮಿ|ನೇಕಾರ|ಕೈಗಾರಿಕೆ|অটো|গাড়ি|লরি|খাবার|টিফিন|হোটেল|মুদি|দোকান|হকার|কৃষি|কৃষক|ফসল|দুগ্ধ|শিক্ষা|প্রতিবন্ধী|দিব্যাঙ্গ|মহিলা|কারিগর|তাঁতি|শিল্প|कारखाना|गाड़ी|ऑटो|रिक्शा|ट्रक|टिफिन|होटल|किराना|दुकान|ठेला|रेहड़ी|खेती|किसान|डेयरी|गाय|भैंस|पढ़ाई|छात्र|दिव्यांग|विकलांग|महिला|कारीगर|बुनकर|उद्योग|कारखाना)/i.test(message);
+
+  if (!hasSpecificDomain && clean.length <= 40) {
+    return true;
+  }
+
+  return false;
+}
+
+const DISCOVERY_BUSINESS_OPTIONS = {
+  English: [
+    { id: 'auto', label: '🛺 Commercial Vehicle / Auto-rickshaw', prompt: 'I want a loan for a commercial auto-rickshaw / transport vehicle' },
+    { id: 'food', label: '🍲 Food Business / Tiffin / Hotel', prompt: 'I want a loan for starting a food business or tiffin center' },
+    { id: 'retail', label: '🛒 Kirana / Retail Shop / Street Vendor', prompt: 'I want a loan for a kirana shop or retail business' },
+    { id: 'agri', label: '🌾 Agriculture / Dairy Farming (KCC)', prompt: 'I want an agriculture or dairy farming loan (KCC)' },
+    { id: 'artisan', label: '🧵 Traditional Artisan / Weaver (Vishwakarma)', prompt: 'I am an artisan/weaver looking for PM Vishwakarma scheme' },
+    { id: 'msme', label: '🏭 Small Manufacturing / MSME Unit', prompt: 'I want a loan to set up a small manufacturing or MSME business' },
+    { id: 'women', label: '👩‍💼 Women Entrepreneur Schemes', prompt: 'I am a woman entrepreneur looking for government schemes and subsidies' },
+    { id: 'divyang', label: '♿ Differently Abled / Divyangjan Loan', prompt: 'I am a person with disability looking for NHFDC self-employment loan' }
+  ],
+  Telugu: [
+    { id: 'auto', label: '🛺 వాణిజ్య వాహనం / ఆటో రిక్షా', prompt: 'నాకు కమర్షియల్ ఆటో రిక్షా / వాణిజ్య వాహనం కొనడానికి లోన్ కావాలి' },
+    { id: 'food', label: '🍲 ఫుడ్ బిజినెస్ / టిఫిన్ సెంటర్ / హోటల్', prompt: 'నాకు టిఫిన్ సెంటర్ లేదా ఫుడ్ బిజినెస్ కోసం లోన్ కావాలి' },
+    { id: 'retail', label: '🛒 కిరాణా దుకాణం / చిల్లర వ్యాపారం', prompt: 'నాకు కిరాణా షాప్ లేదా రిటైల్ వ్యాపారం కోసం లోన్ కావాలి' },
+    { id: 'agri', label: '🌾 వ్యవసాయం / పాడి పరిశ్రమ (KCC)', prompt: 'నాకు వ్యవసాయం లేదా పాడి పెంపకం కోసం కిసాన్ క్రెడిట్ కార్డ్ లోన్ కావాలి' },
+    { id: 'artisan', label: '🧵 చేతివృత్తులు / చేనేత (పీఎం విశ్వకర్మ)', prompt: 'నేను చేతివృత్తి కళాకారుడిని, నాకు పీఎం విశ్వకర్మ పథకం రుణం కావాలి' },
+    { id: 'msme', label: '🏭 చిన్న పరిశ్రమ / తయారీ యూనిట్', prompt: 'నాకు చిన్న పరిశ్రమ లేదా తయారీ యూనిట్ ప్రారంభించడానికి రుణ సహాయం కావాలి' },
+    { id: 'women', label: '👩‍💼 మహిళా పారిశ్రామికవేత్తల పథకాలు', prompt: 'మహిళా పారిశ్రామికవేత్తల కోసం ప్రభుత్వ ప్రత్యేక రాయితీ పథకాలు కావాలి' },
+    { id: 'divyang', label: '♿ దివ్యాంగుల స్వయం ఉపాధి రుణం (NHFDC)', prompt: 'దివ్యాంగుల స్వయం ఉపాధి కోసం తక్కువ వడ్డీతో కూడిన ప్రభుత్వ రుణం కావాలి' }
+  ],
+  Kannada: [
+    { id: 'auto', label: '🛺 ವಾಣಿಜ್ಯ ವಾಹನ / ಆಟೋ ರಿಕ್ಷಾ', prompt: 'ನನಗೆ ಕಮರ್ಷಿಯಲ್ ಆಟೋ ರಿಕ್ಷಾ ಅಥವಾ ಸರಕು ವಾಹನ ಖರೀದಿಸಲು ಸಾಲ ಬೇಕು' },
+    { id: 'food', label: '🍲 ಆಹಾರ ವ್ಯವಹಾರ / ಹೋಟೆಲ್ / ತಿಂಡಿ ಕೇಂದ್ರ', prompt: 'ನನಗೆ ಹೋಟೆಲ್ ಅಥವಾ ತಿಂಡಿ ಕೇಂದ್ರ ಪ್ರಾರಂಭಿಸಲು ಸಾಲ ಬೇಕು' },
+    { id: 'retail', label: '🛒 ಕಿರಾಣಿ ಅಂಗಡಿ / ಚಿಲ್ಲರೆ ವ್ಯಾಪಾರ', prompt: 'ನನಗೆ ಕಿರಾಣಿ ಅಂಗಡಿ ಅಥವಾ ಚಿಲ್ಲರೆ ವ್ಯಾಪಾರಕ್ಕಾಗಿ ಸಾಲ ಬೇಕು' },
+    { id: 'agri', label: '🌾 ಕೃಷಿ / ಹೈನುಗಾರಿಕೆ (ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್)', prompt: 'ನನಗೆ ಕೃಷಿ ಅಥವಾ ಹೈನುಗಾರಿಕೆಗಾಗಿ ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಸಾಲ ಬೇಕು' },
+    { id: 'artisan', label: '🧵 ಕುಶಲಕರ್ಮಿಗಳು / ನೇಕಾರರು (ವಿಶ್ವಕರ್ಮ)', prompt: 'ನಾನು ಕುಶಲಕರ್ಮಿ, ನನಗೆ ಪಿಎಂ ವಿಶ್ವಕರ್ಮ ಯೋಜನೆಯ ಸಾಲ ಬೇಕು' },
+    { id: 'msme', label: '🏭 ಸಣ್ಣ ಕೈಗಾರಿಕೆ / ಉತ್ಪಾದನಾ ಘಟಕ', prompt: 'ನನಗೆ ಸಣ್ಣ ಕೈಗಾರಿಕೆ ಅಥವಾ ಉತ್ಪಾದನಾ ಘಟಕ ಸ್ಥಾಪಿಸಲು ಸಾಲ ಬೇಕು' },
+    { id: 'women', label: '👩‍💼 ಮಹಿಳಾ ಉದ್ಯಮಿಗಳ ವಿಶೇಷ ಯೋಜನೆಗಳು', prompt: 'ಮಹಿಳಾ ಉದ್ಯಮಿಗಳಿಗಾಗಿ ಸರ್ಕಾರದ ವಿಶೇಷ ಸಾಲ ಮತ್ತು ಸಬ್ಸಿಡಿ ಯೋಜನೆಗಳು ಬೇಕು' },
+    { id: 'divyang', label: '♿ ವಿಕಲಚೇತನರ ಸ್ವಯಂ ಉದ್ಯೋಗ ಸಾಲ (NHFDC)', prompt: 'ವಿಕಲಚೇತನರ ಸ್ವಯಂ ಉದ್ಯೋಗಕ್ಕಾಗಿ ಕಡಿಮೆ ಬಡ್ಡಿಯ ಸರ್ಕಾರಿ ಸಾಲ ಬೇಕು' }
+  ],
+  Bengali: [
+    { id: 'auto', label: '🛺 বাণিজ্যিক যানবাহন / অটো-রিকশা', prompt: 'আমার বাণিজ্যিক অটো-রিকশা বা যানবাহন কেনার জন্য ঋণ প্রয়োজন' },
+    { id: 'food', label: '🍲 খাদ্য ব্যবসা / টিফিন / হোটেল', prompt: 'আমার খাদ্য ব্যবসা বা টিফিন সেন্টার খোলার জন্য ঋণ প্রয়োজন' },
+    { id: 'retail', label: '🛒 মুদি দোকান / খুচরা ব্যবসা / হকার', prompt: 'আমার মুদি দোকান বা খুচরা ব্যবসার জন্য ঋণ প্রয়োজন' },
+    { id: 'agri', label: '🌾 কৃষি / দুগ্ধ খামার (কিসান ক্রেডিট)', prompt: 'আমার কৃষি বা দুগ্ধ খামারের জন্য কিসান ক্রেডিট কার্ড ঋণ প্রয়োজন' },
+    { id: 'artisan', label: '🧵 ঐতিহ্যবাহী কারিগর / তাঁতি (বিশ্বকর্মা)', prompt: 'আমি একজন কারিগর, আমার প্রধানমন্ত্রী বিশ্বকর্মা ঋণ প্রয়োজন' },
+    { id: 'msme', label: '🏭 ক্ষুদ্র শিল্প / উৎপাদন ইউনিট', prompt: 'আমার ক্ষুদ্র শিল্প বা ম্যানুফ্যাকচারিং ইউনিট স্থাপনের জন্য ঋণ প্রয়োজন' },
+    { id: 'women', label: '👩‍💼 মহিলা উদ্যোক্তা বিশেষ প্রকল্প', prompt: 'মহিলা উদ্যোক্তাদের জন্য সরকারি বিশেষ অনুদান ও ঋণ প্রকল্প প্রয়োজন' },
+    { id: 'divyang', label: '♿ প্রতিবন্ধী স্বনির্ভর ঋণ (NHFDC)', prompt: 'প্রতিবন্ধী ব্যক্তিদের স্বনির্ভরতার জন্য কম সুদের সরকারি ঋণ প্রকল্প প্রয়োজন' }
+  ],
+  Hindi: [
+    { id: 'auto', label: '🛺 वाणिज्यिक वाहन / ऑटो-रिक्शा', prompt: 'मुझे कमर्शियल ऑटो रिक्शा या कमर्शियल वाहन खरीदने के लिए लोन चाहिए' },
+    { id: 'food', label: '🍲 खाद्य व्यवसाय / टिफिन सेंटर / होटल', prompt: 'मुझे टिफिन सेंटर या खाद्य व्यवसाय शुरू करने के लिए लोन चाहिए' },
+    { id: 'retail', label: '🛒 किराना दुकान / खुदरा व्यापार / रेहड़ी', prompt: 'मुझे किराना दुकान या खुदरा व्यापार के लिए लोन चाहिए' },
+    { id: 'agri', label: '🌾 कृषि / डेयरी फार्मिंग (KCC)', prompt: 'मुझे कृषि या डेयरी फार्मिंग के लिए किसान क्रेडिट कार्ड लोन चाहिए' },
+    { id: 'artisan', label: '🧵 दस्तकार / कारीगर / बुनकर (विश्वकर्मा)', prompt: 'मैं एक कारीगर हूँ, मुझे पीएम विश्वकर्मा योजना के तहत लोन चाहिए' },
+    { id: 'msme', label: '🏭 लघु उद्योग / विनिर्माण इकाई', prompt: 'मुझे लघु उद्योग या विनिर्माण इकाई शुरू करने के लिए लोन चाहिए' },
+    { id: 'women', label: '👩‍💼 महिला उद्यमी विशेष योजनाएं', prompt: 'महिला उद्यमियों के लिए सरकारी विशेष ऋण और सब्सिडी योजनाएं चाहिए' },
+    { id: 'divyang', label: '♿ दिव्यांगजन स्वरोजगार ऋण (NHFDC)', prompt: 'दिव्यांगजनों के स्वरोजगार के लिए कम ब्याज वाला सरकारी लोन चाहिए' }
+  ],
+  Marathi: [
+    { id: 'auto', label: '🛺 व्यावसायिक वाहन / ऑटो-रिक्षा', prompt: 'मला व्यावसायिक ऑटो रिक्षा किंवा वाहन खरेदीसाठी कर्ज हवे आहे' },
+    { id: 'food', label: '🍲 खाद्य व्यवसाय / हॉटेल / टिफिन', prompt: 'मला हॉटेल किंवा खाद्य व्यवसाय सुरू करण्यासाठी कर्ज हवे आहे' },
+    { id: 'retail', label: '🛒 किराणा दुकान / किरकोळ व्यापार', prompt: 'मला किराणा दुकान किंवा किरकोळ व्यवसायासाठी कर्ज हवे आहे' },
+    { id: 'agri', label: '🌾 शेती / दुग्ध व्यवसाय (KCC)', prompt: 'मला शेती किंवा दुग्ध व्यवसायासाठी किसान क्रेडिट कार्ड कर्ज हवे आहे' },
+    { id: 'artisan', label: '🧵 कारागीर / विणकर (विश्वकर्मा)', prompt: 'मी एक कारागीर आहे, मला पीएम विश्वकर्मा योजनेचे कर्ज हवे आहे' },
+    { id: 'msme', label: '🏭 लहान उद्योग / मॅन्युफॅक्चरिंग', prompt: 'मला लहान उद्योग सुरू करण्यासाठी सरकारी कर्ज हवे आहे' },
+    { id: 'women', label: '👩‍💼 महिला उद्योजक विशेष योजना', prompt: 'महिला उद्योजकांसाठी सरकारी विशेष अनुदान आणि कर्ज हवे आहे' },
+    { id: 'divyang', label: '♿ दिव्यांगजन स्वयंरोजगार कर्ज (NHFDC)', prompt: 'दिव्यांगांच्या स्वयंरोजगारासाठी कमी व्याजाचे सरकारी कर्ज हवे आहे' }
+  ],
+  Tamil: [
+    { id: 'auto', label: '🛺 வணிக வாகனம் / ஆட்டோ ரிக்ஷா', prompt: 'வணிக ஆட்டோ அல்லது வாகனம் வாங்க கடன் வேண்டும்' },
+    { id: 'food', label: '🍲 உணவு வணிகம் / ஹோட்டல் / டிபன்', prompt: 'உணவு வணிகம் அல்லது ஹோட்டல் தொடங்க கடன் வேண்டும்' },
+    { id: 'retail', label: '🛒 மளிகைக் கடை / சில்லறை வணிகம்', prompt: 'மளிகைக் கடை அல்லது சில்லறை வணிகத்திற்கு கடன் வேண்டும்' },
+    { id: 'agri', label: '🌾 விவசாயம் / பால் பண்ணை (KCC)', prompt: 'விவசாயம் அல்லது பால் பண்ணைக்கு கிசான் கடன் அட்டை வேண்டும்' },
+    { id: 'artisan', label: '🧵 கைவினைஞர்கள் / நெசவாளர்கள் (விஸ்வகர்மா)', prompt: 'கைவினைஞர் விஸ்வகர்மா கடன் உதவி வேண்டும்' },
+    { id: 'msme', label: '🏭 குறுந்தொழில் / உற்பத்தி பிரிவு', prompt: 'சிறு தொழில் தொடங்க கடன் உதவி வேண்டும்' },
+    { id: 'women', label: '👩‍💼 பெண் தொழில்முனைவோர் திட்டங்கள்', prompt: 'பெண் தொழில்முனைவோருக்கான அரசு மானிய திட்டங்கள் வேண்டும்' },
+    { id: 'divyang', label: '♿ மாற்றுத்திறனாளிகள் சுயதொழில் கடன் (NHFDC)', prompt: 'மாற்றுத்திறனாளிகளுக்கான குறைந்த வட்டி அரசு கடன் வேண்டும்' }
+  ]
+};
+
+/**
+ * Generates an interactive conversational discovery response asking for user's identity & business.
+ * Does NOT dump schemes directly. Provides business_options for the user to select.
+ */
+function buildDiscoveryResponse(language = 'English') {
+  const lang = (language || 'English').toLowerCase();
+  let message = '';
+  let langKey = 'English';
+
+  if (lang.includes('telugu') || lang === 'te') {
+    langKey = 'Telugu';
+    message = 'నమస్కారం! ఉద్యమ్ సేతు ఏఐ ప్రభుత్వ పథకాల సలహా కేంద్రానికి స్వాగతం. మీకు అత్యంత అనువైన ప్రభుత్వ పథకాలు, పూచీకత్తు లేని రుణాలు మరియు సబ్సిడీలను కనుగొనడానికి, దయచేసి మీరు ఎవరూ మరియు ఏ వ్యాపారాన్ని నడుపుతున్నారు లేదా ప్రారంభించాలనుకుంటున్నారో క్రింది ఎంపికలలో ఎంచుకోండి లేదా నేరుగా టైప్ చేయండి:';
+  } else if (lang.includes('kannada') || lang === 'kn') {
+    langKey = 'Kannada';
+    message = 'ನಮಸ್ಕಾರ! ಉದ್ಯಮ ಸೇತು ಎಐ ಸರ್ಕಾರಿ ಯೋಜನೆಗಳ ಸಲಹಾ ಕೇಂದ್ರಕ್ಕೆ ಸ್ವಾಗತ. ನಿಮಗೆ ಅತ್ಯಂತ ಸೂಕ್ತವಾದ ಸರ್ಕಾರಿ ಸಾಲಗಳು, ಅಡಮಾನ ರಹಿತ ನೆರವು ಮತ್ತು ಸಬ್ಸಿಡಿಗಳನ್ನು ಶಿಫಾರಸು ಮಾಡಲು, ದಯವಿಟ್ಟು ನೀವು ಯಾರು ಮತ್ತು ಯಾವ ವ್ಯವಹಾರವನ್ನು ನಡೆಸುತ್ತಿದ್ದೀರಿ ಅಥವಾ ಪ್ರಾರಂಭಿಸಲು ಬಯಸುತ್ತೀರಿ ಎಂಬುದನ್ನು ಕೆಳಗಿನ ಆಯ್ಕೆಗಳಿಂದ ಆರಿಸಿ ಅಥವಾ ನೇರವಾಗಿ ಟೈಪ್ ಮಾಡಿ:';
+  } else if (lang.includes('bengali') || lang === 'bn') {
+    langKey = 'Bengali';
+    message = 'নমস্কার! উদ্যম সেতু এআই সরকারি প্রকল্পের পরামর্শ কেন্দ্রে আপনাকে স্বাগত জানাই। আপনার জন্য সবচেয়ে উপযুক্ত সরকারি ঋণ, বিনা গ্যারান্টির সহায়তা এবং ভর্তুকি খুঁজে পেতে, অনুগ্রহ করে জানান আপনি কে এবং কোন ব্যবসা পরিচালনা করছেন বা শুরু করতে চান? নিচের বিকল্পগুলি থেকে বেছে নিন অথবা লিখে জানান:';
+  } else if (lang.includes('hindi') || lang === 'hi') {
+    langKey = 'Hindi';
+    message = 'नमस्ते! उद्यम सेतु एआई सरकारी योजना सलाहकार केंद्र में आपका स्वागत है। आपके लिए सबसे उपयुक्त सरकारी योजनाएं, बिना गारंटी लोन और सब्सिडी ढूंढने के लिए, कृपया हमें बताएं कि आप कौन हैं और कौन सा व्यवसाय चला रहे हैं या शुरू करना चाहते हैं? नीचे दिए गए विकल्पों में से चुनें या लिखकर बताएं:';
+  } else if (lang.includes('marathi') || lang === 'mr') {
+    langKey = 'Marathi';
+    message = 'नमस्कार! उद्यम सेतू एआय सरकारी योजना सल्लागार केंद्रात आपले स्वागत आहे. आपल्यासाठी सर्वात योग्य सरकारी योजना, विनातारण कर्ज आणि अनुदान शोधण्यासाठी, कृपया आपण कोण आहात आणि कोणता व्यवसाय सुरू करू इच्छिता किंवा चालवत आहात हे खालील पर्यायांमधून निवडा किंवा लिहून कळवा:';
+  } else if (lang.includes('tamil') || lang === 'ta') {
+    langKey = 'Tamil';
+    message = 'வணக்கம்! உத்யம் சேது ஏஐ அரசு திட்ட ஆலோசனை மையத்திற்கு உங்களை வரவேற்கிறோம். உங்களுக்கு மிகவும் பொருத்தமான அரசு கடன்கள் மற்றும் மானியங்களைக் கண்டறிய, நீங்கள் என்ன தொழில் செய்கிறீர்கள் அல்லது தொடங்க திட்டமிட்டுள்ளீர்கள் என்பதை கீழே உள்ள விருப்பங்களில் இருந்து தேர்வு செய்யவும் அல்லது பதிவிடவும்:';
+  } else {
+    langKey = 'English';
+    message = 'Welcome to Udyam Setu AI, your intelligent government scheme advisor. To recommend the most suitable collateral-free loans, subsidies, and schemes, please tell us: Who are you and which business or enterprise do you run or plan to start? You can select from the options below or type your details:';
+  }
+
+  const options = DISCOVERY_BUSINESS_OPTIONS[langKey] || DISCOVERY_BUSINESS_OPTIONS.English;
+
+  return {
+    type: 'business_selection',
+    message,
+    target_sector: 'Discovery',
+    business_options: options,
+    schemes: [],
+    reply: message,
+    recommendedSchemes: [],
+    detectedSector: 'Discovery',
+    source: 'Udyam Setu AI Engine',
+    language,
+    bhashiniVoiceEnabled: true
+  };
+}
+
+/**
  * 1. Intelligent Sector & Intent Classifier
  * Accurately classifies user goal into explicit domain sectors.
  */
 function classifyUserSector(message = '', userProfile = null) {
+  if (isDiscoveryOrUnspecifiedQuery(message, userProfile)) {
+    return 'Discovery';
+  }
+
   const text = (message + ' ' + (userProfile?.businessType || '')).toLowerCase();
 
   // Commercial Vehicle / Transport / Logistics
@@ -213,6 +372,10 @@ async function retrieveRelevantSchemes(query, userProfile = null) {
   const allSchemes = await dataStore.getSchemes();
   const detectedSector = classifyUserSector(query, userProfile);
   const queryLower = query.toLowerCase();
+
+  if (detectedSector === 'Discovery') {
+    return [];
+  }
 
   // Strict domain candidate filtering to prevent hallucinated cross-sector suggestions
   let candidateCodes = [];
@@ -794,14 +957,136 @@ async function handleRAGConversationalChat({
   }
 
   // 2. Classify sector & retrieve strictly relevant schemes
+  // 2. Classify sector & check for discovery
   const detectedSector = classifyUserSector(message, userProfile);
+  const isDiscovery = (detectedSector === 'Discovery') || isDiscoveryOrUnspecifiedQuery(message, userProfile);
+
+  const languageRules = effectiveLang === 'Kannada' ? `
+🚨 ABSOLUTE MANDATORY: 100% PURE KANNADA (ಕನ್ನಡ) SCRIPT ONLY!
+- Every single word, message, option label, title, and description MUST be in pure Kannada script.
+- Zero English words or English code-switching.
+` : effectiveLang === 'Bengali' ? `
+🚨 ABSOLUTE MANDATORY: 100% PURE BENGALI (বাংলা) SCRIPT ONLY!
+- Every single word, message, option label, title, and description MUST be in pure Bengali script.
+- Zero English words or English code-switching.
+` : effectiveLang === 'Telugu' ? `
+🚨 ABSOLUTE MANDATORY: 100% PURE TELUGU (తెలుగు) SCRIPT ONLY!
+- Every single word, message, option label, title, and description MUST be in pure Telugu script.
+- Zero English words or English code-switching.
+` : effectiveLang === 'Hindi' ? `
+🚨 ABSOLUTE MANDATORY: 100% PURE HINDI (हिन्दी देवनागरी) SCRIPT ONLY!
+- Every single word, message, option label, title, and description MUST be in pure Hindi script.
+- Zero English words.
+` : `
+- Output clear, reassuring Indian English.
+`;
+
+  // Helper for resilient Gemini API calls across models
+  const callGeminiWithModels = async (systemPrompt) => {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return null;
+    const candidateModels = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest'];
+    for (const model of candidateModels) {
+      try {
+        const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: systemPrompt }] }],
+            generationConfig: {
+              temperature: 0.2,
+              maxOutputTokens: 3500,
+              responseMimeType: 'application/json'
+            }
+          })
+        });
+        if (geminiRes.status === 200) {
+          const geminiData = await geminiRes.json();
+          const aiText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (aiText) {
+            let cleanText = aiText.trim();
+            if (cleanText.startsWith('```')) {
+              cleanText = cleanText.replace(/^```json?\s*/i, '').replace(/\s*```$/, '').trim();
+            }
+            const parsed = JSON.parse(cleanText);
+            return { model, parsed };
+          }
+        } else {
+          console.warn(`Gemini model ${model} returned HTTP ${geminiRes.status}`);
+        }
+      } catch (err) {
+        console.warn(`Gemini model ${model} call error:`, err.message);
+      }
+    }
+    return null;
+  };
+
+  // 3. CASE A: Conversational Discovery (User clicked "Ask", said "help", or business is not specified)
+  if (isDiscovery) {
+    const discoverySystemPrompt = `
+You are "Udyam Setu AI", an intelligent government scheme advisory engine.
+
+BEHAVIOR RULES:
+1. CONVERSATIONAL DISCOVERY:
+   - The user has sent a general inquiry or clicked "Ask" without specifying their business or demographic goal.
+   - DO NOT recommend schemes directly! Set "type": "business_selection" and "schemes": [].
+   - In "message", politely greet the user, explain that to guide them to the right schemes, you need to know who they are and what business they run or plan to start.
+   - In "business_options", provide 6 to 8 concise business category choices (keep labels and prompts under 10 words) in pure script of ${effectiveLang}:
+     1. Commercial Vehicle / Auto-rickshaw / Transport
+     2. Food Business / Tiffin / Hotel / Catering
+     3. Retail Shop / Kirana / Street Vendor (Thela)
+     4. Agriculture / Dairy Farming / Kisan Credit Card
+     5. Traditional Artisan / Weaver / Crafts (Vishwakarma)
+     6. Small Industry / MSME Manufacturing
+     7. Women Entrepreneur Special Schemes
+     8. Differently Abled / Divyangjan Loan (NHFDC)
+2. LANGUAGE:
+   - Detect and respond in the requested language: ${effectiveLang}.
+   ${languageRules}
+3. STRICT JSON SCHEMA:
+{
+  "type": "business_selection",
+  "message": "<Polite text asking who they are and what business they run or plan to start in ${effectiveLang}>",
+  "target_sector": "Discovery",
+  "business_options": [
+    { "id": "auto", "label": "<Label in ${effectiveLang}>", "prompt": "<User message when tapped in ${effectiveLang}>" }
+  ],
+  "schemes": []
+}
+
+USER QUERY: "${message}"
+`;
+
+    const geminiResult = await callGeminiWithModels(discoverySystemPrompt);
+    if (geminiResult && geminiResult.parsed && geminiResult.parsed.message) {
+      const parsed = geminiResult.parsed;
+      const options = (Array.isArray(parsed.business_options) && parsed.business_options.length >= 4)
+        ? parsed.business_options
+        : (DISCOVERY_BUSINESS_OPTIONS[effectiveLang] || DISCOVERY_BUSINESS_OPTIONS.English);
+
+      return {
+        type: 'business_selection',
+        message: parsed.message,
+        target_sector: 'Discovery',
+        business_options: options,
+        schemes: [],
+        reply: parsed.message,
+        recommendedSchemes: [],
+        detectedSector: 'Discovery',
+        source: `Google Gemini (${geminiResult.model}) (Autonomous AI)`,
+        language: effectiveLang,
+        bhashiniVoiceEnabled: true
+      };
+    }
+
+    // Dynamic Discovery Fallback
+    return buildDiscoveryResponse(effectiveLang);
+  }
+
+  // 4. CASE B: User specified their business domain / vehicle / activity -> Autonomous Scheme Recommendation
   const relevantSchemes = await retrieveRelevantSchemes(message, userProfile);
 
-  // 3. Try Gemini Autonomous Reasoning
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (apiKey) {
-    try {
-      const schemesContext = relevantSchemes.map(s => `
+  const schemesContext = relevantSchemes.map(s => `
 [GROUND TRUTH SCHEME]
 - scheme_id: ${s.shortCode || s.schemeId}
 - schemeName: ${s.schemeName}
@@ -813,35 +1098,17 @@ async function handleRAGConversationalChat({
 - description: ${s.description}
 `).join('\n---\n');
 
-      const languageRules = effectiveLang === 'Kannada' ? `
-🚨 ABSOLUTE MANDATORY: 100% PURE KANNADA (ಕನ್ನಡ) SCRIPT ONLY!
-- Every single word, message, title, and description MUST be in pure Kannada script.
-- Zero English words or English code-switching.
-` : effectiveLang === 'Bengali' ? `
-🚨 ABSOLUTE MANDATORY: 100% PURE BENGALI (বাংলা) SCRIPT ONLY!
-- Every single word, message, title, and description MUST be in pure Bengali script.
-- Zero English words or English code-switching.
-` : effectiveLang === 'Telugu' ? `
-🚨 ABSOLUTE MANDATORY: 100% PURE TELUGU (తెలుగు) SCRIPT ONLY!
-- Every single word, message, title, and description MUST be in pure Telugu script.
-- Zero English words or English code-switching.
-` : effectiveLang === 'Hindi' ? `
-🚨 ABSOLUTE MANDATORY: 100% PURE HINDI (हिन्दी देवनागरी) SCRIPT ONLY!
-- Every single word, message, title, and description MUST be in pure Hindi script.
-- Zero English words.
-` : `
-- Output clear, reassuring Indian English.
-`;
-
-      const systemPrompt = `
+  const recommendationSystemPrompt = `
 You are "Udyam Setu AI", an intelligent government scheme advisory engine.
 
 BEHAVIOR RULES:
-1. DYNAMIC RELEVANCE:
+1. DYNAMIC RELEVANCE & AUTONOMOUS THINKING:
+   - Think on your own autonomously. Evaluate the user's specific query, business, and profile against the ground truth schemes.
    - Match schemes strictly based on the user's exact goal or domain.
-   - Example (Transport/Vehicle): If user asks for commercial vehicle, auto-rickshaw, or lorry, recommend schemes like Stand-Up India, Mudra Kishor/Tarun, or PMEGP. Strictly DO NOT suggest street vendor or agriculture-specific schemes.
-   - Example (Food/Tiffin): Recommend Mudra Shishu, PM SVANidhi, or PMEGP.
-   - If user query is a greeting, set type="greeting" and schemes=[].
+   - Example (Commercial Transport): If user asks for commercial vehicle, auto-rickshaw, or lorry, recommend Stand-Up India, Mudra Kishor/Tarun, or PMEGP. Strictly DO NOT suggest street vendor or agriculture schemes.
+   - Example (Food Business): Recommend Mudra Shishu, PM SVANidhi, or PMEGP.
+   - Recommend up to 3 most relevant schemes.
+   - In "message", explain why you are recommending these schemes for their specific business.
 2. LANGUAGE:
    - Detect and respond in the requested language: ${effectiveLang}.
    ${languageRules}
@@ -850,7 +1117,7 @@ BEHAVIOR RULES:
    - JSON Schema:
 {
   "type": "scheme_recommendation",
-  "message": "<Conversational summary text in ${effectiveLang}>",
+  "message": "<Conversational summary text in ${effectiveLang} explaining why these schemes match their business>",
   "target_sector": "${detectedSector}",
   "schemes": [
     {
@@ -859,7 +1126,7 @@ BEHAVIOR RULES:
       "sector": "<Sector category in ${effectiveLang}>",
       "max_amount": "<e.g. Up to ₹10,00,000>",
       "benefit_tag": "<e.g. No Collateral Required / 35% Subsidy in ${effectiveLang}>",
-      "description": "<Concise 2-sentence summary in ${effectiveLang}>",
+      "description": "<Clear explanation of how this scheme funds their specific business in ${effectiveLang}>",
       "redirect_url": "/schemes/<scheme_id>"
     }
   ]
@@ -878,77 +1145,53 @@ ${schemesContext}
 USER'S MESSAGE: "${message}"
 `;
 
-      const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: systemPrompt }] }],
-          generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 1000
-          }
-        })
-      });
+  const geminiResult = await callGeminiWithModels(recommendationSystemPrompt);
 
-      const geminiData = await geminiRes.json();
-      const aiText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (geminiResult && geminiResult.parsed && geminiResult.parsed.message && Array.isArray(geminiResult.parsed.schemes)) {
+    const parsed = geminiResult.parsed;
+    parsed.schemes = parsed.schemes.map(s => ({
+      ...s,
+      scheme_id: s.scheme_id || 'PMMY',
+      redirect_url: `/schemes/${s.scheme_id || 'PMMY'}`
+    }));
 
-      if (aiText) {
-        let cleanText = aiText.trim();
-        if (cleanText.startsWith('```')) {
-          cleanText = cleanText.replace(/^```json?\s*/i, '').replace(/\s*```$/, '').trim();
-        }
-        const parsed = JSON.parse(cleanText);
+    const isKn = effectiveLang === 'Kannada';
+    const isBn = effectiveLang === 'Bengali';
+    const isTe = effectiveLang === 'Telugu';
+    const isHi = effectiveLang === 'Hindi';
 
-        if (parsed && parsed.message && Array.isArray(parsed.schemes)) {
-          // Normalize redirect_urls & ensure scheme_id presence
-          parsed.schemes = parsed.schemes.map(s => ({
-            ...s,
-            scheme_id: s.scheme_id || 'PMMY',
-            redirect_url: `/schemes/${s.scheme_id || 'PMMY'}`
-          }));
+    const amountLabel = isKn ? 'ಗರಿಷ್ಠ ಮೊತ್ತ:' : (isBn ? 'সর্বোচ্চ পরিমাণ:' : (isTe ? 'ఆర్థిక సహాయం:' : (isHi ? 'अधिकतम राशि:' : 'Max Amount:')));
+    const benefitLabel = isKn ? 'ಪ್ರಯೋಜನ:' : (isBn ? 'সুবিধা:' : (isTe ? 'ప్రయోజనం:' : (isHi ? 'लाभ:' : 'Benefit:')));
+    const detailsLabel = isKn ? 'ವಿವರಗಳು:' : (isBn ? 'বিবরণ:' : (isTe ? 'వివరాలు:' : (isHi ? 'विवरण:' : 'Details:')));
 
-          const isKn = effectiveLang === 'Kannada';
-          const isBn = effectiveLang === 'Bengali';
-          const isTe = effectiveLang === 'Telugu';
-          const isHi = effectiveLang === 'Hindi';
+    const backwardCompatibleReply = `${parsed.message}\n\n` + parsed.schemes.map((s, idx) => 
+      `${idx + 1}. **${s.title}**\n   - **${amountLabel}** ${s.max_amount}\n   - **${benefitLabel}** ${s.benefit_tag}\n   - **${detailsLabel}** ${s.description}`
+    ).join('\n\n');
 
-          const amountLabel = isKn ? 'ಗರಿಷ್ಠ ಮೊತ್ತ:' : (isBn ? 'সর্বোচ্চ পরিমাণ:' : (isTe ? 'ఆర్థిక సహాయం:' : (isHi ? 'अधिकतम राशि:' : 'Max Amount:')));
-          const benefitLabel = isKn ? 'ಪ್ರಯೋಜನ:' : (isBn ? 'সুবিধা:' : (isTe ? 'ప్రయోజనం:' : (isHi ? 'लाभ:' : 'Benefit:')));
-          const detailsLabel = isKn ? 'ವಿವರಗಳು:' : (isBn ? 'বিবরণ:' : (isTe ? 'వివరాలు:' : (isHi ? 'विवरण:' : 'Details:')));
-
-          const backwardCompatibleReply = `${parsed.message}\n\n` + parsed.schemes.map((s, idx) => 
-            `${idx + 1}. **${s.title}**\n   - **${amountLabel}** ${s.max_amount}\n   - **${benefitLabel}** ${s.benefit_tag}\n   - **${detailsLabel}** ${s.description}`
-          ).join('\n\n');
-
-          return {
-            type: parsed.type || 'scheme_recommendation',
-            message: parsed.message,
-            target_sector: parsed.target_sector || detectedSector,
-            schemes: parsed.schemes,
-            // Backward compatibility
-            reply: backwardCompatibleReply,
-            recommendedSchemes: parsed.schemes.map(s => ({
-              schemeName: s.title,
-              loanAmount: s.max_amount,
-              subsidy: s.benefit_tag,
-              sector: s.sector,
-              url: s.redirect_url,
-              schemeId: s.scheme_id
-            })),
-            detectedSector: parsed.target_sector || detectedSector,
-            source: 'Google Gemini 3.6 Flash (Autonomous AI)',
-            language: effectiveLang,
-            bhashiniVoiceEnabled: true
-          };
-        }
-      }
-    } catch (err) {
-      console.warn('Gemini RAG JSON call failed, using dynamic vernacular engine fallback:', err.message);
-    }
+    return {
+      type: 'scheme_recommendation',
+      message: parsed.message,
+      target_sector: parsed.target_sector || detectedSector,
+      schemes: parsed.schemes,
+      business_options: [],
+      // Backward compatibility
+      reply: backwardCompatibleReply,
+      recommendedSchemes: parsed.schemes.map(s => ({
+        schemeName: s.title,
+        loanAmount: s.max_amount,
+        subsidy: s.benefit_tag,
+        sector: s.sector,
+        url: s.redirect_url,
+        schemeId: s.scheme_id
+      })),
+      detectedSector: parsed.target_sector || detectedSector,
+      source: `Google Gemini (${geminiResult.model}) (Autonomous AI)`,
+      language: effectiveLang,
+      bhashiniVoiceEnabled: true
+    };
   }
 
-  // 4. Graceful Dynamic Vernacular Fallback (Strict JSON Schema Compliant)
+  // Graceful Dynamic Vernacular Fallback
   return buildVernacularResponse(message, relevantSchemes, effectiveLang, userProfile, detectedSector);
 }
 
@@ -956,6 +1199,9 @@ module.exports = {
   handleRAGConversationalChat,
   retrieveRelevantSchemes,
   classifyUserSector,
-  isGreetingMessage
+  isGreetingMessage,
+  isDiscoveryOrUnspecifiedQuery,
+  buildDiscoveryResponse,
+  DISCOVERY_BUSINESS_OPTIONS
 };
 

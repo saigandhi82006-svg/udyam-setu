@@ -798,7 +798,32 @@ async function sendChatMessage(autoSpeak = false) {
     // Build dynamic recommended scheme cards or greeting quick chips
     let interactiveContentHtml = '';
 
-    if (data.type === 'greeting') {
+    if (data.type === 'business_selection' || (data.business_options && data.business_options.length > 0)) {
+      const options = data.business_options || [];
+      const isTe = lang === 'Telugu';
+      const isHi = lang === 'Hindi';
+      const isKn = lang === 'Kannada';
+      const isBn = lang === 'Bengali';
+      const titleText = isTe ? "👇 మీ వ్యాపారాన్ని లేదా లక్ష్యాన్ని ఎంచుకోండి:"
+        : (isHi ? "👇 अपने व्यवसाय या लक्ष्य का चयन करें:"
+        : (isKn ? "👇 ನಿಮ್ಮ ವ್ಯವಹಾರ ಅಥವಾ ಗುರಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ:"
+        : (isBn ? "👇 আপনার ব্যবসা বা লক্ষ্য নির্বাচন করুন:"
+        : "👇 Select your business or goal:")));
+
+      interactiveContentHtml = `
+        <div class="business-selection-container">
+          <div class="selection-title">${titleText}</div>
+          <div class="business-chips-grid">
+            ${options.map(opt => `
+              <button type="button" class="business-option-chip" onclick="selectBusinessOption('${escapeTextForAttr(opt.prompt || opt.label)}')">
+                <span class="chip-label">${opt.label}</span>
+                <span class="chip-arrow">➔</span>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    } else if (data.type === 'greeting') {
       const isTe = lang === 'Telugu';
       const isHi = lang === 'Hindi';
       const isKn = lang === 'Kannada';
@@ -1021,6 +1046,10 @@ function sendSuggestedPrompt(promptText) {
     input.value = promptText;
     sendChatMessage();
   }
+}
+
+function selectBusinessOption(promptText) {
+  sendSuggestedPrompt(promptText);
 }
 
 function escapeTextForAttr(text) {

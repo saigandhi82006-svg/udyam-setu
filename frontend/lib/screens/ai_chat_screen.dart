@@ -24,16 +24,11 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
   final List<ChatMessage> _messages = [
     ChatMessage(
-      id: 'msg_1',
-      sender: 'user',
-      text: 'I want a loan for starting a small food business.',
-      timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
-    ),
-    ChatMessage(
-      id: 'msg_2',
+      id: 'msg_init',
       sender: 'ai',
-      text: 'Great! I will help you find the best schemes for your business. May I know your business category?',
-      timestamp: DateTime.now().subtract(const Duration(minutes: 4)),
+      text: 'Welcome to Udyam Setu AI! To help me find the best government schemes, loans, and subsidies, please tell me: Who are you and which business or enterprise do you run or plan to start?',
+      timestamp: DateTime.now(),
+      source: 'gemini',
     ),
   ];
 
@@ -41,9 +36,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
     {'code': 'en', 'name': 'English'},
     {'code': 'hi', 'name': 'हिन्दी (Hindi)'},
     {'code': 'te', 'name': 'తెలుగు (Telugu)'},
+    {'code': 'kn', 'name': 'ಕನ್ನಡ (Kannada)'},
+    {'code': 'bn', 'name': 'বাংলা (Bengali)'},
     {'code': 'ta', 'name': 'தமிழ் (Tamil)'},
     {'code': 'mr', 'name': 'मराठी (Marathi)'},
-    {'code': 'bn', 'name': 'বাংলা (Bengali)'},
   ];
 
   void _sendMessage([String? customText]) async {
@@ -248,16 +244,21 @@ class _AiChatScreenState extends State<AiChatScreen> {
             ),
           ),
 
-          // Quick Prompt Chips
+          // Quick Business Category Selection Chips
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Row(
               children: [
-                _buildPromptChip('Mudra Loan for Food Stall'),
-                _buildPromptChip('35% Subsidy in PMEGP'),
-                _buildPromptChip('Stand-Up India for Women'),
-                _buildPromptChip('Check My Matching Schemes', isAction: true),
+                _buildPromptChip('🛺 Commercial Auto Loan'),
+                _buildPromptChip('🍲 Food Business / Tiffin'),
+                _buildPromptChip('🛒 Kirana / Retail Shop'),
+                _buildPromptChip('🌾 Agriculture / Dairy (KCC)'),
+                _buildPromptChip('🧵 PM Vishwakarma (Artisan)'),
+                _buildPromptChip('🏭 Small Industry / MSME'),
+                _buildPromptChip('👩‍💼 Women Entrepreneur'),
+                _buildPromptChip('♿ Divyangjan Loan (NHFDC)'),
+                _buildPromptChip('✨ Check Matching Schemes', isAction: true),
               ],
             ),
           ),
