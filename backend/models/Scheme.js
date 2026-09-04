@@ -30,6 +30,78 @@ const SchemeSchema = new mongoose.Schema({
     mr: { type: String, default: '' },
     bn: { type: String, default: '' }
   },
+  translations: {
+    te: {
+      tagline: { type: String, default: '' },
+      description: { type: String, default: '' },
+      benefits: [{ type: String }],
+      whoCanApply: { type: String, default: '' },
+      purpose: { type: String, default: '' },
+      loanAmountFormatted: { type: String, default: '' },
+      interestRate: { type: String, default: '' },
+      repaymentPeriod: { type: String, default: '' },
+      requiredDocuments: [{ docName: String, description: String }]
+    },
+    hi: {
+      tagline: { type: String, default: '' },
+      description: { type: String, default: '' },
+      benefits: [{ type: String }],
+      whoCanApply: { type: String, default: '' },
+      purpose: { type: String, default: '' },
+      loanAmountFormatted: { type: String, default: '' },
+      interestRate: { type: String, default: '' },
+      repaymentPeriod: { type: String, default: '' },
+      requiredDocuments: [{ docName: String, description: String }]
+    },
+    kn: {
+      tagline: { type: String, default: '' },
+      description: { type: String, default: '' },
+      benefits: [{ type: String }],
+      whoCanApply: { type: String, default: '' },
+      purpose: { type: String, default: '' },
+      loanAmountFormatted: { type: String, default: '' },
+      interestRate: { type: String, default: '' },
+      repaymentPeriod: { type: String, default: '' },
+      requiredDocuments: [{ docName: String, description: String }]
+    },
+    ta: {
+      tagline: { type: String, default: '' },
+      description: { type: String, default: '' },
+      benefits: [{ type: String }],
+      whoCanApply: { type: String, default: '' },
+      purpose: { type: String, default: '' },
+      loanAmountFormatted: { type: String, default: '' },
+      interestRate: { type: String, default: '' },
+      repaymentPeriod: { type: String, default: '' },
+      requiredDocuments: [{ docName: String, description: String }]
+    },
+    mr: {
+      tagline: { type: String, default: '' },
+      description: { type: String, default: '' },
+      benefits: [{ type: String }],
+      whoCanApply: { type: String, default: '' },
+      purpose: { type: String, default: '' },
+      loanAmountFormatted: { type: String, default: '' },
+      interestRate: { type: String, default: '' },
+      repaymentPeriod: { type: String, default: '' },
+      requiredDocuments: [{ docName: String, description: String }]
+    },
+    bn: {
+      tagline: { type: String, default: '' },
+      description: { type: String, default: '' },
+      benefits: [{ type: String }],
+      whoCanApply: { type: String, default: '' },
+      purpose: { type: String, default: '' },
+      loanAmountFormatted: { type: String, default: '' },
+      interestRate: { type: String, default: '' },
+      repaymentPeriod: { type: String, default: '' },
+      requiredDocuments: [{ docName: String, description: String }]
+    }
+  },
+  vernacularDetails: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  },
   embedding: {
     type: [Number], // 768-dimensional vector embedding for semantic search
     default: undefined
