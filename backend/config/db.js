@@ -27,7 +27,7 @@ const checkMongoServer = (host, port) => {
 const connectDB = async () => {
   if (isConnected) return;
   const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/udyam_setu';
-  
+
   try {
     if (!process.env.MONGODB_URI) {
       const isPortOpen = await checkMongoServer('127.0.0.1', 27017);
