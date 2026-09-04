@@ -50,6 +50,7 @@ app.get('/api/health', (req, res) => {
 // Mount Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/schemes', schemesRoutes);
+app.use('/schemes', schemesRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/partners', partnersRoutes);
 app.use('/api/calculator', calculatorRoutes);

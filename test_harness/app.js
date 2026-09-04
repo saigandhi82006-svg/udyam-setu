@@ -774,53 +774,99 @@ async function sendChatMessage(autoSpeak = false) {
       })
     });
     const data = await response.json();
-
     typingBubble.remove();
 
     // Track multi-turn conversation history
     chatHistory.push({ role: 'user', text: message });
-    chatHistory.push({ role: 'model', text: data.reply });
+    chatHistory.push({ role: 'model', text: data.message || data.reply });
     if (chatHistory.length > 8) chatHistory = chatHistory.slice(-8);
 
-    // Build dynamic recommended scheme cards HTML
-    let recommendationsHtml = '';
-    if (data.recommendedSchemes && data.recommendedSchemes.length > 0) {
-      recommendationsHtml = `
+    // Build dynamic recommended scheme cards or greeting quick chips
+    let interactiveContentHtml = '';
+
+    if (data.type === 'greeting') {
+      const isTe = lang === 'Telugu';
+      const isHi = lang === 'Hindi';
+      interactiveContentHtml = `
+        <div class="greeting-chips">
+          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${isTe ? "నాకు కమర్షియల్ ఆటో కొనడానికి లోన్ కావాలి" : (isHi ? "मुझे कमर्शियल ऑटो रिक्शा खरीदने के लिए लोन चाहिए" : "I want a commercial auto-rickshaw loan")}')">
+            🛺 ${isTe ? "కమర్షియల్ ఆటో రుణం" : (isHi ? "कमर्शियल ऑटो लोन" : "Commercial Auto Loan")}
+          </button>
+          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${isTe ? "నాకు టిఫిన్ సెంటర్ / ఫుడ్ బిజినెస్ లోన్ కావాలి" : (isHi ? "मुझे टिफिन सेंटर / फूड बिजनेस लोन चाहिए" : "I want a food business / tiffin loan")}')">
+            🍲 ${isTe ? "టిఫిన్ సెంటర్ / ఫుడ్ లోన్" : (isHi ? "टिफिन सेंटर / फ़ूड लोन" : "Food / Tiffin Center")}
+          </button>
+          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${isTe ? "నాకు కిసాన్ క్రెడిట్ కార్డ్ వ్యవసాయ లోన్ కావాలి" : (isHi ? "मुझे किसान क्रेडिट कार्ड कृषि लोन चाहिए" : "I want Kisan Credit Card agri loan")}')">
+            🌾 ${isTe ? "వ్యవసాయ రుణం (KCC)" : (isHi ? "कृषि लोन (KCC)" : "Kisan Credit Card")}
+          </button>
+          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${isTe ? "చేతివృత్తుల కోసం పీఎం విశ్వకర్మ లోన్ కావాలి" : (isHi ? "दस्तकारों के लिए पीएम विश्वकर्मा लोन चाहिए" : "PM Vishwakarma artisan loan")}')">
+            🧵 ${isTe ? "చేతివృత్తుల లోన్ (విశ్వకర్మ)" : (isHi ? "विश्वकर्मा योजना" : "Artisan Vishwakarma")}
+          </button>
+          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${isTe ? "దివ్యాంగుల స్వయం ఉపాధి రుణ పథకం" : (isHi ? "दिव्यांगजन स्वरोजगार ऋण योजना" : "Divyangjan PwD loan")}')">
+            ♿ ${isTe ? "దివ్యాంగుల రుణం (NHFDC)" : (isHi ? "दिव्यांगजन ऋण" : "Divyangjan Loan")}
+          </button>
+        </div>
+      `;
+    } else if (data.schemes && data.schemes.length > 0) {
+      interactiveContentHtml = `
+        <div class="ai-schemes-container">
+          ${data.schemes.map(s => `
+            <div class="ai-scheme-card" onclick="navigateToSchemeFromAI('${s.scheme_id}', '${s.redirect_url || ''}')">
+              <div class="ai-scheme-card-header">
+                <span class="ai-scheme-title">🏷️ ${s.title}</span>
+                <span class="ai-scheme-amount">${s.max_amount}</span>
+              </div>
+              <div class="ai-scheme-meta">
+                <span class="ai-sector-pill">${s.sector || data.target_sector || 'Govt Scheme'}</span>
+                <span class="ai-benefit-tag">${s.benefit_tag || 'No Collateral'}</span>
+              </div>
+              <p class="ai-scheme-desc">${s.description}</p>
+              <button type="button" class="ai-view-scheme-btn" onclick="event.stopPropagation(); navigateToSchemeFromAI('${s.scheme_id}', '${s.redirect_url || ''}')">
+                <span>View Full Scheme Details</span> ➔
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    } else if (data.recommendedSchemes && data.recommendedSchemes.length > 0) {
+      interactiveContentHtml = `
         <div class="rag-recommendations">
           ${data.recommendedSchemes.map(s => `
-            <div class="scheme-pill">
+            <div class="scheme-pill" onclick="navigateToSchemeFromAI('${s.schemeId || ''}', '${s.url || ''}')">
               <div>
                 <strong>🏷️ ${s.schemeName}</strong><br>
                 <small style="color:#64748B;">Sector: ${s.sector || 'Govt Scheme'}</small>
               </div>
-              <span>${s.loanAmount || ''} ${s.subsidy ? '• ' + s.subsidy + '% Subsidy' : ''}</span>
+              <span>${s.loanAmount || ''} ${s.subsidy ? '• ' + s.subsidy : ''}</span>
             </div>
           `).join('')}
         </div>
       `;
     }
 
-    const sectorBadge = data.detectedSector 
-      ? `<div class="sector-indicator">🎯 Target Sector: ${data.detectedSector}</div>` 
+    const sectorName = data.target_sector || data.detectedSector;
+    const sectorBadge = (sectorName && sectorName !== 'General Advisory')
+      ? `<div class="sector-indicator">🎯 Target Sector: ${sectorName}</div>` 
       : '';
+
+    const displayText = data.message || data.reply;
 
     const aiBubble = document.createElement('div');
     aiBubble.className = 'chat-bubble ai';
     aiBubble.innerHTML = `
       ${sectorBadge}
-      <div>${data.reply.replace(/\n/g, '<br>')}</div>
-      ${recommendationsHtml}
-      <button class="listen-btn" onclick="speakBhashiniVoice('${escapeTextForAttr(data.reply)}', '${lang}', this)">🔊 Suniye / వినండి (Listen)</button>
-      <small class="ai-credit">✨ Source: ${data.source} • Digital India BHASHINI RAG</small>
+      <div>${displayText.replace(/\n/g, '<br>')}</div>
+      ${interactiveContentHtml}
+      <button class="listen-btn" onclick="speakBhashiniVoice('${escapeTextForAttr(displayText)}', '${lang}', this)">🔊 Suniye / వినండి (Listen)</button>
+      <small class="ai-credit">✨ Source: ${data.source || 'Udyam Setu AI Engine'} • Digital India BHASHINI RAG</small>
     `;
     chatContainer.appendChild(aiBubble);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 
-    logTerminal(`[POST /api/ai/chat] Language: ${lang} | Sector: ${data.detectedSector || 'General'}\nReply: ${data.reply.substring(0, 160)}...`);
+    logTerminal(`[POST /api/ai/chat] Type: ${data.type || 'scheme_recommendation'} | Sector: ${sectorName || 'General'}\nMessage: ${displayText.substring(0, 160)}...`);
 
     if (autoSpeak) {
       const btn = aiBubble.querySelector('.listen-btn');
-      speakBhashiniVoice(data.reply, lang, btn);
+      speakBhashiniVoice(displayText, lang, btn);
     }
   } catch (e) {
     typingBubble.remove();
@@ -844,6 +890,43 @@ async function sendChatMessage(autoSpeak = false) {
       const btn = aiBubble.querySelector('.listen-btn');
       speakBhashiniVoice(fallbackText, lang, btn);
     }
+  }
+}
+
+async function navigateToSchemeFromAI(schemeId, redirectUrl) {
+  logTerminal(`[Udyam Setu AI] Navigating to scheme details: ${schemeId} (${redirectUrl || ''})`);
+  try {
+    if (schemeId) {
+      const res = await fetch(`${API_BASE}/schemes/${schemeId}`);
+      const data = await res.json();
+      if (data.success && data.scheme) {
+        openSchemeDetails(data.scheme, { matchBadge: 'AI Recommended' });
+        return;
+      }
+    }
+  } catch (err) {
+    console.warn('Direct scheme lookup failed:', err);
+  }
+
+  // Fallback: check all registry schemes
+  try {
+    const res = await fetch(`${API_BASE}/schemes`);
+    const data = await res.json();
+    const s = (data.schemes || []).find(item => item.shortCode === schemeId || item.schemeId === schemeId);
+    if (s) {
+      openSchemeDetails(s, { matchBadge: 'AI Recommended' });
+      return;
+    }
+  } catch (e) {}
+
+  showScreen(6);
+}
+
+function sendSuggestedPrompt(promptText) {
+  const input = document.getElementById('chatInput');
+  if (input) {
+    input.value = promptText;
+    sendChatMessage();
   }
 }
 

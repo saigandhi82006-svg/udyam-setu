@@ -584,6 +584,11 @@ const COMPREHENSIVE_GOVT_SCHEMES = [
   }
 ];
 
+// Ensure every scheme has a standardized schemeId matching its shortCode
+COMPREHENSIVE_GOVT_SCHEMES.forEach(s => {
+  if (!s.schemeId) s.schemeId = s.shortCode;
+});
+
 module.exports = {
   COMPREHENSIVE_GOVT_SCHEMES
 };
