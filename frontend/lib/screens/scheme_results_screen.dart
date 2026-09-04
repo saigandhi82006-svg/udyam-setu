@@ -94,16 +94,16 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
     }
 
     return Container(
-      width: 42,
-      height: 42,
+      width: 32,
+      height: 32,
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Center(
         child: Text(
           emoji,
-          style: const TextStyle(fontSize: 20),
+          style: const TextStyle(fontSize: 14),
         ),
       ),
     );
@@ -117,7 +117,7 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
         backgroundColor: Colors.white,
         elevation: 0.5,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: AppTheme.darkText),
+          icon: const Icon(Icons.arrow_back_ios_new, size: 14, color: AppTheme.darkText),
           onPressed: () => Navigator.pop(context),
         ),
         title: Column(
@@ -125,12 +125,12 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
           children: [
             const Text(
               'Matching Schemes',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppTheme.darkText),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.darkText),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 1),
             Text(
               _showAll ? 'All Central & State Schemes' : 'Based on your information',
-              style: const TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.normal),
+              style: const TextStyle(fontSize: 10, color: Color(0xFF64748B), fontWeight: FontWeight.normal),
             ),
           ],
         ),
@@ -143,24 +143,24 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
                 // Compact Success Message Banner
                 Container(
                   width: double.infinity,
-                  margin: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  margin: const EdgeInsets.fromLTRB(14, 10, 14, 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF0FDF4),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: const Color(0xFFBBF7D0)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.check_circle_rounded, color: AppTheme.primaryGreen, size: 18),
-                      const SizedBox(width: 8),
+                      const Icon(Icons.stars_rounded, color: Color(0xFFD97706), size: 14),
+                      const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           _showAll
-                              ? '✓ Showing all ${_schemes.length} official government schemes.'
-                              : '✓ Great! We found ${_schemes.length} schemes that match your profile.',
+                              ? 'Showing all ${_schemes.length} official government schemes.'
+                              : 'Great! We found ${_schemes.length} schemes that match your profile.',
                           style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 10.5,
                             color: Color(0xFF15803D),
                             fontWeight: FontWeight.w600,
                           ),
@@ -173,7 +173,7 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
                 // List of Scheme Cards
                 Expanded(
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     itemCount: _schemes.length,
                     itemBuilder: (context, index) {
                       final scheme = _schemes[index];
@@ -185,14 +185,14 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
                 // Bottom Action: View All Schemes
                 if (!_showAll)
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     decoration: const BoxDecoration(
                       color: Colors.white,
                       boxShadow: [
                         BoxShadow(
                           color: Color(0x0F000000),
-                          blurRadius: 10,
-                          offset: Offset(0, -3),
+                          blurRadius: 8,
+                          offset: Offset(0, -2),
                         ),
                       ],
                     ),
@@ -202,19 +202,19 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primaryGreen,
                           foregroundColor: Colors.white,
-                          minimumSize: const Size.fromHeight(52),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
-                          elevation: 2,
+                          minimumSize: const Size.fromHeight(44),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+                          elevation: 1.5,
                         ),
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               'View All Schemes',
-                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                             ),
-                            SizedBox(width: 8),
-                            Icon(Icons.arrow_forward_rounded, size: 18),
+                            SizedBox(width: 6),
+                            Icon(Icons.arrow_forward_rounded, size: 14),
                           ],
                         ),
                       ),
@@ -242,35 +242,30 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
       badgeBg = const Color(0xFFE0E7FF);
       badgeText = const Color(0xFF4338CA);
     }
-
-    final String amountText = scheme.loanAmountFormatted.isNotEmpty
-        ? scheme.loanAmountFormatted
-        : 'Up to ₹${scheme.maxGrantLoanAmount}';
-
     // Limit tags to max 3 items
     final List<String> displayTags = scheme.tags.isNotEmpty
         ? scheme.tags.take(3).toList()
         : ['Low Interest', 'Easy Process', 'Collateral-Free'];
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFF1F5F9)),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x08000000),
-            blurRadius: 10,
-            offset: Offset(0, 4),
+            color: Color(0x06000000),
+            blurRadius: 8,
+            offset: Offset(0, 3),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           onTap: () {
             Navigator.push(
               context,
@@ -280,7 +275,7 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
             );
           },
           child: Padding(
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -289,54 +284,55 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildSchemeSectorIcon(scheme),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.only(right: 6),
+                        padding: const EdgeInsets.only(right: 4),
                         child: Text(
                           scheme.schemeName,
                           softWrap: true,
                           style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
                             color: AppTheme.darkText,
-                            height: 1.3,
+                            height: 1.25,
                           ),
                         ),
                       ),
                     ),
-                    // Match Score Badge Pill
+                    // Match Score Badge Pill with Circle Indicator
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                       decoration: BoxDecoration(
                         color: badgeBg,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      child: Text(
-                        scheme.matchBadge ?? '$matchScore% Match',
-                        style: TextStyle(
-                          color: badgeText,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 5,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: badgeText,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            scheme.matchBadge ?? '$matchScore% Match',
+                            style: TextStyle(
+                              color: badgeText,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 14),
-
-                // Main Financial Benefit
-                Text(
-                  amountText,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: AppTheme.primaryGreen,
-                  ),
-                ),
-
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
 
                 // Tags & View Details Line
                 Row(
@@ -348,26 +344,26 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 12,
+                          fontSize: 10,
                           color: Color(0xFF64748B),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           'View Details',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 10.5,
                             color: AppTheme.primaryGreen,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(width: 4),
-                        Icon(Icons.arrow_forward_rounded, size: 14, color: AppTheme.primaryGreen),
+                        SizedBox(width: 2),
+                        Icon(Icons.arrow_forward_rounded, size: 10.5, color: AppTheme.primaryGreen),
                       ],
                     ),
                   ],

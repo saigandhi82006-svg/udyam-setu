@@ -1328,9 +1328,8 @@ function renderSchemeCards(matches) {
         <div class="scheme-title-col">
           <div class="scheme-card-title">${displayName}</div>
         </div>
-        <span class="match-badge">${badgeText}</span>
+        <span class="match-badge"><span class="match-dot"></span>${badgeText}</span>
       </div>
-      <div class="scheme-main-benefit">${loanAmt}</div>
       <div class="scheme-card-footer">
         <span class="scheme-tags-text">${displayTagsArr.map(t => '• ' + t).join(' ')}</span>
         <span class="scheme-action-text">View Details →</span>
