@@ -88,6 +88,7 @@ class ApiService {
     required String message,
     String language = 'English',
     UserProfile? profile,
+    List<Map<String, String>>? conversationHistory,
   }) async {
     try {
       final response = await http.post(
@@ -97,6 +98,7 @@ class ApiService {
           'message': message,
           'language': language,
           'userProfile': profile?.toJson(),
+          'conversationHistory': conversationHistory ?? [],
         }),
       ).timeout(const Duration(seconds: 8));
 
@@ -104,8 +106,10 @@ class ApiService {
         final data = json.decode(response.body);
         if (data['success'] == true) {
           return {
-            'reply': data['reply'],
+            'reply': data['message'] ?? data['reply'],
             'source': data['source'] ?? 'gemini',
+            'type': data['type'],
+            'schemes': data['schemes'] ?? [],
           };
         }
       }

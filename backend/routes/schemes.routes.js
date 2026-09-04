@@ -2,11 +2,13 @@ const express = require('express');
 const router = express.Router();
 const dataStore = require('../services/dataStore');
 const { matchSchemesForUser } = require('../services/matchingEngine');
+const { COMPREHENSIVE_GOVT_SCHEMES } = require('../data/comprehensiveSchemes');
 
 // GET /api/schemes - list all active schemes
 router.get('/', async (req, res) => {
   try {
-    const { category, businessType, search } = req.query;
+    const { category, businessType, search, lang: queryLang } = req.query;
+    const lang = (queryLang || req.headers['x-language'] || '').toLowerCase();
     let schemes = await dataStore.getSchemes();
 
     if (category) {
@@ -27,6 +29,16 @@ router.get('/', async (req, res) => {
         (s.tagline && s.tagline.toLowerCase().includes(q)) ||
         (s.description && s.description.toLowerCase().includes(q))
       );
+    }
+
+    if (lang) {
+      schemes = schemes.map(s => {
+        const item = s.toObject ? s.toObject() : { ...s };
+        if (item.vernacularNames && item.vernacularNames[lang]) {
+          item.vernacularName = item.vernacularNames[lang];
+        }
+        return item;
+      });
     }
 
     return res.json({
@@ -129,11 +141,36 @@ router.post('/match', async (req, res) => {
 // GET /api/schemes/:id - scheme details
 router.get('/:id', async (req, res) => {
   try {
-    const scheme = await dataStore.getSchemeById(req.params.id);
+    const rawId = decodeURIComponent(req.params.id || '');
+    const scheme = await dataStore.getSchemeById(rawId);
     if (!scheme) {
       return res.status(404).json({ success: false, message: 'Scheme not found' });
     }
-    return res.json({ success: true, scheme });
+
+    const lang = (req.query.lang || req.headers['x-language'] || '').toLowerCase();
+    const resultScheme = typeof scheme.toObject === 'function' ? scheme.toObject() : { ...scheme };
+
+    // If vernacularNames is missing or empty, search COMPREHENSIVE_GOVT_SCHEMES
+    if (!resultScheme.vernacularNames || Object.keys(resultScheme.vernacularNames).length === 0) {
+      const matchComp = COMPREHENSIVE_GOVT_SCHEMES.find(c =>
+        (c.shortCode && resultScheme.shortCode && c.shortCode.toLowerCase() === resultScheme.shortCode.toLowerCase()) ||
+        (c.schemeName && resultScheme.schemeName && (
+          c.schemeName.toLowerCase() === resultScheme.schemeName.toLowerCase() ||
+          c.schemeName.toLowerCase().includes(resultScheme.schemeName.toLowerCase()) ||
+          resultScheme.schemeName.toLowerCase().includes(c.schemeName.toLowerCase())
+        ))
+      );
+      if (matchComp && matchComp.vernacularNames) {
+        resultScheme.vernacularNames = matchComp.vernacularNames;
+      }
+    }
+
+    if (lang && resultScheme.vernacularNames && resultScheme.vernacularNames[lang]) {
+      resultScheme.vernacularName = resultScheme.vernacularNames[lang];
+      resultScheme.requestedLanguage = lang;
+    }
+
+    return res.json({ success: true, scheme: resultScheme, language: lang || 'en' });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }

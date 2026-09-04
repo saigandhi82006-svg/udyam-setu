@@ -15,6 +15,14 @@ const SEED_SCHEMES = [
     shortCode: 'PMMY',
     category: 'Central Government',
     tagline: 'Funding the Unfunded - Collateral Free Micro Loans',
+    vernacularNames: {
+      te: 'ప్రధాన మంత్రి ముద్ర యోజన (ముద్ర వ్యాపార రుణం - రూ. 10 లక్షలు)',
+      hi: 'प्रधानमंत्री मुद्रा योजना (10 लाख तक बिना गारंटी ऋण)',
+      kn: 'ಪ್ರಧಾನ ಮಂತ್ರಿ ಮುದ್ರಾ ಯೋಜನೆ (₹10 ಲಕ್ಷದವರೆಗೆ ಸಾಲ)',
+      bn: 'প্রধানমন্ত্রী মুদ্রা যোজনা (১০ লাখ পর্যন্ত বিনা বন্ধকী ঋণ)',
+      mr: 'पंतप्रधान मुद्रा योजना (10 लाखांपर्यंत विनातारण कर्ज)',
+      ta: 'பிரதான் மந்திரி முத்ரா திட்டம் (ரூ. 10 லட்சம் வரை பிணையில்லா கடன்)'
+    },
     description: 'Pradhan Mantri Mudra Yojana (PMMY) provides loans up to ₹10 Lakh to non-corporate, non-farm small/micro enterprises. Divided into Shishu (up to ₹50,000), Kishore (₹50,000 to ₹5,00,000), and Tarun (₹5,00,000 to ₹10,00,000).',
     maxGrantLoanAmount: 1000000,
     loanAmountFormatted: 'Up to ₹10,00,000',
@@ -61,6 +69,14 @@ const SEED_SCHEMES = [
     shortCode: 'PMEGP',
     category: 'Central Government',
     tagline: 'Prime Minister Employment Generation Programme with up to 35% Subsidy',
+    vernacularNames: {
+      te: 'పీఎంఈజీపీ ఆహార తయారీ పథకం (35% ప్రభుత్వ నగదు సబ్సిడీ)',
+      hi: 'पीएमईजीपी सूक्ष्म उद्योग योजना (35% नकद सब्सिडी)',
+      kn: 'ಪಿಎಂಇಜಿಪಿ ಯೋಜನೆ (35% ನಗದು ಸಬ್ಸಿಡಿ)',
+      bn: 'পিএমইজিপি যোজনা (৩৫% সরকারি অনুদান)',
+      mr: 'पीएमईजीपी योजना (35% सरकारी अनुदान)',
+      ta: 'பிஎம்இஜிபி திட்டம் (35% மானியம்)'
+    },
     description: 'A credit-linked subsidy programme to generate self-employment opportunities through establishment of micro-enterprises in non-farm sectors by helping traditional artisans and unemployed youth.',
     maxGrantLoanAmount: 2500000,
     loanAmountFormatted: 'Up to ₹25,00,000',
@@ -105,6 +121,14 @@ const SEED_SCHEMES = [
     shortCode: 'SUIS',
     category: 'Central Government',
     tagline: 'Empowering SC, ST, and Women Entrepreneurs with Greenfield Credit',
+    vernacularNames: {
+      te: 'స్టాండ్-అప్ ఇండియా పథకం (ఎస్సీ, ఎస్టీ, మహిళలకు రూ. 1 కోటి వరకు రుణం)',
+      hi: 'स्टैंड-अप इंडिया योजना (एससी/एसटी और महिला उद्यमियों के लिए)',
+      kn: 'ಸ್ಟ್ಯಾಂಡ್-ಅಪ್ ಇಂಡಿಯಾ ಯೋಜನೆ (ಎಸ್‌ಸಿ, ಎಸ್‌ಟಿ ಮತ್ತು ಮಹಿಳಾ ಉದ್ಯಮಿಗಳಿಗೆ)',
+      bn: 'স্ট্যান্ড-আপ ইন্ডিয়া যোজনা (তফসিলি জাতি/উপজাতি ও নারী উদ্যোক্তাদের জন্য)',
+      mr: 'स्टँड-अप इंडिया योजना (अनुसूचित जाती, जमाती आणि महिलांसाठी)',
+      ta: 'ஸ்டாண்ட் அப் இந்தியா திட்டம் (எஸ்சி, எஸ்டி மற்றும் பெண் தொழில்முனைவோர்)'
+    },
     description: 'Facilitates bank loans between ₹10 Lakh and ₹1 Crore to at least one SC or ST borrower and at least one woman borrower per bank branch for setting up a greenfield enterprise.',
     maxGrantLoanAmount: 10000000,
     loanAmountFormatted: '₹10 Lakh to ₹1 Crore',
@@ -150,6 +174,14 @@ const SEED_SCHEMES = [
     shortCode: 'PMSVANIDHI',
     category: 'Central Government',
     tagline: 'Special Micro-Credit Facility for Street Vendors',
+    vernacularNames: {
+      te: 'పీఎం స్వనిధి పథకం (వీధి వ్యాపారులకు రూ. 50,000 వరకు వడ్డీ సబ్సిడీ రుణం)',
+      hi: 'पीएम स्वनिधि योजना (स्ट्रीट वेंडर्स के लिए ₹50,000 तक ऋण)',
+      kn: 'ಪಿಎಂ ಸ್ವನಿಧಿ ಯೋಜನೆ (ಬೀದಿ ವ್ಯಾಪಾರಿಗಳಿಗೆ ಸಾಲ)',
+      bn: 'প্রধানমন্ত্রী স্বনিধি যোজনা (পথ বিক্রেতাদের জন্য ৫০,০০০ টাকা ঋণ)',
+      mr: 'पीएम स्वनिधी योजना (फेरीवाल्यांसाठी ₹50,000 पर्यंत कर्ज)',
+      ta: 'பிஎம் ஸ்வநிதி திட்டம் (தெருவோர வியாபாரிகளுக்கு ₹50,000 வரை கடன்)'
+    },
     description: 'Ministry of Housing and Urban Affairs initiative providing affordable working capital credit to street vendors to resume their livelihoods with up to 7% interest subsidy.',
     maxGrantLoanAmount: 50000,
     loanAmountFormatted: 'Up to ₹50,000',
@@ -185,6 +217,14 @@ const SEED_SCHEMES = [
     shortCode: 'PMVY',
     category: 'Central Government',
     tagline: 'Holistic Support to Traditional Artisans and Craftspersons',
+    vernacularNames: {
+      te: 'పీఎం విశ్వకర్మ యోజన (చేతివృత్తుల వారికి రూ. 3 లక్షలు & రూ. 15,000 టూల్‌కిట్)',
+      hi: 'पीएम विश्वकर्मा योजना (कारीगरों के लिए ₹3 लाख ऋण और ₹15,000 टूलकिट)',
+      kn: 'ಪಿಎಂ ವಿಶ್ವಕರ್ಮ ಯೋಜನೆ (ಕುಶಲಕರ್ಮಿಗಳಿಗೆ ₹3 ಲಕ್ಷ ಸಾಲ ಮತ್ತು ₹15,000 ಟೂಲ್‌ಕಿಟ್)',
+      bn: 'প্রধানমন্ত্রী বিশ্বকর্মা যোজনা (কারিগরদের জন্য ৩ লাখ ঋণ ও ১৫,০০০ টাকা টুলকিট)',
+      mr: 'पीएम विश्वकर्मा योजना (कारागिरांसाठी ₹3 लाख कर्ज व ₹15,000 टूलकिट)',
+      ta: 'பிரதமர் விஸ்வகர்மா திட்டம் (கைவினைஞர்களுக்கு ₹3 லட்சம் கடன் மற்றும் ₹15,000 கருவித்தொகுப்பு)'
+    },
     description: 'Central sector scheme for end-to-end support to artisans and craftspeople working with hands and tools across 18 traditional trades.',
     maxGrantLoanAmount: 300000,
     loanAmountFormatted: 'Up to ₹3,00,000 (5% Concessional Interest)',
@@ -221,6 +261,14 @@ const SEED_SCHEMES = [
     shortCode: 'MCY',
     category: 'Rural Development',
     tagline: 'Women Empowerment through Rural Coir & Fiber Processing',
+    vernacularNames: {
+      te: 'మహిళా కాయిర్ యోజన (గ్రామీణ మహిళలకు 75% సబ్సిడీ)',
+      hi: 'महिला कॉयर योजना (ग्रामीण महिलाओं के लिए 75% सब्सिडी)',
+      kn: 'ಮಹಿಳಾ ಕಾಯರ್ ಯೋಜನೆ (ಗ್ರಾಮೀಣ ಮಹಿಳೆಯರಿಗೆ 75% ಸಬ್ಸಿಡಿ)',
+      bn: 'মহিলা কয়্যার যোজনা (গ্রামীণ নারীদের জন্য ৭৫% ভর্তুকি)',
+      mr: 'महिला कॉयर योजना (ग्रामीण महिलांसाठी 75% अनुदान)',
+      ta: 'மகிளா கயிறு திட்டம் (கிராமப்புற பெண்களுக்கு 75% மானியம்)'
+    },
     description: 'Women-centric self-employment scheme by the Coir Board aimed at rural women entrepreneurs providing spinning ratts with up to 75% financial subsidy.',
     maxGrantLoanAmount: 350000,
     loanAmountFormatted: 'Up to ₹3,50,000',

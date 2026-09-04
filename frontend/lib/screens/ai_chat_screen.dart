@@ -62,10 +62,20 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
     _scrollToBottom();
 
+    // Build conversation history for multi-turn context
+    final history = _messages
+        .where((m) => m.id != 'msg_init' && m.id != userMsg.id)
+        .map((m) => {
+              'role': m.sender == 'user' ? 'user' : 'model',
+              'text': m.text,
+            })
+        .toList();
+
     // Call AI Backend endpoint
     final response = await _apiService.sendAIChat(
       message: text,
       language: _selectedLanguage,
+      conversationHistory: history,
     );
 
     if (mounted) {

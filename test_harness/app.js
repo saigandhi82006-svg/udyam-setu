@@ -27,11 +27,38 @@ let currentDocuments = [
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
+  if (window.UdyamI18n && typeof window.UdyamI18n.initI18n === 'function') {
+    window.UdyamI18n.initI18n();
+  }
   checkBackendHealth();
   updateEMICalculator();
   loadNearbyPartners();
   renderDocumentChecklist();
   runSchemeMatching(false); // background populate
+});
+
+// Reactively handle language changes across the entire app
+window.addEventListener('udyam:languageChanged', (event) => {
+  const langCode = event.detail.language;
+  if (currentProfile) currentProfile.language = langCode;
+  
+  // Re-render Scheme Details if currently on screen 7
+  if (currentSelectedScheme && typeof window.refreshCurrentSchemeDetails === 'function') {
+    window.refreshCurrentSchemeDetails();
+  }
+
+  // Re-render Scheme Cards if on screen 6
+  if (window.__lastMatchedSchemes && typeof renderSchemeCards === 'function') {
+    renderSchemeCards(window.__lastMatchedSchemes);
+  }
+
+  // Re-render EMI calculator, document checklist, partners
+  if (typeof updateEMICalculator === 'function') updateEMICalculator();
+  if (typeof renderDocumentChecklist === 'function') renderDocumentChecklist();
+  if (window.__lastPartners && typeof renderPartners === 'function') {
+    renderPartners(window.__lastPartners);
+  }
+  if (typeof updateAgeCategoryBadge === 'function') updateAgeCategoryBadge();
 });
 
 // Screen Switcher
@@ -640,6 +667,13 @@ function onLanguageChanged() {
   const input = document.getElementById('chatInput');
   const voiceText = document.getElementById('voicePromptText');
   
+  if (window.UdyamI18n && typeof window.UdyamI18n.setLanguage === 'function') {
+    const code = window.UdyamI18n.normalizeLangCode(lang);
+    if (window.UdyamI18n.getActiveLanguage() !== code) {
+      window.UdyamI18n.setLanguage(code);
+    }
+  }
+
   if (lang === 'Hindi') {
     input.placeholder = 'हिंदी में पूछें या बोलें...';
     voiceText.innerText = '🎙️ बोलें (Tap to Speak in Hindi)';
@@ -756,7 +790,8 @@ let chatHistory = [];
 async function sendChatMessage(autoSpeak = false) {
   const input = document.getElementById('chatInput');
   const message = input.value.trim();
-  const lang = document.getElementById('chatLangSelect').value;
+  const lang = document.getElementById('chatLangSelect')?.value || window.__currentLanguageName || 'English';
+  const langCode = window.__currentLanguage || (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : 'en');
 
   if (!message) return;
 
@@ -783,6 +818,7 @@ async function sendChatMessage(autoSpeak = false) {
       body: JSON.stringify({
         message,
         language: lang,
+        languageCode: langCode,
         userProfile: currentProfile,
         conversationHistory: chatHistory
       })
@@ -909,10 +945,14 @@ async function sendChatMessage(autoSpeak = false) {
         </div>
       `;
     } else if (data.schemes && data.schemes.length > 0) {
+      window.__aiChatSchemes = window.__aiChatSchemes || {};
       interactiveContentHtml = `
         <div class="ai-schemes-container">
-          ${data.schemes.map(s => `
-            <div class="ai-scheme-card" onclick="navigateToSchemeFromAI('${s.scheme_id}', '${s.redirect_url || ''}')">
+          ${data.schemes.map(s => {
+            const schemeKey = 'card_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+            window.__aiChatSchemes[schemeKey] = s;
+            return `
+            <div class="ai-scheme-card" data-schemekey="${schemeKey}" onclick="navigateToSchemeFromCardKey('${schemeKey}')">
               <div class="ai-scheme-card-header">
                 <span class="ai-scheme-title">🏷️ ${s.title}</span>
                 <span class="ai-scheme-amount">${s.max_amount}</span>
@@ -922,33 +962,40 @@ async function sendChatMessage(autoSpeak = false) {
                 <span class="ai-benefit-tag">${s.benefit_tag || 'No Collateral'}</span>
               </div>
               <p class="ai-scheme-desc">${s.description}</p>
-              <button type="button" class="ai-view-scheme-btn" onclick="event.stopPropagation(); navigateToSchemeFromAI('${s.scheme_id}', '${s.redirect_url || ''}')">
+              <button type="button" class="ai-view-scheme-btn" onclick="event.stopPropagation(); navigateToSchemeFromCardKey('${schemeKey}')">
                 <span>View Full Scheme Details</span> ➔
               </button>
             </div>
-          `).join('')}
+          `;}).join('')}
         </div>
       `;
     } else if (data.recommendedSchemes && data.recommendedSchemes.length > 0) {
+      window.__aiChatSchemes = window.__aiChatSchemes || {};
       interactiveContentHtml = `
         <div class="rag-recommendations">
-          ${data.recommendedSchemes.map(s => `
-            <div class="scheme-pill" onclick="navigateToSchemeFromAI('${s.schemeId || ''}', '${s.url || ''}')">
+          ${data.recommendedSchemes.map(s => {
+            const schemeKey = 'card_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+            window.__aiChatSchemes[schemeKey] = s;
+            return `
+            <div class="scheme-pill" data-schemekey="${schemeKey}" onclick="navigateToSchemeFromCardKey('${schemeKey}')">
               <div>
                 <strong>🏷️ ${s.schemeName}</strong><br>
                 <small style="color:#64748B;">Sector: ${s.sector || 'Govt Scheme'}</small>
               </div>
               <span>${s.loanAmount || ''} ${s.subsidy ? '• ' + s.subsidy : ''}</span>
             </div>
-          `).join('')}
+          `;}).join('')}
         </div>
       `;
     }
 
     const sectorName = data.target_sector || data.detectedSector;
-    const sectorBadge = (sectorName && sectorName !== 'General Advisory')
-      ? `<div class="sector-indicator">🎯 Target Sector: ${sectorName}</div>` 
-      : '';
+    let sectorBadge = '';
+    if (data.type === 'financial_advisory') {
+      sectorBadge = `<div class="sector-indicator" style="background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;">💡 AI Financial Advisory • EMI & Repayment Terms</div>`;
+    } else if (sectorName && sectorName !== 'General Advisory') {
+      sectorBadge = `<div class="sector-indicator">🎯 Target Sector: ${sectorName}</div>`;
+    }
 
     const displayText = data.message || data.reply;
 
@@ -1011,33 +1058,99 @@ async function sendChatMessage(autoSpeak = false) {
   }
 }
 
-async function navigateToSchemeFromAI(schemeId, redirectUrl) {
-  logTerminal(`[Udyam Setu AI] Navigating to scheme details: ${schemeId} (${redirectUrl || ''})`);
+let previousScreenBeforeDetails = 4;
+
+async function navigateToSchemeFromCardKey(schemeKey) {
+  const cardData = (window.__aiChatSchemes && window.__aiChatSchemes[schemeKey]) ? window.__aiChatSchemes[schemeKey] : null;
+  const schemeId = cardData?.scheme_id || cardData?.schemeId || '';
+  const redirectUrl = cardData?.redirect_url || cardData?.url || '';
+  await navigateToSchemeFromAI(schemeId, redirectUrl, cardData);
+}
+
+async function navigateToSchemeFromAI(schemeId, redirectUrl, cardData = null) {
+  // Track previous screen so back button returns cleanly
+  for (let i = 1; i <= 10; i++) {
+    const scr = document.getElementById(`screen-${i}`);
+    if (scr && scr.classList.contains('active')) {
+      previousScreenBeforeDetails = i;
+      break;
+    }
+  }
+
+  const targetTitle = (cardData?.title || cardData?.schemeName || schemeId || '').trim();
+  logTerminal(`[Udyam Setu AI] Navigating to scheme details: ${schemeId || targetTitle}`);
+
+  // 1. Direct fetch by ID
+  if (schemeId) {
+    try {
+      const res = await fetch(`${API_BASE}/schemes/${encodeURIComponent(schemeId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.scheme) {
+          openSchemeDetails(data.scheme, { matchBadge: 'AI Recommended' });
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Direct scheme lookup failed:', err);
+    }
+  }
+
+  // 2. Fallback: Search all schemes in registry
   try {
-    if (schemeId) {
-      const res = await fetch(`${API_BASE}/schemes/${schemeId}`);
+    const res = await fetch(`${API_BASE}/schemes`);
+    if (res.ok) {
       const data = await res.json();
-      if (data.success && data.scheme) {
-        openSchemeDetails(data.scheme, { matchBadge: 'AI Recommended' });
+      const allSchemes = data.schemes || [];
+      const cleanTarget = (schemeId || targetTitle).toLowerCase();
+
+      const found = allSchemes.find(item => {
+        const sCode = (item.shortCode || '').toLowerCase();
+        const sId = (item.schemeId || '').toLowerCase();
+        const sName = (item.schemeName || '').toLowerCase();
+        return (
+          (cleanTarget && (sCode === cleanTarget || sId === cleanTarget || sName === cleanTarget)) ||
+          (cleanTarget && (sName.includes(cleanTarget) || cleanTarget.includes(sCode) || cleanTarget.includes(sId)))
+        );
+      });
+
+      if (found) {
+        openSchemeDetails(found, { matchBadge: 'AI Recommended' });
         return;
       }
     }
-  } catch (err) {
-    console.warn('Direct scheme lookup failed:', err);
+  } catch (e) {
+    console.warn('Fallback registry lookup error:', e);
   }
 
-  // Fallback: check all registry schemes
-  try {
-    const res = await fetch(`${API_BASE}/schemes`);
-    const data = await res.json();
-    const s = (data.schemes || []).find(item => item.shortCode === schemeId || item.schemeId === schemeId);
-    if (s) {
-      openSchemeDetails(s, { matchBadge: 'AI Recommended' });
-      return;
-    }
-  } catch (e) {}
+  // 3. Fallback: Construct scheme object directly from cardData so Screen 7 ALWAYS opens!
+  if (cardData) {
+    const constructed = {
+      schemeName: cardData.title || cardData.schemeName || targetTitle || 'Government Enterprise Scheme',
+      shortCode: schemeId || 'GOVT-SCHEME',
+      schemeId: schemeId || 'GOVT-SCHEME',
+      category: 'Central Government',
+      tagline: cardData.benefit_tag || cardData.subsidy || 'Government Supported Enterprise Credit Scheme',
+      description: cardData.description || 'Special credit facility providing collateral-free capital and financial assistance for micro and small enterprises.',
+      loanAmountFormatted: cardData.max_amount || cardData.loanAmount || 'Up to ₹10,00,000',
+      maxGrantLoanAmount: 1000000,
+      interestRate: '8% - 12% (approx.)',
+      repaymentPeriod: 'Up to 5 - 7 Years',
+      whoCanApply: cardData.sector || 'Micro & Small Business Enterprises',
+      purpose: 'Working Capital, Machinery Purchase, Business Setup',
+      benefits: [
+        cardData.benefit_tag || '100% Collateral-free credit support',
+        'Direct subsidy & interest subvention benefits',
+        'Simplified application and priority banking sanction'
+      ],
+      eligibleCategories: ['General', 'OBC', 'SC', 'ST', 'Women Entrepreneur', 'Differently Abled (Divyangjan)'],
+      eligibleBusinessTypes: ['All', 'Food Business', 'Retail / Kirana Shop', 'Handicrafts & Handlooms', 'Agriculture & Allied', 'Textile & Garments', 'Manufacturing & Fabrication', 'Services / Repair Shop', 'Street Vending']
+    };
+    openSchemeDetails(constructed, { matchBadge: 'AI Recommended' });
+    return;
+  }
 
-  showScreen(6);
+  showScreen(7);
 }
 
 function sendSuggestedPrompt(promptText) {
@@ -1074,20 +1187,21 @@ function updateAgeCategoryBadge() {
     badge.className = 'form-badge-pill';
     badge.style.background = '#FEE2E2';
     badge.style.color = '#991B1B';
-    badge.innerText = '⚠️ Minimum age for government schemes is 18 years';
+    badge.innerText = (typeof t === 'function') ? t('screen5.badge_underage', '⚠️ Minimum age for government schemes is 18 years') : '⚠️ Minimum age for government schemes is 18 years';
   } else if (age <= 35) {
     badge.className = 'form-badge-pill youth';
-    badge.innerText = '⚡ Youth (18-35) • High Subsidy Priority';
+    badge.innerText = (typeof t === 'function') ? t('screen5.badge_youth', '⚡ Youth (18-35) • High Subsidy Priority') : '⚡ Youth (18-35) • High Subsidy Priority';
   } else if (age <= 55) {
     badge.className = 'form-badge-pill mature';
-    badge.innerText = '💼 Prime Entrepreneur (36-55) • Full Credit Eligibility';
+    badge.innerText = (typeof t === 'function') ? t('screen5.badge_mature', '💼 Prime Entrepreneur (36-55) • Full Credit Eligibility') : '💼 Prime Entrepreneur (36-55) • Full Credit Eligibility';
   } else {
     badge.className = 'form-badge-pill';
     badge.style.background = '#F3E8FF';
     badge.style.color = '#6B21A8';
-    badge.innerText = '🌟 Senior Entrepreneur (56+) • Special Advisory Support';
+    badge.innerText = (typeof t === 'function') ? t('screen5.badge_senior', '🌟 Senior Entrepreneur (56+) • Special Advisory Support') : '🌟 Senior Entrepreneur (56+) • Special Advisory Support';
   }
 }
+window.updateAgeCategoryBadge = updateAgeCategoryBadge;
 
 // 3. Profiling & Rule-Based Matching (Screen 5 & 6)
 async function runSchemeMatching(shouldNavigate = true) {
@@ -1114,6 +1228,7 @@ async function runSchemeMatching(shouldNavigate = true) {
     const data = await res.json();
 
     if (data.success && data.matches) {
+      window.__lastMatchedSchemes = data.matches;
       renderSchemeCards(data.matches);
       const disInfo = currentProfile.hasDisability ? ` | Divyangjan: ${currentProfile.disabilityType} (${currentProfile.disabilityPercentage})` : '';
       logTerminal(`[POST /api/schemes/match] Processed profile: Age ${currentProfile.age} (${currentProfile.gender}), Cat ${currentProfile.category}${disInfo}, Area ${currentProfile.locationType}\nMatched ${data.matchedCount} schemes.`);
@@ -1130,24 +1245,46 @@ async function runSchemeMatching(shouldNavigate = true) {
 function renderSchemeCards(matches) {
   const container = document.getElementById('schemeListContainer');
   container.innerHTML = '';
+  const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
 
   matches.forEach((item, idx) => {
-    const scheme = item.scheme;
+    const rawScheme = item.scheme;
+    const scheme = (window.UdyamI18n && typeof window.UdyamI18n.getLocalizedSchemeDetails === 'function')
+      ? window.UdyamI18n.getLocalizedSchemeDetails(rawScheme, curLang)
+      : rawScheme;
+
     const card = document.createElement('div');
     card.className = 'scheme-card';
     card.onclick = () => openSchemeDetails(scheme, item);
 
+    const displayName = scheme.displayName || scheme.schemeName;
+    const loanAmt = (window.UdyamI18n && typeof window.UdyamI18n.localizeLoanAmount === 'function')
+      ? window.UdyamI18n.localizeLoanAmount(scheme.loanAmountFormatted || 'Up to ₹' + scheme.maxGrantLoanAmount, curLang)
+      : (scheme.loanAmountFormatted || 'Up to ₹' + scheme.maxGrantLoanAmount);
+
+    const rawBadge = item.matchBadge || '85% Match';
+    const badgeText = (window.UdyamI18n && typeof window.UdyamI18n.localizeBadge === 'function')
+      ? window.UdyamI18n.localizeBadge(rawBadge, curLang)
+      : rawBadge;
+
+    const rawTags = (scheme.tags && scheme.tags.length) ? scheme.tags : ['Low Interest', 'Easy Process', 'Collateral-Free', 'Top Choice'];
+    const tagsArr = (window.UdyamI18n && typeof window.UdyamI18n.localizeTags === 'function')
+      ? window.UdyamI18n.localizeTags(rawTags, curLang)
+      : rawTags;
+
+    const viewDetailsText = (typeof t === 'function') ? t('common.view_details', (t('screen4.view_details', 'View Details ›'))) : 'View Details ›';
+
     card.innerHTML = `
       <div class="scheme-card-top">
         <div>
-          <div class="scheme-card-title">${scheme.schemeName}</div>
-          <div class="scheme-loan-amount">${scheme.loanAmountFormatted || 'Up to ₹' + scheme.maxGrantLoanAmount}</div>
+          <div class="scheme-card-title">${displayName}</div>
+          <div class="scheme-loan-amount">${loanAmt}</div>
         </div>
-        <span class="match-badge">${item.matchBadge || '85% Match'}</span>
+        <span class="match-badge">${badgeText}</span>
       </div>
       <div class="scheme-tags">
-        <span>${scheme.tags && scheme.tags.length ? scheme.tags.join(' • ') : 'Low Interest • Easy Process'}</span>
-        <strong style="color: var(--primary-green);">View Details ›</strong>
+        <span>${tagsArr.join(' • ')}</span>
+        <strong style="color: var(--primary-green);">${viewDetailsText}</strong>
       </div>
     `;
     container.appendChild(card);
@@ -1163,6 +1300,7 @@ async function loadAllRegistrySchemes() {
         scheme: s,
         matchBadge: 'Registered Scheme'
       }));
+      window.__lastMatchedSchemes = formatted;
       renderSchemeCards(formatted);
       logTerminal(`[GET /api/schemes] Loaded all ${data.count} official schemes in registry.`);
     }
@@ -1171,22 +1309,91 @@ async function loadAllRegistrySchemes() {
 
 // 4. Scheme Details (Screen 7)
 function openSchemeDetails(scheme, matchMeta) {
-  currentSelectedScheme = scheme;
-  document.getElementById('detailSchemeName').innerText = scheme.schemeName;
-  document.getElementById('detailMatchBadge').innerText = (matchMeta && matchMeta.matchBadge) ? matchMeta.matchBadge : '90% Match';
-  document.getElementById('checklistSchemeName').innerText = scheme.schemeName;
+  if (!scheme) return;
+  const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
+  
+  const locScheme = (window.UdyamI18n && typeof window.UdyamI18n.getLocalizedSchemeDetails === 'function')
+    ? window.UdyamI18n.getLocalizedSchemeDetails(scheme, curLang)
+    : scheme;
+
+  currentSelectedScheme = locScheme;
+
+  const name = locScheme.displayName || locScheme.schemeName || 'Scheme Details';
+  const nameEl = document.getElementById('detailSchemeName');
+  if (nameEl) nameEl.innerText = name;
+
+  const rawBadge = (matchMeta && matchMeta.matchBadge) ? matchMeta.matchBadge : '90% Match';
+  const badgeText = (window.UdyamI18n && typeof window.UdyamI18n.localizeBadge === 'function')
+    ? window.UdyamI18n.localizeBadge(rawBadge, curLang)
+    : rawBadge;
+
+  const badgeEl = document.getElementById('detailMatchBadge');
+  if (badgeEl) badgeEl.innerText = badgeText;
+
+  const checkEl = document.getElementById('checklistSchemeName');
+  if (checkEl) checkEl.innerText = name;
 
   switchDetailTab('overview');
   showScreen(7);
+
+  const screen7 = document.getElementById('screen-7');
+  if (screen7) screen7.scrollTop = 0;
 }
 
-function switchDetailTab(tab) {
-  const tabs = document.querySelectorAll('.tab-btn');
+window.refreshCurrentSchemeDetails = function() {
+  if (currentSelectedScheme) {
+    const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
+    const locScheme = (window.UdyamI18n && typeof window.UdyamI18n.getLocalizedSchemeDetails === 'function')
+      ? window.UdyamI18n.getLocalizedSchemeDetails(currentSelectedScheme, curLang)
+      : currentSelectedScheme;
+
+    currentSelectedScheme = locScheme;
+
+    const name = locScheme.displayName || locScheme.schemeName || 'Scheme Details';
+    const nameEl = document.getElementById('detailSchemeName');
+    if (nameEl) nameEl.innerText = name;
+    const checkEl = document.getElementById('checklistSchemeName');
+    if (checkEl) checkEl.innerText = name;
+
+    const badgeEl = document.getElementById('detailMatchBadge');
+    if (badgeEl) {
+      badgeEl.innerText = (window.UdyamI18n && typeof window.UdyamI18n.localizeBadge === 'function')
+        ? window.UdyamI18n.localizeBadge(badgeEl.innerText, curLang)
+        : badgeEl.innerText;
+    }
+
+    const activeTabBtn = document.querySelector('#screen-7 .tab-btn.active');
+    const activeTab = activeTabBtn ? (activeTabBtn.getAttribute('onclick')?.match(/'([^']+)'/)?.[1] || 'overview') : 'overview';
+    switchDetailTab(activeTab);
+  }
+};
+
+function switchDetailTab(tab, element = null) {
+  const tabs = document.querySelectorAll('#screen-7 .tab-btn');
   tabs.forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
+
+  let targetBtn = element;
+  if (!targetBtn && typeof event !== 'undefined' && event && event.target && event.target.classList && event.target.classList.contains('tab-btn')) {
+    targetBtn = event.target;
+  }
+  if (!targetBtn) {
+    targetBtn = Array.from(tabs).find(t => 
+      t.getAttribute('onclick')?.includes(`'${tab}'`) || 
+      t.getAttribute('onclick')?.includes(`"${tab}"`) ||
+      t.textContent.trim().toLowerCase() === tab.toLowerCase()
+    );
+  }
+  if (targetBtn) {
+    targetBtn.classList.add('active');
+  } else if (tabs.length > 0) {
+    tabs[0].classList.add('active');
+  }
 
   const content = document.getElementById('detailTabContent');
-  const s = currentSelectedScheme || {
+  if (!content) return;
+
+  const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
+  const rawScheme = currentSelectedScheme || {
     schemeName: 'PM Mudra Yojana',
     description: 'Pradhan Mantri Mudra Yojana (PMMY) provides loans up to ₹10 Lakh to non-corporate micro/small enterprises.',
     loanAmountFormatted: 'Up to ₹10,00,000',
@@ -1203,42 +1410,71 @@ function switchDetailTab(tab) {
     eligibleBusinessTypes: ['Food Business', 'Retail / Kirana', 'Handicrafts', 'Manufacturing']
   };
 
+  const s = (window.UdyamI18n && typeof window.UdyamI18n.getLocalizedSchemeDetails === 'function')
+    ? window.UdyamI18n.getLocalizedSchemeDetails(rawScheme, curLang)
+    : rawScheme;
+
+  const loanAmt = s.loanAmountFormatted || s.max_amount || (s.maxGrantLoanAmount ? 'Up to ₹' + Number(s.maxGrantLoanAmount).toLocaleString('en-IN') : 'Up to ₹10,00,000');
+  const intRate = s.interestRate || '8% - 12% (approx.)';
+  const repay = s.repaymentPeriod || (s.repaymentPeriodYears ? `Up to ${s.repaymentPeriodYears} Years` : 'Up to 5 - 7 Years');
+  const whoApply = s.whoCanApply || s.sector || 'Micro & Small Enterprises';
+  const purpose = s.purpose || 'Business Expansion & Working Capital';
+  const desc = s.description || 'Government-backed credit facility designed to empower enterprise growth.';
+
+  const labelLoanAmount = (typeof t === 'function') ? t('screen7.loan_amount', 'Loan Amount') : 'Loan Amount';
+  const labelInterestRate = (typeof t === 'function') ? t('screen7.interest_rate', 'Interest Rate') : 'Interest Rate';
+  const labelRepayment = (typeof t === 'function') ? t('screen7.repayment_period', 'Repayment Period') : 'Repayment Period';
+  const labelWhoApply = (typeof t === 'function') ? t('screen7.who_can_apply', 'Who can apply?') : 'Who can apply?';
+  const labelPurpose = (typeof t === 'function') ? t('screen7.purpose', 'Purpose') : 'Purpose';
+  const labelMinAge = (typeof t === 'function') ? t('screen7.min_age', 'Min Age') : 'Min Age';
+  const labelEligibleCats = (typeof t === 'function') ? t('screen7.eligible_categories', 'Eligible Categories') : 'Eligible Categories';
+  const labelEligibleBiz = (typeof t === 'function') ? t('screen7.eligible_business', 'Eligible Business') : 'Eligible Business';
+  const labelIncomeCap = (typeof t === 'function') ? t('screen7.income_cap', 'Income Cap') : 'Income Cap';
+  const labelKeyAdvantages = (typeof t === 'function') ? t('screen7.key_advantages', 'Key Financial Advantages:') : 'Key Financial Advantages:';
+  const labelDocChecklist = (typeof t === 'function') ? t('screen7.doc_checklist_title', 'Documents Checklist:') : 'Documents Checklist:';
+  const labelDocSub = (typeof t === 'function') ? t('screen7.doc_checklist_sub', 'Keep these documents prepared before submitting to bank:') : 'Keep these documents prepared before submitting to bank:';
+
   if (tab === 'overview') {
     content.innerHTML = `
-      <p style="margin-bottom: 12px; color: #475569;">${s.description}</p>
-      <div class="spec-row"><span>Loan Amount</span><strong>${s.loanAmountFormatted}</strong></div>
-      <div class="spec-row"><span>Interest Rate</span><strong>${s.interestRate}</strong></div>
-      <div class="spec-row"><span>Repayment Period</span><strong>${s.repaymentPeriod}</strong></div>
-      <div class="spec-row"><span>Who can apply?</span><strong>${s.whoCanApply}</strong></div>
-      <div class="spec-row"><span>Purpose</span><strong>${s.purpose}</strong></div>
+      <p style="margin-bottom: 12px; color: #475569; line-height: 1.6;">${desc}</p>
+      <div class="spec-row"><span>${labelLoanAmount}</span><strong>${loanAmt}</strong></div>
+      <div class="spec-row"><span>${labelInterestRate}</span><strong>${intRate}</strong></div>
+      <div class="spec-row"><span>${labelRepayment}</span><strong>${repay}</strong></div>
+      <div class="spec-row"><span>${labelWhoApply}</span><strong>${whoApply}</strong></div>
+      <div class="spec-row"><span>${labelPurpose}</span><strong>${purpose}</strong></div>
     `;
   } else if (tab === 'benefits') {
-    const list = (s.benefits && s.benefits.length) ? s.benefits : ['Zero collateral required', 'Interest subvention available'];
+    const list = (s.benefits && s.benefits.length) ? s.benefits : [s.tagline || 'Zero collateral required', 'Interest subvention available', 'Government institutional handholding'];
     content.innerHTML = `
-      <h5 style="margin-bottom: 10px; font-size: 13px;">Key Financial Advantages:</h5>
+      <h5 style="margin-bottom: 10px; font-size: 13px;">${labelKeyAdvantages}</h5>
       <ul style="padding-left: 18px; line-height: 1.8;">
         ${list.map(b => `<li>${b}</li>`).join('')}
       </ul>
     `;
   } else if (tab === 'eligibility') {
+    const cats = (s.eligibleCategories && s.eligibleCategories.length) ? s.eligibleCategories : ['General', 'OBC', 'SC', 'ST', 'Women Entrepreneur'];
+    const bizTypes = (s.eligibleBusinessTypes && s.eligibleBusinessTypes.length) ? s.eligibleBusinessTypes : ['All Micro-Enterprises'];
     content.innerHTML = `
-      <div class="spec-row"><span>Min Age</span><strong>${s.minAge || 18} Years</strong></div>
-      <div class="spec-row"><span>Eligible Categories</span><strong>${(s.eligibleCategories || []).join(', ')}</strong></div>
-      <div class="spec-row"><span>Eligible Business</span><strong>${(s.eligibleBusinessTypes || []).join(', ')}</strong></div>
-      <div class="spec-row"><span>Income Cap</span><strong>${s.maxIncome ? 'Up to ₹' + s.maxIncome : 'No restrictive ceiling'}</strong></div>
+      <div class="spec-row"><span>${labelMinAge}</span><strong>${s.minAge || '18 ' + (typeof t === 'function' ? t('common.years', 'Years') : 'Years')}</strong></div>
+      <div class="spec-row"><span>${labelEligibleCats}</span><strong>${cats.join(', ')}</strong></div>
+      <div class="spec-row"><span>${labelEligibleBiz}</span><strong>${bizTypes.join(', ')}</strong></div>
+      <div class="spec-row"><span>${labelIncomeCap}</span><strong>${s.incomeCap || (s.maxIncome ? 'Up to ₹' + Number(s.maxIncome).toLocaleString('en-IN') : (typeof t === 'function' ? t('common.no_restrictive_ceiling', 'No restrictive ceiling') : 'No restrictive ceiling'))}</strong></div>
     `;
   } else if (tab === 'documents') {
+    const docs = (s.requiredDocuments && s.requiredDocuments.length)
+      ? s.requiredDocuments.map(d => ({ docName: d.docName || d, status: d.status || 'Pending' }))
+      : currentDocuments;
     content.innerHTML = `
-      <h5 style="margin-bottom: 8px;">Documents Checklist:</h5>
-      <p style="color: #64748B; font-size: 11px; margin-bottom: 12px;">Keep these documents prepared before submitting to bank:</p>
+      <h5 style="margin-bottom: 8px;">${labelDocChecklist}</h5>
+      <p style="color: #64748B; font-size: 11px; margin-bottom: 12px;">${labelDocSub}</p>
       <div class="doc-list">
-        ${currentDocuments.map(d => `
+        ${docs.map(d => `
           <div class="doc-item">
             <div class="doc-meta">
               <h5>${d.docName}</h5>
-              <span class="${d.status.toLowerCase()}">${d.status}</span>
+              <span class="${(d.status || 'Pending').toLowerCase()}">${(typeof t === 'function') ? (d.status === 'Uploaded' ? t('common.uploaded', 'Uploaded') : t('common.pending', 'Pending')) : (d.status || 'Pending')}</span>
             </div>
-            <div class="status-badge-circle ${d.status.toLowerCase()}">${d.status === 'Uploaded' ? '✓' : '⧗'}</div>
+            <div class="status-badge-circle ${(d.status || 'Pending').toLowerCase()}">${d.status === 'Uploaded' ? '✓' : '⧗'}</div>
           </div>
         `).join('')}
       </div>
@@ -1246,15 +1482,23 @@ function switchDetailTab(tab) {
   }
 }
 
+function handleBackFromDetails() {
+  showScreen(previousScreenBeforeDetails || 6);
+}
+
 // 5. EMI Calculator (Screen 8)
 function updateEMICalculator() {
   const P = parseFloat(document.getElementById('loanRange').value) || 500000;
   const annualRate = parseFloat(document.getElementById('rateRange').value) || 10;
   const tenureYears = parseInt(document.getElementById('tenureRange').value) || 3;
+  const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
+
+  const yearsWord = (typeof t === 'function') ? t('common.years', 'Years') : 'Years';
+  const perMonthWord = (typeof t === 'function') ? t('common.per_month', '/ month') : '/ month';
 
   document.getElementById('calcLoanVal').innerText = '₹ ' + P.toLocaleString('en-IN');
   document.getElementById('calcRateVal').innerText = annualRate + ' %';
-  document.getElementById('calcTenureVal').innerText = tenureYears + ' Years';
+  document.getElementById('calcTenureVal').innerText = `${tenureYears} ${yearsWord}`;
 
   const r = (annualRate / 100) / 12;
   const n = tenureYears * 12;
@@ -1266,7 +1510,21 @@ function updateEMICalculator() {
   const totalPayment = displayEmi * n;
   const totalInterest = totalPayment - P;
 
-  document.getElementById('calculatedEmiText').innerText = `₹ ${displayEmi.toLocaleString('en-IN')} / month`;
+  if (curLang === 'te') {
+    document.getElementById('calculatedEmiText').innerText = `నెలకు ₹ ${displayEmi.toLocaleString('en-IN')}`;
+  } else if (curLang === 'hi') {
+    document.getElementById('calculatedEmiText').innerText = `प्रति माह ₹ ${displayEmi.toLocaleString('en-IN')}`;
+  } else if (curLang === 'kn') {
+    document.getElementById('calculatedEmiText').innerText = `ತಿಂಗಳಿಗೆ ₹ ${displayEmi.toLocaleString('en-IN')}`;
+  } else if (curLang === 'ta') {
+    document.getElementById('calculatedEmiText').innerText = `மாதத்திற்கு ₹ ${displayEmi.toLocaleString('en-IN')}`;
+  } else if (curLang === 'mr') {
+    document.getElementById('calculatedEmiText').innerText = `दरमहा ₹ ${displayEmi.toLocaleString('en-IN')}`;
+  } else if (curLang === 'bn') {
+    document.getElementById('calculatedEmiText').innerText = `প্রতি মাসে ₹ ${displayEmi.toLocaleString('en-IN')}`;
+  } else {
+    document.getElementById('calculatedEmiText').innerText = `₹ ${displayEmi.toLocaleString('en-IN')} ${perMonthWord}`;
+  }
   document.getElementById('calcPrincipalText').innerText = `₹ ${P.toLocaleString('en-IN')}`;
   document.getElementById('calcInterestText').innerText = `₹ ${totalInterest.toLocaleString('en-IN')}`;
 }
@@ -1277,28 +1535,40 @@ async function loadNearbyPartners() {
     const res = await fetch(`${API_BASE}/partners/nearby?lat=17.3850&lng=78.4867`);
     const data = await res.json();
     if (data.partners) {
+      window.__lastPartners = data.partners;
       renderPartners(data.partners);
     }
   } catch (e) {
-    renderPartners([
+    const fallback = [
       { partnerName: 'Andhra Grameena Bank', distanceKm: 0.8, type: 'Bank', contactPhone: '+91 40 2475 8890' },
       { partnerName: 'KVK Business Center', distanceKm: 1.5, type: 'KVK', contactPhone: '+91 40 2401 5380' },
       { partnerName: 'State Bank of India', distanceKm: 2.3, type: 'Bank', contactPhone: '+91 40 2320 1200' }
-    ]);
+    ];
+    window.__lastPartners = fallback;
+    renderPartners(fallback);
   }
 }
 
 function renderPartners(partners) {
   const container = document.getElementById('partnerListContainer');
   container.innerHTML = '';
+  const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
+  const kmAwayWord = (typeof t === 'function') ? t('common.km_away', 'km away') : 'km away';
 
   partners.slice(0, 3).forEach(p => {
+    let pType = p.type;
+    if (curLang === 'te') {
+      pType = p.type === 'Bank' ? 'బ్యాంకు శాఖ' : (p.type === 'KVK' ? 'వ్యవసాయ విజ్ఞాన కేంద్రం (KVK)' : 'డిజిటల్ సేవా కేంద్రం (CSC)');
+    } else if (curLang === 'hi') {
+      pType = p.type === 'Bank' ? 'बैंक शाखा' : (p.type === 'KVK' ? 'कृषि विज्ञान केंद्र' : 'डिजिटल सेवा केंद्र');
+    }
+
     const card = document.createElement('div');
     card.className = 'partner-card';
     card.innerHTML = `
       <div class="partner-info">
         <h5>${p.partnerName}</h5>
-        <p>${p.distanceKm} km away • ${p.type}</p>
+        <p>${p.distanceKm} ${kmAwayWord} • ${pType}</p>
       </div>
       <button class="call-btn" title="Call Partner" onclick="alert('Calling ${p.contactPhone}...')">📞</button>
     `;
@@ -1310,17 +1580,68 @@ function renderPartners(partners) {
 function renderDocumentChecklist() {
   const container = document.getElementById('docListContainer');
   container.innerHTML = '';
+  const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
+
+  const docNamesMap = {
+    te: {
+      'Aadhaar Card': 'ఆధార్ కార్డు',
+      'PAN Card': 'పాన్ కార్డు',
+      'Business Plan': 'వ్యాపార ప్రణాళిక పత్రం',
+      'Bank Statement': 'గత 6 నెలల బ్యాంక్ స్టేట్‌మెంట్',
+      'Address Proof': 'చిరునామా రుజువు (కరెంట్ బిల్లు / అద్దె ఒప్పందం)'
+    },
+    hi: {
+      'Aadhaar Card': 'आधार कार्ड',
+      'PAN Card': 'पैन कार्ड',
+      'Business Plan': 'व्यावसायिक योजना',
+      'Bank Statement': 'बैंक विवरण',
+      'Address Proof': 'पते का प्रमाण'
+    },
+    kn: {
+      'Aadhaar Card': 'ಆಧಾರ್ ಕಾರ್ಡ್',
+      'PAN Card': 'ಪ್ಯಾನ್ ಕಾರ್ಡ್',
+      'Business Plan': 'ವ್ಯವಹಾರ ಯೋಜನೆ',
+      'Bank Statement': 'ಬ್ಯಾಂಕ್ ವಿವರಣೆ',
+      'Address Proof': 'ವಿಳಾಸ ಪುರಾವೆ'
+    },
+    ta: {
+      'Aadhaar Card': 'ஆதார் அட்டை',
+      'PAN Card': 'பான் அட்டை',
+      'Business Plan': 'வணிகத் திட்டம்',
+      'Bank Statement': 'வங்கி அறிக்கை',
+      'Address Proof': 'முகவரி சான்று'
+    },
+    mr: {
+      'Aadhaar Card': 'आधार कार्ड',
+      'PAN Card': 'पॅन कार्ड',
+      'Business Plan': 'व्यवसाय योजना',
+      'Bank Statement': 'बँक स्टेटमेंट',
+      'Address Proof': 'पत्ता पुरावा'
+    },
+    bn: {
+      'Aadhaar Card': 'আধার কার্ড',
+      'PAN Card': 'প্যান কার্ড',
+      'Business Plan': 'ব্যবসায়িক পরিকল্পনা',
+      'Bank Statement': 'ব্যাংক স্টেটমেন্ট',
+      'Address Proof': 'ঠিকানার প্রমাণ'
+    }
+  };
 
   let uploadedCount = 0;
   currentDocuments.forEach((doc, idx) => {
     if (doc.status === 'Uploaded') uploadedCount++;
 
+    const localizedDocName = (docNamesMap[curLang] && docNamesMap[curLang][doc.docName]) || doc.docName;
+    const localizedStatus = (typeof t === 'function')
+      ? (doc.status === 'Uploaded' ? t('common.uploaded', 'Uploaded') : t('common.pending', 'Pending'))
+      : doc.status;
+
     const item = document.createElement('div');
     item.className = 'doc-item';
     item.innerHTML = `
       <div class="doc-meta">
-        <h5>${doc.docName}</h5>
-        <span class="${doc.status.toLowerCase()}">${doc.status} ${doc.size ? '(' + doc.size + ')' : ''}</span>
+        <h5>${localizedDocName}</h5>
+        <span class="${doc.status.toLowerCase()}">${localizedStatus} ${doc.size ? '(' + doc.size + ')' : ''}</span>
       </div>
       <div class="status-badge-circle ${doc.status.toLowerCase()}" onclick="toggleDocStatus(${idx})">
         ${doc.status === 'Uploaded' ? '✓' : '⧗'}
@@ -1329,10 +1650,24 @@ function renderDocumentChecklist() {
     container.appendChild(item);
   });
 
-  document.getElementById('docCountText').innerText = `${uploadedCount} of ${currentDocuments.length} Documents Uploaded`;
-  const pct = Math.round((uploadedCount / currentDocuments.length) * 100);
-  document.getElementById('docProgressBar').style.width = `${pct}%`;
-  document.querySelector('.ready-badge').innerText = `${pct}% Ready`;
+  const totalDocs = currentDocuments.length;
+  if (curLang === 'te') {
+    document.getElementById('docCountText').innerText = `${totalDocs} లో ${uploadedCount} పత్రాలు అప్‌లోడ్ అయ్యాయి`;
+    const readyEl = document.querySelector('.ready-badge');
+    if (readyEl) readyEl.innerText = `${Math.round((uploadedCount / totalDocs) * 100)}% సిద్ధంగా ఉంది`;
+  } else if (curLang === 'hi') {
+    document.getElementById('docCountText').innerText = `${totalDocs} में से ${uploadedCount} दस्तावेज अपलोड हुए`;
+    const readyEl = document.querySelector('.ready-badge');
+    if (readyEl) readyEl.innerText = `${Math.round((uploadedCount / totalDocs) * 100)}% तैयार`;
+  } else {
+    document.getElementById('docCountText').innerText = `${uploadedCount} of ${totalDocs} Documents Uploaded`;
+    const pct = Math.round((uploadedCount / totalDocs) * 100);
+    const readyEl = document.querySelector('.ready-badge');
+    if (readyEl) readyEl.innerText = `${pct}% Ready`;
+  }
+  const pct = Math.round((uploadedCount / totalDocs) * 100);
+  const progEl = document.getElementById('docProgressBar');
+  if (progEl) progEl.style.width = `${pct}%`;
 }
 
 function toggleDocStatus(index) {

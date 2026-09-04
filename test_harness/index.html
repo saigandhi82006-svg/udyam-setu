@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="i18n.js"></script>
   <!-- Official Google Identity Services SDK for Live accounts.google.com OAuth -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -20,62 +21,74 @@
       </div>
       <div>
         <h1 class="brand-title">Udyam Setu <span class="sih-tag">SIH 2026 • PS ID: 92</span></h1>
-        <p class="brand-sub">Right Scheme • Right Guidance • Right Growth</p>
+        <p class="brand-sub" data-i18n="brand.tagline">Right Scheme • Right Guidance • Right Growth</p>
       </div>
     </div>
     <div class="nav-actions">
-      <div class="backend-status" id="backendStatus">
-        <span class="status-dot"></span> Backend Online: Port 5000
+      <div class="lang-switcher-wrapper">
+        <span class="lang-icon">🌐</span>
+        <select id="navLangSelect" class="lang-switcher-select" onchange="setLanguage(this.value)">
+          <option value="en">English (Indian)</option>
+          <option value="hi">हिन्दी (Hindi)</option>
+          <option value="te">తెలుగు (Telugu)</option>
+          <option value="kn">ಕನ್ನಡ (Kannada)</option>
+          <option value="ta">தமிழ் (Tamil)</option>
+          <option value="mr">मराठी (Marathi)</option>
+          <option value="bn">বাংলা (Bengali)</option>
+        </select>
       </div>
-      <button class="nav-btn" onclick="switchView('mobile')">📱 Mobile App Simulator</button>
-      <button class="nav-btn secondary" onclick="switchView('api')">⚡ Live API Tester</button>
+      <div class="backend-status" id="backendStatus">
+        <span class="status-dot"></span> <span data-i18n="brand.backend_online">Backend Online: Port 5000</span>
+      </div>
+      <button class="nav-btn" onclick="switchView('mobile')" data-i18n="brand.mobile_sim">📱 Mobile App Simulator</button>
+      <button class="nav-btn secondary" onclick="switchView('api')" data-i18n="brand.api_tester">⚡ Live API Tester</button>
     </div>
   </header>
 
   <main class="main-layout">
     <!-- Left Screen Switcher / Journey Step Tracker -->
     <aside class="workflow-sidebar">
-      <h3 class="sidebar-title">APP INTERFACE • STEP-BY-STEP</h3>
+      <h3 class="sidebar-title" data-i18n="sidebar.title">APP INTERFACE • STEP-BY-STEP</h3>
       <div class="steps-nav" id="stepsNav">
         <button class="step-btn active" onclick="showScreen(1)">
           <span class="step-num">1</span>
-          <div class="step-meta"><strong>Splash Screen</strong><small>Welcome & mission</small></div>
+          <div class="step-meta"><strong data-i18n="sidebar.step1_title">Splash Screen</strong><small data-i18n="sidebar.step1_sub">Welcome & mission</small></div>
         </button>
         <button class="step-btn" onclick="showScreen(2)">
           <span class="step-num">2</span>
-          <div class="step-meta"><strong>Login / Sign Up</strong><small>OTP & guest access</small></div>
+          <div class="step-meta"><strong data-i18n="sidebar.step2_title">Login / Sign Up</strong><small data-i18n="sidebar.step2_sub">OTP & guest access</small></div>
         </button>
         <button class="step-btn" onclick="showScreen(3)">
           <span class="step-num">3</span>
-          <div class="step-meta"><strong>Home Dashboard</strong><small>Quick access grid</small></div>
+          <div class="step-meta"><strong data-i18n="sidebar.step3_title">Home Dashboard</strong><small data-i18n="sidebar.step3_sub">Quick access grid</small></div>
         </button>
         <button class="step-btn" onclick="showScreen(4)">
           <span class="step-num">4</span>
-          <div class="step-meta"><strong>AI Chat / Ask</strong><small>Gemini vernacular AI</small></div>
+          <div class="step-meta"><strong data-i18n="sidebar.step4_title">AI Chat / Ask</strong><small data-i18n="sidebar.step4_sub">Gemini vernacular AI</small></div>
         </button>
         <button class="step-btn" onclick="showScreen(5)">
           <span class="step-num">5</span>
-          <div class="step-meta"><strong>User Details</strong><small>Step-by-step profiling</small></div>
+          <div class="step-meta"><strong data-i18n="sidebar.step5_title">User Details</strong><small data-i18n="sidebar.step5_sub">Step-by-step profiling</small></div>
         </button>
         <button class="step-btn" onclick="showScreen(6)">
           <span class="step-num">6</span>
-          <div class="step-meta"><strong>Scheme Match Results</strong><small>Rule engine scores</small></div>
+          <div class="step-meta"><strong data-i18n="sidebar.step6_title">Scheme Match Results</strong><small data-i18n="sidebar.step6_sub">Rule engine scores</small></div>
         </button>
         <button class="step-btn" onclick="showScreen(7)">
           <span class="step-num">7</span>
-          <div class="step-meta"><strong>Scheme Details</strong><small>Benefits & eligibility</small></div>
+          <div class="step-meta"><strong data-i18n="sidebar.step7_title">Scheme Details</strong><small data-i18n="sidebar.step7_sub">Benefits & eligibility</small></div>
         </button>
         <button class="step-btn" onclick="showScreen(8)">
           <span class="step-num">8</span>
-          <div class="step-meta"><strong>EMI Calculator</strong><small>Repayment planner</small></div>
+          <div class="step-meta"><strong data-i18n="sidebar.step8_title">EMI Calculator</strong><small data-i18n="sidebar.step8_sub">Repayment planner</small></div>
         </button>
         <button class="step-btn" onclick="showScreen(9)">
           <span class="step-num">9</span>
-          <div class="step-meta"><strong>Nearest Partner</strong><small>Banks, CSCs, KVKs</small></div>
+          <div class="step-meta"><strong data-i18n="sidebar.step9_title">Nearest Partner</strong><small data-i18n="sidebar.step9_sub">Banks, CSCs, KVKs</small></div>
         </button>
         <button class="step-btn" onclick="showScreen(10)">
           <span class="step-num">10</span>
-          <div class="step-meta"><strong>Document Checklist</strong><small>Upload & verify status</small></div>
+          <div class="step-meta"><strong data-i18n="sidebar.step10_title">Document Checklist</strong><small data-i18n="sidebar.step10_sub">Upload & verify status</small></div>
         </button>
       </div>
 
@@ -99,15 +112,15 @@
           <div class="screen active" id="screen-1">
             <div class="splash-hero">
               <div class="sprout-badge">🌱</div>
-              <h2 class="app-brand-name">Udyam Setu</h2>
-              <p class="app-tagline">AI-Powered Scheme Matching<br>for Every Entrepreneur</p>
+              <h2 class="app-brand-name" data-i18n="screen1.brand_name">Udyam Setu</h2>
+              <p class="app-tagline" data-i18n="screen1.tagline">AI-Powered Scheme Matching<br>for Every Entrepreneur</p>
             </div>
             <div class="splash-illustration">
               <div class="scenic-banner">
                 <div class="scenic-top">🌾 🚜 ⚡ ☀️</div>
                 <div class="scenic-bottom">
-                  <h4>Right Scheme • Right Growth</h4>
-                  <small>Empowering Marginalized Businesses</small>
+                  <h4 data-i18n="screen1.banner_title">Right Scheme • Right Growth</h4>
+                  <small data-i18n="screen1.banner_sub">Empowering Marginalized Businesses</small>
                 </div>
               </div>
             </div>
@@ -115,7 +128,7 @@
               <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
             </div>
             <div class="splash-footer">
-              <button class="pill-btn primary" onclick="showScreen(2)">Get Started →</button>
+              <button class="pill-btn primary" onclick="showScreen(2)" data-i18n="screen1.get_started">Get Started →</button>
             </div>
           </div>
 
@@ -123,42 +136,57 @@
           <div class="screen" id="screen-2">
             <div class="auth-top">
               <div class="logo-chip">🌱 <strong>Udyam Setu</strong></div>
-              <h2>Welcome Back!</h2>
-              <p>Login to continue your business journey</p>
+              <h2 data-i18n="screen2.welcome_back">Welcome Back!</h2>
+              <p data-i18n="screen2.login_sub">Login to continue your business journey</p>
             </div>
+
+            <!-- Login Screen Language Switcher -->
+            <div class="login-lang-bar">
+              <span>🌐 Language:</span>
+              <select id="loginLangSelect" class="lang-switcher-select" onchange="setLanguage(this.value)">
+                <option value="en">English (Indian)</option>
+                <option value="hi">हिन्दी (Hindi)</option>
+                <option value="te">తెలుగు (Telugu)</option>
+                <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                <option value="ta">தமிழ் (Tamil)</option>
+                <option value="mr">मराठी (Marathi)</option>
+                <option value="bn">বাংলা (Bengali)</option>
+              </select>
+            </div>
+
             <div class="auth-form">
-              <label>Mobile Number</label>
+              <label data-i18n="screen2.mobile_label">Mobile Number</label>
               <div class="input-with-prefix">
                 <span class="prefix">🇮🇳 +91</span>
-                <input type="tel" id="loginPhone" value="9876543210" placeholder="Enter Mobile Number" maxlength="10">
+                <input type="tel" id="loginPhone" value="9876543210" placeholder="Enter Mobile Number" data-i18n-placeholder="screen2.mobile_placeholder" maxlength="10">
               </div>
-              <button class="pill-btn primary" id="sendOtpBtn" onclick="handleSendOTP()">Send OTP</button>
+              <button class="pill-btn primary" id="sendOtpBtn" onclick="handleSendOTP()" data-i18n="screen2.send_otp">Send OTP</button>
 
               <div id="otpBox" style="display:none; margin-top: 14px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                  <label style="margin-bottom: 0;">Enter 6-Digit OTP</label>
+                  <label style="margin-bottom: 0;" data-i18n="screen2.enter_otp">Enter 6-Digit OTP</label>
                   <span id="otpCountdown" style="font-size: 11px; color: #16A34A; font-weight: 600;"></span>
                 </div>
                 <input type="text" id="otpInput" class="otp-input" placeholder="• • • • • •" maxlength="6">
                 <div id="otpStatusMsg" style="font-size: 11px; color: #64748B; margin: 4px 0 8px;"></div>
-                <button class="pill-btn primary" id="verifyOtpBtn" onclick="handleVerifyOTP()">Verify & Continue</button>
+                <button class="pill-btn primary" id="verifyOtpBtn" onclick="handleVerifyOTP()" data-i18n="screen2.verify_continue">Verify & Continue</button>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-                  <button type="button" id="resendOtpBtn" onclick="handleSendOTP()" style="background: none; border: none; font-size: 11px; color: #2563EB; cursor: pointer; text-decoration: underline;" disabled>Resend OTP</button>
+                  <button type="button" id="resendOtpBtn" onclick="handleSendOTP()" style="background: none; border: none; font-size: 11px; color: #2563EB; cursor: pointer; text-decoration: underline;" disabled data-i18n="screen2.resend_otp">Resend OTP</button>
                   <span style="font-size: 11px; color: #94A3B8;">Test OTP: 123456</span>
                 </div>
               </div>
 
-              <div class="or-divider"><span>OR</span></div>
+              <div class="or-divider"><span data-i18n="screen2.or">OR</span></div>
 
               <button class="pill-btn outline google-btn" onclick="handleContinueWithGoogle()">
                 <svg width="18" height="18" viewBox="0 0 18 18" style="margin-right: 8px; vertical-align: middle;"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.616z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.173 0 7.547 0 9s.347 2.827.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/></svg>
-                Continue with Google
+                <span data-i18n="screen2.continue_google">Continue with Google</span>
               </button>
               <button class="pill-btn outline" onclick="showScreen(3)">
-                <span class="btn-icon">👤</span> Continue as Guest
+                <span class="btn-icon">👤</span> <span data-i18n="screen2.continue_guest">Continue as Guest</span>
               </button>
 
-              <p class="auth-footer-text">New user? <a href="#" onclick="showScreen(5)">Sign Up</a></p>
+              <p class="auth-footer-text"><span data-i18n="screen2.new_user">New user?</span> <a href="#" onclick="showScreen(5)" data-i18n="screen2.sign_up">Sign Up</a></p>
             </div>
           </div>
 
@@ -202,8 +230,21 @@
           <div class="screen" id="screen-3">
             <div class="dash-header">
               <div>
-                <h2>Hello, Entrepreneur 👋</h2>
-                <p>How can we help you today?</p>
+                <h2 data-i18n="screen3.greeting">Hello, Entrepreneur 👋</h2>
+                <p data-i18n="screen3.sub_greeting">How can we help you today?</p>
+                <!-- Dashboard Language Selector Widget -->
+                <div class="dash-lang-widget">
+                  <span style="font-size: 13px;">🌐</span>
+                  <select id="dashLangSelect" class="lang-switcher-select" onchange="setLanguage(this.value)">
+                    <option value="en">English (Indian)</option>
+                    <option value="hi">हिन्दी (Hindi)</option>
+                    <option value="te">తెలుగు (Telugu)</option>
+                    <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                    <option value="ta">தமிழ் (Tamil)</option>
+                    <option value="mr">मराठी (Marathi)</option>
+                    <option value="bn">বাংলা (Bengali)</option>
+                  </select>
+                </div>
               </div>
               <div class="user-avatar" onclick="showScreen(5)">RK</div>
             </div>
@@ -211,46 +252,46 @@
             <!-- Hero Banner -->
             <div class="banner-card">
               <div class="banner-content">
-                <h3>Find Schemes for You</h3>
-                <p>Answer a few questions and get best matching schemes.</p>
-                <button class="banner-btn" onclick="showScreen(5)">Start Now →</button>
+                <h3 data-i18n="screen3.banner_title">Find Schemes for You</h3>
+                <p data-i18n="screen3.banner_sub">Answer a few questions and get best matching schemes.</p>
+                <button class="banner-btn" onclick="showScreen(5)" data-i18n="screen3.start_now">Start Now →</button>
               </div>
               <div class="banner-icon">📋</div>
             </div>
 
-            <h4 class="section-title">Quick Access</h4>
+            <h4 class="section-title" data-i18n="screen3.quick_access">Quick Access</h4>
             <div class="quick-grid">
               <div class="quick-item" onclick="showScreen(5)">
                 <div class="icon-circle green">✨</div>
-                <span>Match Schemes</span>
+                <span data-i18n="screen3.match_schemes">Match Schemes</span>
               </div>
               <div class="quick-item" onclick="showScreen(8)">
                 <div class="icon-circle blue">🧮</div>
-                <span>EMI Calculator</span>
+                <span data-i18n="screen3.emi_calc">EMI Calculator</span>
               </div>
               <div class="quick-item" onclick="showScreen(10)">
                 <div class="icon-circle amber">📄</div>
-                <span>My Applications</span>
+                <span data-i18n="screen3.my_applications">My Applications</span>
               </div>
               <div class="quick-item" onclick="showScreen(10)">
                 <div class="icon-circle purple">📁</div>
-                <span>Documents</span>
+                <span data-i18n="screen3.documents">Documents</span>
               </div>
               <div class="quick-item" onclick="showScreen(9)">
                 <div class="icon-circle teal">📍</div>
-                <span>Nearby Partners</span>
+                <span data-i18n="screen3.nearby_partners">Nearby Partners</span>
               </div>
               <div class="quick-item" onclick="showScreen(4)">
                 <div class="icon-circle red">💬</div>
-                <span>Help & Support</span>
+                <span data-i18n="screen3.help_support">Help & Support</span>
               </div>
             </div>
 
             <div class="dash-bottom-nav">
-              <div class="nav-tab active" onclick="showScreen(3)"><span>🏠</span><small>Home</small></div>
-              <div class="nav-tab" onclick="showScreen(4)"><span>💬</span><small>Chat</small></div>
-              <div class="nav-tab" onclick="showScreen(6)"><span>⭐</span><small>Saved</small></div>
-              <div class="nav-tab" onclick="showScreen(5)"><span>👤</span><small>Profile</small></div>
+              <div class="nav-tab active" onclick="showScreen(3)"><span>🏠</span><small data-i18n="screen3.nav_home">Home</small></div>
+              <div class="nav-tab" onclick="showScreen(4)"><span>💬</span><small data-i18n="screen3.nav_chat">Chat</small></div>
+              <div class="nav-tab" onclick="showScreen(6)"><span>⭐</span><small data-i18n="screen3.nav_saved">Saved</small></div>
+              <div class="nav-tab" onclick="showScreen(5)"><span>👤</span><small data-i18n="screen3.nav_profile">Profile</small></div>
             </div>
           </div>
 
@@ -259,8 +300,8 @@
             <div class="chat-header">
               <button class="back-btn" onclick="showScreen(3)">‹</button>
               <div class="chat-title-group">
-                <h4>Udyam Sethu AI <span class="bhashini-badge">🇮🇳 BHASHINI</span></h4>
-                <span class="chat-status"><span class="green-dot"></span> Online • Digital India Voice (22 Langs)</span>
+                <h4><span data-i18n="screen4.title">Udyam Setu AI</span> <span class="bhashini-badge">🇮🇳 BHASHINI</span></h4>
+                <span class="chat-status"><span class="green-dot"></span> <span data-i18n="screen4.status">Online • Digital India Voice (22 Langs)</span></span>
               </div>
               <span class="header-icon" title="Voice Assistant Ready">🔊</span>
             </div>
@@ -269,56 +310,56 @@
               <div class="chat-bubble ai">
                 <div>Welcome to <strong>Udyam Setu AI</strong>, your intelligent government scheme advisor. To find the best collateral-free loans, subsidies, and schemes, please tell us: <strong>Who are you and which business or enterprise do you run or plan to start?</strong></div>
                 <div class="business-selection-container">
-                  <div class="selection-title">👇 Select your business or goal:</div>
+                  <div class="selection-title" data-i18n="screen4.select_business_title">👇 Select your business or goal:</div>
                   <div class="business-chips-grid">
                     <button type="button" class="business-option-chip" onclick="selectBusinessOption('I want a loan for starting a food business, hotel, or tiffin center')">
-                      <span class="chip-label">🍲 Food Business / Tiffin / Hotel</span>
+                      <span class="chip-label" data-i18n="screen4.food_opt">🍲 Food Business / Tiffin / Hotel</span>
                       <span class="chip-arrow">➔</span>
                     </button>
                     <button type="button" class="business-option-chip" onclick="selectBusinessOption('I want a loan for a kirana shop or retail grocery store')">
-                      <span class="chip-label">🛒 Retail / Kirana Shop / General Store</span>
+                      <span class="chip-label" data-i18n="screen4.retail_opt">🛒 Retail / Kirana Shop / General Store</span>
                       <span class="chip-arrow">➔</span>
                     </button>
                     <button type="button" class="business-option-chip" onclick="selectBusinessOption('I am an artisan or handloom weaver looking for PM Vishwakarma and Weaver Mudra schemes')">
-                      <span class="chip-label">🧵 Handicrafts & Handlooms / Weaver</span>
+                      <span class="chip-label" data-i18n="screen4.artisan_opt">🧵 Handicrafts & Handlooms / Weaver</span>
                       <span class="chip-arrow">➔</span>
                     </button>
                     <button type="button" class="business-option-chip" onclick="selectBusinessOption('I want an agriculture, farming, or dairy loan (KCC / AIF)')">
-                      <span class="chip-label">🌾 Agriculture & Allied / Dairy (KCC)</span>
+                      <span class="chip-label" data-i18n="screen4.agri_opt">🌾 Agriculture & Allied / Dairy (KCC)</span>
                       <span class="chip-arrow">➔</span>
                     </button>
                     <button type="button" class="business-option-chip" onclick="selectBusinessOption('I want a loan for a tailoring boutique or textile garment business')">
-                      <span class="chip-label">👗 Textile & Garments / Tailoring</span>
+                      <span class="chip-label" data-i18n="screen4.textile_opt">👗 Textile & Garments / Tailoring</span>
                       <span class="chip-arrow">➔</span>
                     </button>
                     <button type="button" class="business-option-chip" onclick="selectBusinessOption('I want a loan to set up a small manufacturing or fabrication unit')">
-                      <span class="chip-label">🏭 Manufacturing & Fabrication / MSME</span>
+                      <span class="chip-label" data-i18n="screen4.mfg_opt">🏭 Manufacturing & Fabrication / MSME</span>
                       <span class="chip-arrow">➔</span>
                     </button>
                     <button type="button" class="business-option-chip" onclick="selectBusinessOption('I want a loan for a repair shop, service center, or commercial vehicle')">
-                      <span class="chip-label">🔧 Services / Repair Shop / Auto Garage</span>
+                      <span class="chip-label" data-i18n="screen4.services_opt">🔧 Services / Repair Shop / Auto Garage</span>
                       <span class="chip-arrow">➔</span>
                     </button>
                     <button type="button" class="business-option-chip" onclick="selectBusinessOption('I am a street vendor looking for PM SVANidhi working capital loan')">
-                      <span class="chip-label">🛍️ Street Vending / Pushcart (SVANidhi)</span>
+                      <span class="chip-label" data-i18n="screen4.vending_opt">🛍️ Street Vending / Pushcart (SVANidhi)</span>
                       <span class="chip-arrow">➔</span>
                     </button>
                   </div>
                 </div>
-                <button class="listen-btn" onclick="speakBhashiniVoice('Welcome to Udyam Setu AI. Which business or enterprise do you run or plan to start? Please select an option or tell us your details.', 'English', this)">🔊 Listen / వినండి</button>
+                <button class="listen-btn" onclick="speakBhashiniVoice('Welcome to Udyam Setu AI. Which business or enterprise do you run or plan to start? Please select an option or tell us your details.', 'English', this)" data-i18n="screen4.listen_btn">🔊 Listen</button>
                 <small class="ai-credit">✨ Powered by Google Gemini AI & Digital India Bhashini</small>
               </div>
             </div>
 
             <!-- Voice mic bar -->
             <div class="voice-bar">
-              <span id="voicePromptText">🎙️ Tap to Speak in your Language</span>
+              <span id="voicePromptText" data-i18n="screen4.voice_prompt">🎙️ Tap to Speak in your Language</span>
               <button class="voice-btn" id="voiceBtn" onclick="triggerBhashiniSpeechInput()" title="Speak in your mother tongue">🎙️</button>
             </div>
 
             <!-- Language & text input row -->
             <div class="chat-input-row">
-              <select id="chatLangSelect" class="lang-select" onchange="onLanguageChanged()">
+              <select id="chatLangSelect" class="lang-select" onchange="onLanguageChanged(); setLanguage(this.value)">
                 <option value="English">English (Indian)</option>
                 <option value="Hindi">हिन्दी (Hindi)</option>
                 <option value="Telugu">తెలుగు (Telugu)</option>
@@ -327,7 +368,7 @@
                 <option value="Kannada">ಕನ್ನಡ (Kannada)</option>
                 <option value="Bengali">বাংলা (Bengali)</option>
               </select>
-              <input type="text" id="chatInput" placeholder="Ask or speak in your language..." onkeypress="if(event.key==='Enter') sendChatMessage()">
+              <input type="text" id="chatInput" placeholder="Ask or speak in your language..." data-i18n-placeholder="screen4.input_placeholder" onkeypress="if(event.key==='Enter') sendChatMessage()">
               <button class="send-btn" onclick="sendChatMessage()">➤</button>
             </div>
           </div>
@@ -336,10 +377,10 @@
           <div class="screen" id="screen-5">
             <div class="sub-header">
               <button class="back-btn" onclick="showScreen(3)">‹</button>
-              <h4>Tell us about yourself</h4>
+              <h4 data-i18n="screen5.header">Tell us about yourself</h4>
             </div>
             <div class="step-indicator">
-              <span>Step 2 of 5</span>
+              <span data-i18n="screen5.step_indicator">Step 2 of 5</span>
               <div class="progress-bar"><div class="progress-fill" style="width: 40%;"></div></div>
             </div>
 
@@ -347,36 +388,36 @@
               <!-- Section 1: Personal & Demographics -->
               <div class="form-section-header">
                 <span class="sec-icon">👤</span>
-                <strong>Personal & Demographic Details</strong>
+                <strong data-i18n="screen5.personal_header">Personal & Demographic Details</strong>
               </div>
 
               <div class="form-row-2">
                 <div class="form-group">
-                  <label>Age (వయస్సు / उम्र) <span class="required">*</span></label>
+                  <label><span data-i18n="screen5.age_label">Age</span> <span class="required">*</span></label>
                   <input type="number" id="profAge" min="18" max="95" value="28" oninput="updateAgeCategoryBadge()">
                   <small class="form-badge-pill youth" id="profAgeBadge">⚡ Youth (18-35) • High Subsidy</small>
                 </div>
                 <div class="form-group">
-                  <label>Gender (లింగం / लिंग)</label>
+                  <label data-i18n="screen5.gender_label">Gender</label>
                   <select id="profGender">
-                    <option value="Male" selected>Male (పురుషుడు)</option>
-                    <option value="Female">Female (మహిళ - 35% Special Grant)</option>
-                    <option value="Transgender / Other">Transgender / Other</option>
+                    <option value="Male" selected data-i18n="screen5.gender_male">Male</option>
+                    <option value="Female" data-i18n="screen5.gender_female">Female (35% Special Grant)</option>
+                    <option value="Transgender / Other" data-i18n="screen5.gender_other">Transgender / Other</option>
                   </select>
                 </div>
               </div>
 
               <div class="form-group">
-                <label>Social Category (సామాజిక వర్గం / सामाजिक वर्ग)</label>
+                <label data-i18n="screen5.social_cat_label">Social Category</label>
                 <select id="profCategory">
-                  <option value="OBC" selected>OBC (Other Backward Classes - 35% Subsidy)</option>
-                  <option value="SC">SC (Scheduled Caste - 35% Subsidy)</option>
-                  <option value="ST">ST (Scheduled Tribe - 35% Subsidy)</option>
-                  <option value="General">General (సాధారణ / सामान्य)</option>
-                  <option value="Women Entrepreneur">Women Entrepreneur (మహిళా పారిశ్రామికవేత్త)</option>
-                  <option value="Minority">Minority (మైనారిటీ / अल्पसंख्यक)</option>
-                  <option value="Differently Abled (Divyangjan)">Differently Abled (దివ్యాంగులు)</option>
-                  <option value="Ex-Servicemen">Ex-Servicemen (మాజీ సైనికులు)</option>
+                  <option value="OBC" selected data-i18n="screen5.cat_obc">OBC (Other Backward Classes - 35% Subsidy)</option>
+                  <option value="SC" data-i18n="screen5.cat_sc">SC (Scheduled Caste - 35% Subsidy)</option>
+                  <option value="ST" data-i18n="screen5.cat_st">ST (Scheduled Tribe - 35% Subsidy)</option>
+                  <option value="General" data-i18n="screen5.cat_general">General Category</option>
+                  <option value="Women Entrepreneur" data-i18n="screen5.cat_women">Women Entrepreneur</option>
+                  <option value="Minority" data-i18n="screen5.cat_minority">Minority Community</option>
+                  <option value="Differently Abled (Divyangjan)" data-i18n="screen5.cat_pwd">Differently Abled (Divyangjan)</option>
+                  <option value="Ex-Servicemen" data-i18n="screen5.cat_ex_servicemen">Ex-Servicemen</option>
                 </select>
               </div>
 
@@ -384,72 +425,72 @@
               <div class="form-section-header highlight-blue">
                 <span class="sec-icon">♿</span>
                 <div>
-                  <strong>Differently Abled / Divyangjan (దివ్యాంగుల వివరాలు)</strong>
-                  <small class="sec-sub">Special 35% PMEGP subsidy & NHFDC 5% low-interest loans</small>
+                  <strong data-i18n="screen5.divyang_header">Differently Abled / Divyangjan</strong>
+                  <small class="sec-sub" data-i18n="screen5.divyang_sub">Special 35% PMEGP subsidy & NHFDC 5% low-interest loans</small>
                 </div>
               </div>
 
               <div class="form-group">
-                <label>Person with Disability (దివ్యాంగులా?) <span class="required">*</span></label>
+                <label><span data-i18n="screen5.pwd_label">Person with Disability</span> <span class="required">*</span></label>
                 <select id="profDisability" onchange="toggleDisabilityFields()">
-                  <option value="No" selected>No (కాదు / सामान्य)</option>
-                  <option value="Yes">Yes (అవును - దివ్యాంగులు / दिव्यांगजन - PwD)</option>
+                  <option value="No" selected data-i18n="screen5.pwd_no">No</option>
+                  <option value="Yes" data-i18n="screen5.pwd_yes">Yes (Differently Abled - PwD)</option>
                 </select>
               </div>
 
               <!-- Conditional Disability Fields -->
               <div id="disabilityFieldsContainer" class="conditional-card" style="display: none;">
                 <div class="form-group">
-                  <label>Type of Disability (వైకల్యం రకం / प्रकार)</label>
+                  <label data-i18n="screen5.disability_type_label">Type of Disability</label>
                   <select id="profDisabilityType">
-                    <option value="Locomotor / Physical" selected>Locomotor / Orthopedic (చలన వైకల్యం)</option>
-                    <option value="Visual Impairment">Visual Impairment / Blindness (దృష్టి లోపం)</option>
-                    <option value="Hearing / Speech Impairment">Hearing or Speech (వినికిడి / వాక్ లోపం)</option>
-                    <option value="Intellectual / Mental">Intellectual Disability (మేధోపరమైన)</option>
-                    <option value="Multiple Disabilities">Multiple Disabilities (బహుళ వైకల్యాలు)</option>
-                    <option value="Other PwD Category">Other Certified Disability</option>
+                    <option value="Locomotor / Physical" selected data-i18n="screen5.disability_locomotor">Locomotor / Orthopedic</option>
+                    <option value="Visual Impairment" data-i18n="screen5.disability_visual">Visual Impairment / Blindness</option>
+                    <option value="Hearing / Speech Impairment" data-i18n="screen5.disability_hearing">Hearing or Speech</option>
+                    <option value="Intellectual / Mental" data-i18n="screen5.disability_intellectual">Intellectual Disability</option>
+                    <option value="Multiple Disabilities" data-i18n="screen5.disability_multiple">Multiple Disabilities</option>
+                    <option value="Other PwD Category" data-i18n="screen5.disability_other">Other Certified Disability</option>
                   </select>
                 </div>
 
                 <div class="form-row-2">
                   <div class="form-group">
-                    <label>Disability % (శాతం)</label>
+                    <label data-i18n="screen5.disability_percent_label">Disability %</label>
                     <select id="profDisabilityPercent">
-                      <option value="40% - 70%" selected>40% - 70% (Benchmark PwD)</option>
-                      <option value="Above 70%">Above 70% (Severe)</option>
-                      <option value="Below 40%">Below 40% (Mild)</option>
+                      <option value="40% - 70%" selected data-i18n="screen5.disability_percent_40_70">40% - 70% (Benchmark PwD)</option>
+                      <option value="Above 70%" data-i18n="screen5.disability_percent_above70">Above 70% (Severe)</option>
+                      <option value="Below 40%" data-i18n="screen5.disability_percent_below40">Below 40% (Mild)</option>
                     </select>
                   </div>
                   <div class="form-group">
-                    <label>UDID Card? (కార్డ్ ఉందా?)</label>
+                    <label data-i18n="screen5.udid_card_label">UDID Card?</label>
                     <select id="profHasUdid">
-                      <option value="Yes" selected>Yes, have UDID Card</option>
-                      <option value="In-Process">Applied / In Process</option>
-                      <option value="No">No / Not yet applied</option>
+                      <option value="Yes" selected data-i18n="screen5.udid_yes">Yes, have UDID Card</option>
+                      <option value="In-Process" data-i18n="screen5.udid_in_process">Applied / In Process</option>
+                      <option value="No" data-i18n="screen5.udid_no">No / Not yet applied</option>
                     </select>
                   </div>
                 </div>
                 <div class="divyang-benefit-badge">
-                  <span>💡 Eligible for Divyangjan Swavalamban Yojana (Up to ₹50L @ 5% interest) & PMEGP 35% Grant!</span>
+                  <span data-i18n="screen5.divyang_badge">💡 Eligible for Divyangjan Swavalamban Yojana (Up to ₹50L @ 5% interest) & PMEGP 35% Grant!</span>
                 </div>
               </div>
 
               <!-- Section 3: Business & Financial Information -->
               <div class="form-section-header">
                 <span class="sec-icon">🏢</span>
-                <strong>Business & Financial Details</strong>
+                <strong data-i18n="screen5.business_header">Business & Financial Details</strong>
               </div>
 
               <div class="form-row-2">
                 <div class="form-group">
-                  <label>Enterprise Location (ప్రాంతం)</label>
+                  <label data-i18n="screen5.location_label">Enterprise Location</label>
                   <select id="profLocationType">
-                    <option value="Rural" selected>Rural (గ్రామీణ - 35% Subsidy)</option>
-                    <option value="Urban">Urban (పట్టణ - 25% Subsidy)</option>
+                    <option value="Rural" selected data-i18n="screen5.loc_rural">Rural Area (35% Subsidy)</option>
+                    <option value="Urban" data-i18n="screen5.loc_urban">Urban Area (25% Subsidy)</option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label>Annual Family Income</label>
+                  <label data-i18n="screen5.income_label">Annual Family Income</label>
                   <div class="input-with-prefix">
                     <span class="prefix">₹</span>
                     <input type="number" id="profIncome" value="240000">
@@ -458,35 +499,35 @@
               </div>
 
               <div class="form-group">
-                <label>Business Type / Activity (వ్యాపార రంగం)</label>
+                <label data-i18n="screen5.biz_type_label">Business Type / Activity</label>
                 <select id="profBusiness">
-                  <option value="Food Business" selected>Food Business (హోటల్, క్యాటరింగ్, ఆహార వ్యాపారం)</option>
-                  <option value="Retail / Kirana Shop">Retail / Kirana Shop (కిరాణా, జనరల్ స్టోర్)</option>
-                  <option value="Handicrafts & Handlooms">Handicrafts & Handlooms (చేనేత, చేతివృత్తులు)</option>
-                  <option value="Agriculture & Allied">Agriculture & Allied (వ్యవసాయం, పాడి పరిశ్రమ)</option>
-                  <option value="Textile & Garments">Textile & Garments (టైలరింగ్, వస్త్ర వ్యాపారం)</option>
-                  <option value="Manufacturing & Fabrication">Manufacturing & Fabrication (చిన్న తయారీ పరిశ్రమ)</option>
-                  <option value="Services / Repair Shop">Services / Repair Shop (రిపేర్, సర్వీస్ సెంటర్)</option>
-                  <option value="Street Vending">Street Vending (వీధి వ్యాపారం, తోపుడు బండ్లు)</option>
+                  <option value="Food Business" selected data-i18n="screen5.biz_food">Food Business (Hotel, Catering, Tiffin Center)</option>
+                  <option value="Retail / Kirana Shop" data-i18n="screen5.biz_retail">Retail / Kirana Shop (General Store)</option>
+                  <option value="Handicrafts & Handlooms" data-i18n="screen5.biz_handicrafts">Handicrafts & Handlooms (Artisans, Weavers)</option>
+                  <option value="Agriculture & Allied" data-i18n="screen5.biz_agri">Agriculture & Allied (Farming, Dairy)</option>
+                  <option value="Textile & Garments" data-i18n="screen5.biz_textile">Textile & Garments (Tailoring, Boutique)</option>
+                  <option value="Manufacturing & Fabrication" data-i18n="screen5.biz_mfg">Manufacturing & Fabrication (Workshop)</option>
+                  <option value="Services / Repair Shop" data-i18n="screen5.biz_services">Services / Repair Shop (Service Center)</option>
+                  <option value="Street Vending" data-i18n="screen5.biz_vending">Street Vending (Hawker, Thela Pushcart)</option>
                 </select>
               </div>
 
               <div class="form-row-2">
                 <div class="form-group">
-                  <label>Experience (అనుభవం)</label>
-                  <input type="text" id="profExperience" value="2 Years">
+                  <label data-i18n="screen5.experience_label">Experience</label>
+                  <input type="text" id="profExperience" value="2 Years" data-i18n-val="screen5.experience_val">
                 </div>
                 <div class="form-group">
-                  <label>Education (విద్యార్హత)</label>
+                  <label data-i18n="screen5.education_label">Education</label>
                   <select id="profEducation">
-                    <option value="8th Pass or Above" selected>8th Pass or Above (₹50L Limit)</option>
-                    <option value="Below 8th Pass">Below 8th Pass</option>
-                    <option value="Graduate / ITI / Diploma">Graduate / ITI / Diploma</option>
+                    <option value="8th Pass or Above" selected data-i18n="screen5.edu_8th_above">8th Pass or Above (₹50L Limit)</option>
+                    <option value="Below 8th Pass" data-i18n="screen5.edu_below_8th">Below 8th Pass</option>
+                    <option value="Graduate / ITI / Diploma" data-i18n="screen5.edu_graduate">Graduate / ITI / Diploma</option>
                   </select>
                 </div>
               </div>
 
-              <button class="pill-btn primary mt-4" onclick="runSchemeMatching()">Find Matching Schemes ➔</button>
+              <button class="pill-btn primary mt-4" onclick="runSchemeMatching()" data-i18n="screen5.find_schemes_btn">Find Matching Schemes ➔</button>
             </div>
           </div>
 
@@ -495,8 +536,8 @@
             <div class="sub-header">
               <button class="back-btn" onclick="showScreen(5)">‹</button>
               <div class="center-title">
-                <h4>Matching Schemes</h4>
-                <small>Based on your information</small>
+                <h4 data-i18n="screen6.header">Matching Schemes</h4>
+                <small data-i18n="screen6.sub_header">Based on your information</small>
               </div>
             </div>
 
@@ -505,14 +546,14 @@
             </div>
 
             <div class="screen-footer">
-              <button class="pill-btn primary" onclick="loadAllRegistrySchemes()">View All Schemes</button>
+              <button class="pill-btn primary" onclick="loadAllRegistrySchemes()" data-i18n="screen6.view_all_schemes">View All Schemes</button>
             </div>
           </div>
 
           <!-- SCREEN 7: SCHEME DETAILS -->
           <div class="screen" id="screen-7">
             <div class="sub-header">
-              <button class="back-btn" onclick="showScreen(6)">‹</button>
+              <button class="back-btn" onclick="handleBackFromDetails()">‹</button>
               <div class="center-title">
                 <h4 id="detailSchemeName">PM Mudra Yojana</h4>
               </div>
@@ -521,10 +562,10 @@
 
             <!-- Tabs -->
             <div class="tabs-bar">
-              <button class="tab-btn active" onclick="switchDetailTab('overview')">Overview</button>
-              <button class="tab-btn" onclick="switchDetailTab('benefits')">Benefits</button>
-              <button class="tab-btn" onclick="switchDetailTab('eligibility')">Eligibility</button>
-              <button class="tab-btn" onclick="switchDetailTab('documents')">Documents</button>
+              <button class="tab-btn active" onclick="switchDetailTab('overview')" data-i18n="screen7.tab_overview">Overview</button>
+              <button class="tab-btn" onclick="switchDetailTab('benefits')" data-i18n="screen7.tab_benefits">Benefits</button>
+              <button class="tab-btn" onclick="switchDetailTab('eligibility')" data-i18n="screen7.tab_eligibility">Eligibility</button>
+              <button class="tab-btn" onclick="switchDetailTab('documents')" data-i18n="screen7.tab_documents">Documents</button>
             </div>
 
             <div class="detail-content" id="detailTabContent">
@@ -532,8 +573,8 @@
             </div>
 
             <div class="scheme-action-bar">
-              <button class="pill-btn outline" onclick="alert('Scheme saved to bookmarks!')">Save</button>
-              <button class="pill-btn primary" onclick="showScreen(10)">Apply Now</button>
+              <button class="pill-btn outline" onclick="alert('Scheme saved to bookmarks!')" data-i18n="screen7.save_btn">Save</button>
+              <button class="pill-btn primary" onclick="showScreen(10)" data-i18n="screen7.apply_now_btn">Apply Now</button>
             </div>
           </div>
 
@@ -541,13 +582,13 @@
           <div class="screen" id="screen-8">
             <div class="sub-header">
               <button class="back-btn" onclick="showScreen(3)">‹</button>
-              <h4>EMI Calculator</h4>
+              <h4 data-i18n="screen8.header">EMI Calculator</h4>
             </div>
 
             <div class="calculator-body">
               <div class="calc-field">
                 <div class="field-header">
-                  <span>Loan Amount</span>
+                  <span data-i18n="screen8.loan_amount_label">Loan Amount</span>
                   <strong id="calcLoanVal">₹ 5,00,000</strong>
                 </div>
                 <input type="range" id="loanRange" min="50000" max="2500000" step="25000" value="500000" oninput="updateEMICalculator()">
@@ -555,7 +596,7 @@
 
               <div class="calc-field">
                 <div class="field-header">
-                  <span>Interest Rate (%)</span>
+                  <span data-i18n="screen8.interest_rate_label">Interest Rate (%)</span>
                   <strong id="calcRateVal">10 %</strong>
                 </div>
                 <input type="range" id="rateRange" min="4" max="18" step="0.5" value="10" oninput="updateEMICalculator()">
@@ -563,7 +604,7 @@
 
               <div class="calc-field">
                 <div class="field-header">
-                  <span>Tenure (Years)</span>
+                  <span data-i18n="screen8.tenure_label">Tenure (Years)</span>
                   <strong id="calcTenureVal">3 Years</strong>
                 </div>
                 <input type="range" id="tenureRange" min="1" max="10" step="1" value="3" oninput="updateEMICalculator()">
@@ -571,17 +612,17 @@
 
               <!-- Estimated EMI Card (Matches Screen 8) -->
               <div class="emi-result-card">
-                <small>Estimated EMI</small>
+                <small data-i18n="screen8.estimated_emi">Estimated EMI</small>
                 <h2 id="calculatedEmiText">₹ 16,109 / month</h2>
-                <span class="approx-note">*Values are approximate</span>
+                <span class="approx-note" data-i18n="screen8.approx_note">*Values are approximate</span>
                 <div class="emi-breakdown">
-                  <div><span>Principal:</span> <strong id="calcPrincipalText">₹ 5,00,000</strong></div>
-                  <div><span>Total Interest:</span> <strong id="calcInterestText">₹ 79,924</strong></div>
+                  <div><span data-i18n="screen8.principal_label">Principal:</span> <strong id="calcPrincipalText">₹ 5,00,000</strong></div>
+                  <div><span data-i18n="screen8.total_interest_label">Total Interest:</span> <strong id="calcInterestText">₹ 79,924</strong></div>
                 </div>
               </div>
 
-              <button class="pill-btn outline mt-4" onclick="updateEMICalculator()">Calculate Again</button>
-              <button class="pill-btn primary mt-2" onclick="showScreen(6)">Find Schemes with this EMI</button>
+              <button class="pill-btn outline mt-4" onclick="updateEMICalculator()" data-i18n="screen8.calculate_again">Calculate Again</button>
+              <button class="pill-btn primary mt-2" onclick="showScreen(6)" data-i18n="screen8.find_schemes_with_emi">Find Schemes with this EMI</button>
             </div>
           </div>
 
@@ -590,8 +631,8 @@
             <div class="sub-header">
               <button class="back-btn" onclick="showScreen(3)">‹</button>
               <div class="center-title">
-                <h4>Nearby Partners</h4>
-                <small>Near Your Location</small>
+                <h4 data-i18n="screen9.header">Nearby Partners</h4>
+                <small data-i18n="screen9.sub_header">Near Your Location</small>
               </div>
               <span class="header-icon">🔍</span>
             </div>
@@ -603,10 +644,10 @@
                 <div class="road r2"></div>
                 <div class="road r3"></div>
               </div>
-              <div class="pin user-pin" title="Your Location">📍 You</div>
-              <div class="pin partner-pin bank-pin" style="top: 30%; right: 25%;">🏦 Bank</div>
-              <div class="pin partner-pin kvk-pin" style="bottom: 30%; left: 20%;">🔬 KVK</div>
-              <div class="pin partner-pin csc-pin" style="top: 25%; left: 30%;">💻 CSC</div>
+              <div class="pin user-pin" title="Your Location" data-i18n="screen9.pin_you">📍 You</div>
+              <div class="pin partner-pin bank-pin" style="top: 30%; right: 25%;" data-i18n="screen9.pin_bank">🏦 Bank</div>
+              <div class="pin partner-pin kvk-pin" style="bottom: 30%; left: 20%;" data-i18n="screen9.pin_kvk">🔬 KVK</div>
+              <div class="pin partner-pin csc-pin" style="top: 25%; left: 30%;" data-i18n="screen9.pin_csc">💻 CSC</div>
             </div>
 
             <div class="partner-list" id="partnerListContainer">
@@ -614,7 +655,7 @@
             </div>
 
             <div class="screen-footer">
-              <button class="pill-btn primary" onclick="alert('Opening Google Maps navigation...')">View on Map</button>
+              <button class="pill-btn primary" onclick="alert('Opening Google Maps navigation...')" data-i18n="screen9.view_on_map">View on Map</button>
             </div>
           </div>
 
@@ -623,7 +664,7 @@
             <div class="sub-header">
               <button class="back-btn" onclick="showScreen(7)">‹</button>
               <div class="center-title">
-                <h4>Required Documents</h4>
+                <h4 data-i18n="screen10.header">Required Documents</h4>
                 <small id="checklistSchemeName">PM Mudra Yojana</small>
               </div>
             </div>
@@ -631,7 +672,7 @@
             <div class="checklist-progress">
               <div class="progress-info">
                 <strong id="docCountText">3 of 5 Documents Uploaded</strong>
-                <span class="ready-badge">60% Ready</span>
+                <span class="ready-badge" data-i18n="screen10.ready_badge">60% Ready</span>
               </div>
               <div class="progress-bar"><div class="progress-fill" id="docProgressBar" style="width: 60%;"></div></div>
             </div>
@@ -641,7 +682,7 @@
             </div>
 
             <div class="screen-footer">
-              <button class="pill-btn primary" onclick="handleSubmitApplication()">Submit Application to Bank</button>
+              <button class="pill-btn primary" onclick="handleSubmitApplication()" data-i18n="screen10.submit_app_btn">Submit Application to Bank</button>
             </div>
           </div>
         </div>
@@ -694,6 +735,7 @@
     </aside>
   </main>
 
+  <script src="i18n.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

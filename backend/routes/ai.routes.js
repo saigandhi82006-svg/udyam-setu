@@ -7,7 +7,7 @@ const { SUPPORTED_BHASHINI_LANGUAGES, synthesizeVoicePayload } = require('../ser
 // POST /api/ai/chat - conversational AI assistant for rural entrepreneurs
 router.post('/chat', async (req, res) => {
   try {
-    const { message, conversationHistory = [], language = 'English', userProfile = null } = req.body;
+    const { message, conversationHistory = [], language, languageCode, userProfile = null } = req.body;
 
     if (!message || message.trim() === '') {
       return res.status(400).json({ success: false, message: 'Message cannot be empty' });
@@ -16,7 +16,7 @@ router.post('/chat', async (req, res) => {
     const aiResult = await handleAIChat({
       message,
       conversationHistory,
-      language,
+      language: language || languageCode || 'English',
       userProfile
     });
 

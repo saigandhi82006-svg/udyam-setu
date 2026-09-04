@@ -74,15 +74,52 @@ const dataStore = {
   },
 
   async getSchemeById(id) {
+    if (!id) return null;
+    const cleanId = id.toString().trim();
+    const cleanIdLower = cleanId.toLowerCase();
+
     if (!isInMemoryFallback()) {
       try {
-        const scheme = await Scheme.findById(id);
+        const scheme = await Scheme.findById(cleanId);
         if (scheme) return scheme;
       } catch (e) {
         // Continue to in-memory check
       }
     }
-    return memoryDB.schemes.find(s => s._id.toString() === id.toString() || s.shortCode === id);
+
+    // 1. Exact match by _id, shortCode, or schemeId
+    let found = memoryDB.schemes.find(s => {
+      if (!s) return false;
+      const sId = s._id ? s._id.toString() : '';
+      const sCode = (s.shortCode || '').toLowerCase();
+      const sSchemeId = (s.schemeId || '').toLowerCase();
+      return sId === cleanId || (sCode && sCode === cleanIdLower) || (sSchemeId && sSchemeId === cleanIdLower);
+    });
+    if (found) return found;
+
+    // 2. Exact match by schemeName
+    found = memoryDB.schemes.find(s => {
+      if (!s) return false;
+      const sName = (s.schemeName || '').toLowerCase();
+      return sName && sName === cleanIdLower;
+    });
+    if (found) return found;
+
+    // 3. Substring match on schemeName or cleanId
+    found = memoryDB.schemes.find(s => {
+      if (!s) return false;
+      const sName = (s.schemeName || '').toLowerCase();
+      const sCode = (s.shortCode || '').toLowerCase();
+      const sSchemeId = (s.schemeId || '').toLowerCase();
+      return (
+        (sName && cleanIdLower.length >= 3 && sName.includes(cleanIdLower)) ||
+        (sName && cleanIdLower.length >= 3 && cleanIdLower.includes(sName)) ||
+        (sCode && sCode.length >= 3 && cleanIdLower.includes(sCode)) ||
+        (sSchemeId && sSchemeId.length >= 3 && cleanIdLower.includes(sSchemeId))
+      );
+    });
+
+    return found || null;
   },
 
   async addScheme(schemeData) {

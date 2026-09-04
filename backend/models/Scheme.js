@@ -25,8 +25,10 @@ const SchemeSchema = new mongoose.Schema({
   vernacularNames: {
     hi: { type: String, default: '' },
     te: { type: String, default: '' },
+    kn: { type: String, default: '' },
+    ta: { type: String, default: '' },
     mr: { type: String, default: '' },
-    ta: { type: String, default: '' }
+    bn: { type: String, default: '' }
   },
   embedding: {
     type: [Number], // 768-dimensional vector embedding for semantic search

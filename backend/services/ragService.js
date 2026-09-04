@@ -249,161 +249,237 @@ function buildDiscoveryResponse(language = 'English') {
 }
 
 /**
+ * /**
+ * Helper to detect sector/domain directly from text keywords.
+ */
+function detectSectorFromText(text = '') {
+  if (!text) return null;
+  const t = text.toLowerCase();
+
+  // 1. Commercial Transport & Vehicles (లారీ, ట్రక్, కమర్షియల్ ఆటో, రవాణా)
+  if (
+    t.includes('lorry') || t.includes('truck') || t.includes('commercial vehicle') ||
+    t.includes('auto rickshaw') || t.includes('autorickshaw') || t.includes('auto loan') ||
+    t.includes('rickshaw') || t.includes('taxi') || t.includes('tempo') || t.includes('transport') ||
+    t.includes('లారీ') || t.includes('ఆటో') || t.includes('రవాణా') || t.includes('వాహన') ||
+    t.includes('लॉरी') || t.includes('ट्रक') || t.includes('ऑटो') || t.includes('रिक्शा') || t.includes('परिवहन') || t.includes('गाड़ी') ||
+    t.includes('ಲಾರಿ') || t.includes('ಆಟೋ') || t.includes('ವಾಹನ') || t.includes('ಸಾರಿಗೆ') ||
+    t.includes('লরি') || t.includes('অটো') || t.includes('রিকশা') || t.includes('গাড়ি') || t.includes('পরিবহন') ||
+    t.includes('லாரி') || t.includes('ஆட்டோ') || t.includes('வாகனம்') || t.includes('போக்குவரத்து')
+  ) {
+    return 'Services / Commercial Transport';
+  }
+
+  // 2. Agriculture & Allied (వ్యవసాయం, పాడి పరిశ్రమ, చేపల పెంపకం)
+  if (
+    t.includes('farm') || t.includes('agri') || t.includes('kisan') || t.includes('crop') ||
+    t.includes('tractor') || t.includes('dairy') || t.includes('cattle') || t.includes('cow') ||
+    t.includes('buffalo') || t.includes('milk') || t.includes('poultry') || t.includes('fish') ||
+    t.includes('aquaculture') || t.includes('రైతు') || t.includes('వ్యవసాయం') || t.includes('పంట') ||
+    t.includes('పాడి') || t.includes('చేపల') || t.includes('గొర్రెలు') || t.includes('ట్రాక్టర్') ||
+    t.includes('खेती') || t.includes('किसान') || t.includes('डेयरी') || t.includes('मत्स्य') || t.includes('पशुपालन') ||
+    t.includes('ಕೃಷಿ') || t.includes('ರೈತ') || t.includes('ಬೆಳೆ') || t.includes('ಹೈನುಗಾರಿಕೆ') || t.includes('ಹಾಲು') || t.includes('ಮೀನು') ||
+    t.includes('কৃষি') || t.includes('কৃষক') || t.includes('ফসল') || t.includes('দুগ্ধ') || t.includes('মাছ') ||
+    t.includes('விவசாயம்') || t.includes('பால் பண்ணை') || t.includes('பயிர்') || t.includes('மீன்')
+  ) {
+    return 'Agriculture & Allied';
+  }
+
+  // 3. Services / Repair Shop & Garage (మెకానిక్, గ్యారేజ్, సర్వీస్ సెంటర్)
+  if (
+    t.includes('repair') || t.includes('service center') || t.includes('garage') || t.includes('mechanic') ||
+    t.includes('smartphone repair') || t.includes('electrical repair') ||
+    t.includes('రిపేర్') || t.includes('సర్వీస్') || t.includes('గ్యారేజ్') || t.includes('మెకానిక్') ||
+    t.includes('मरम्मत') || t.includes('गैरेज') || t.includes('सर्विस') ||
+    t.includes('ರಿಪೇರಿ') || t.includes('ಸೇವೆ') || t.includes('ಗ್ಯಾರೇಜ್') ||
+    t.includes('মেরামত') || t.includes('গ্যারেজ') ||
+    t.includes('பழுது') || t.includes('கேரேஜ்')
+  ) {
+    return 'Services / Repair Shop';
+  }
+
+  // 4. Food Business (హోటల్, క్యాటరింగ్, ఆహార వ్యాపారం, టిఫిన్)
+  if (
+    t.includes('food') || t.includes('tiffin') || t.includes('hotel') || t.includes('canteen') ||
+    t.includes('restaurant') || t.includes('snack') || t.includes('tea stall') || t.includes('chai') ||
+    t.includes('bakery') || t.includes('catering') || t.includes('sweet shop') || t.includes('dhaba') ||
+    t.includes('టిఫిన్') || t.includes('హోటల్') || t.includes('భోజనం') || t.includes('ఆహారం') || t.includes('క్యాటరింగ్') ||
+    t.includes('होटल') || t.includes('टिफिन') || t.includes('चाय') || t.includes('खाना') || t.includes('भोजन') || t.includes('ढाबा') ||
+    t.includes('ಹೋಟೆಲ್') || t.includes('ತಿಂಡಿ') || t.includes('ಊಟ') || t.includes('ಚಹಾ') || t.includes('ಬೇಕರಿ') || t.includes('ಆಹಾರ') ||
+    t.includes('হোটেল') || t.includes('টিফিন') || t.includes('খাবার') || t.includes('চা') || t.includes('বেকারি') ||
+    t.includes('உணவு') || t.includes('ஹோட்டல்') || t.includes('டிபன்') || t.includes('கேட்டரிங்')
+  ) {
+    return 'Food Business';
+  }
+
+  // 5. Retail / Kirana Shop (కిరాణా, జనరల్ స్టోర్)
+  if (
+    t.includes('kirana') || t.includes('grocery') || t.includes('general store') || t.includes('supermarket') ||
+    (t.includes('retail') && !t.includes('garment')) || (t.includes('shop') && !t.includes('repair') && !t.includes('tea')) ||
+    t.includes('కిరాణా') || t.includes('జనరల్ స్టోర్') || t.includes('దుకాణం') ||
+    t.includes('किराना') || t.includes('जनरल स्टोर') || t.includes('दुकान') || t.includes('खुदरा') ||
+    t.includes('ಕಿರಾಣಿ') || t.includes('ಅಂಗಡಿ') || t.includes('ಜನರಲ್ ಸ್ಟೋರ್') ||
+    t.includes('মুদি') || t.includes('দোকান') || t.includes('খুচরা') ||
+    t.includes('மளிகை') || t.includes('சில்லறை')
+  ) {
+    return 'Retail / Kirana Shop';
+  }
+
+  // 6. Street Vending (వీధి వ్యాపారం, తోపుడు బండ్లు)
+  if (
+    t.includes('street vendor') || t.includes('street vending') || t.includes('thela') || t.includes('cart') ||
+    t.includes('hawker') || t.includes('footpath') || t.includes('roadside') || t.includes('pushcart') ||
+    t.includes('తోపుడు బండి') || t.includes('తోపుడు') || t.includes('వీధి వ్యాపారం') || t.includes('ఫెరీవాలా') ||
+    t.includes('ठेला') || t.includes('रेहड़ी') || t.includes('पटरी') || t.includes('फेरीवाला') ||
+    t.includes('ತಳ್ಳುವ ಗಾಡಿ') || t.includes('ಬೀದಿ ವ್ಯಾಪಾರ') || t.includes('ಬೀದಿ ಬದಿ') ||
+    t.includes('হকার') || t.includes('ঠেলাগাড়ি') || t.includes('ফুটপাত') ||
+    t.includes('தள்ளுவண்டி') || t.includes('தெருவோர')
+  ) {
+    return 'Street Vending';
+  }
+
+  // 7. Textile & Garments (టైలరింగ్, వస్త్ర వ్యాపారం)
+  if (
+    t.includes('textile') || t.includes('garment') || t.includes('tailor') || t.includes('tailoring') ||
+    t.includes('boutique') || t.includes('dress') || t.includes('cloth') || t.includes('sewing') ||
+    t.includes('టైలరింగ్') || t.includes('వస్త్ర') || t.includes('దర్జీ') || t.includes('బట్టలు') ||
+    t.includes('टेलर') || t.includes('सिलाई') || t.includes('कपड़ा') || t.includes('दर्जी') || t.includes('परिधान') ||
+    t.includes('ಟೈಲರಿಂಗ್') || t.includes('ಜವಳಿ') || t.includes('ಬಟ್ಟೆ') || t.includes('ದರ್ಜಿ') ||
+    t.includes('দর্জি') || t.includes('পোশাক') || t.includes('বস্ত্র') || t.includes('সেলাই') ||
+    t.includes('தையல்') || t.includes('ஜவுளி') || t.includes('ஆடை')
+  ) {
+    return 'Textile & Garments';
+  }
+
+  // 8. Handicrafts & Handlooms (చేనేత, చేతివృత్తులు)
+  if (
+    t.includes('handicraft') || t.includes('handloom') || t.includes('artisan') || t.includes('weaver') ||
+    t.includes('potter') || t.includes('carpenter') || t.includes('blacksmith') || t.includes('coir') ||
+    t.includes('sculptor') || t.includes('vishwakarma') || t.includes('చేనేత') || t.includes('చేతివృత్తులు') ||
+    t.includes('వడ్రంగి') || t.includes('కమ్మరి') || t.includes('కుమ్మరి') ||
+    t.includes('हथकरघा') || t.includes('बुनकर') || t.includes('दस्तकार') || t.includes('कारीगर') || t.includes('बढ़ई') || t.includes('लोहार') || t.includes('कुम्हार') ||
+    t.includes('ನೇಕಾರ') || t.includes('ಕರಕುಶಲ') || t.includes('ಕುಂಬಾರ') || t.includes('ಕಮ್ಮಾರ') || t.includes('ಬಡಗಿ') ||
+    t.includes('তাঁতি') || t.includes('হস্তশিল্প') || t.includes('কারিগর') || t.includes('ছুতোর') || t.includes('কামার') || t.includes('কুমার') ||
+    t.includes('கைத்தறி') || t.includes('கைவினை') || t.includes('நெசவாளர்')
+  ) {
+    return 'Handicrafts & Handlooms';
+  }
+
+  // 9. Manufacturing & Fabrication (చిన్న తయారీ పరిశ్రమ)
+  if (
+    t.includes('manufacturing') || t.includes('fabrication') || t.includes('factory') || t.includes('workshop') ||
+    t.includes('industry') || t.includes('production') || t.includes('zed') || t.includes('unit') ||
+    t.includes('తయారీ పరిశ్రమ') || t.includes('ఫ్యాబ్రికేషన్') || t.includes('పరిశ్రమ') ||
+    t.includes('विनिर्माण') || t.includes('उद्योग') || t.includes('कारखाना') || t.includes('फैब्रिकेशन') ||
+    t.includes('ಉತ್ಪಾದನೆ') || t.includes('ಕೈಗಾರಿಕೆ') ||
+    t.includes('ম্যানুফ্যাকচারিং') || t.includes('কারখানা') || t.includes('উৎপাদন') ||
+    t.includes('உற்பத்தி') || t.includes('தொழிற்சாலை')
+  ) {
+    return 'Manufacturing & Fabrication';
+  }
+
+  // 10. Differently Abled / Divyangjan
+  if (
+    t.includes('disability') || t.includes('pwd') || t.includes('divyang') || t.includes('handicap') ||
+    t.includes('దివ్యాంగుల') || t.includes('వైకల్యం') || t.includes('వికలాంగ') ||
+    t.includes('दिव्यांग') || t.includes('विकलांग') ||
+    t.includes('ವಿಕಲಚೇತನ') || t.includes('ಅಂಗವಿಕಲ') || t.includes('ದಿವ್ಯಾಂಗ') ||
+    t.includes('প্রতিবন্ধী') || t.includes('দিব্যাঙ্গ') ||
+    t.includes('மாற்றுத்திறனாளி')
+  ) {
+    return 'Differently Abled / Divyangjan';
+  }
+
+  // 11. Education / Students
+  if (
+    t.includes('student') || t.includes('college') || t.includes('education') || t.includes('study') ||
+    t.includes('degree') || t.includes('fee') || t.includes('university') ||
+    t.includes('చదువు') || t.includes('విద్య') || t.includes('శిక్షణ') || t.includes('విద్యాభ్యాసం') ||
+    t.includes('शिक्षण') || t.includes('विद्यार्थी') || t.includes('पढ़ाई') || t.includes('छात्र') ||
+    t.includes('ಶಿಕ್ಷಣ') || t.includes('ವಿದ್ಯಾರ್ಥಿ') ||
+    t.includes('শিক্ষা') || t.includes('ছাত্র') ||
+    t.includes('கல்வி') || t.includes('மாணவர்')
+  ) {
+    return 'Education / Youth';
+  }
+
+  // 12. Women Entrepreneur
+  if (
+    t.includes('women') || t.includes('mahila') || t.includes('shg') || t.includes('female') ||
+    t.includes('మహిళ') || t.includes('ఆడ') || t.includes('महिला') ||
+    t.includes('ಮಹಿಳೆ') || t.includes('ಸ್ತ್ರೀ') ||
+    t.includes('মহিলা') || t.includes('নারী') ||
+    t.includes('பெண்')
+  ) {
+    return 'Women Entrepreneur';
+  }
+
+  return null;
+}
+
+/**
+ * Intelligent Follow-up Inquiry Detector
+ * Detects financial inquiries: EMI, tenure, moratorium, interest rate, eligibility, or documentation.
+ */
+function isFollowUpInquiry(message = '', conversationHistory = []) {
+  if (!message) return false;
+  const msgLower = message.toLowerCase();
+
+  const financialTerms = [
+    'emi', 'interest', 'interest rate', 'tenure', 'moratorium', 'installment', 'repay',
+    'repayment', 'terms', 'eligibility', 'documents', 'documentation', 'how to apply',
+    'subsidy percentage', 'loan amount', 'bank', 'collateral', 'margin money',
+    'tell me more', 'more details', 'what about this', 'for this loan', 'for this scheme',
+    // Telugu
+    'వడ్డీ', 'ఈఎంఐ', 'వాయిదా', 'కాలపరిమితి', 'మొరటోరియం', 'పత్రాలు', 'దరఖాస్తు', 'సబ్సిడీ', 'రుణం మొత్తం', 'వివరాలు',
+    // Hindi
+    'ब्याज', 'ईएमआई', 'किस्त', 'अवधि', 'दस्तावेज', 'कागजात', 'आवेदन', 'सब्सिडी', 'ऋण राशि', 'विवरण',
+    // Kannada
+    'ಬಡ್ಡಿ', 'ಇಎಂಐ', 'ಕಂತು', 'ಅವಧಿ', 'ದಾಖಲೆಗಳು', 'ಅರ್ಜಿ', 'ಸಬ್ಸಿಡಿ', 'ಸಾಲದ ಮೊತ್ತ', 'ವಿವರಗಳು',
+    // Bengali
+    'সুদ', 'ইএমআই', 'কিস্তি', 'মেয়াদ', 'নথি', 'আবেদন', 'ভর্তুকি', 'ঋণের পরিমাণ', 'বিস্তারিত',
+    // Tamil
+    'வட்டி', 'இஎம்ஐ', 'தவணை', 'கால அளவு', 'ஆவணங்கள்', 'விண்ணப்பம்', 'மானியம்'
+  ];
+
+  const hasFinancialTerm = financialTerms.some(term => msgLower.includes(term));
+  const hasHistory = Array.isArray(conversationHistory) && conversationHistory.length > 0;
+
+  return hasFinancialTerm || (hasHistory && (
+    msgLower.includes('this') || msgLower.includes('that') || msgLower.includes('it') ||
+    msgLower.includes('దీని') || msgLower.includes('ఇది') ||
+    msgLower.includes('इसके') || msgLower.includes('यह') ||
+    msgLower.includes('ಇದರ') || msgLower.includes('ಇದು') ||
+    msgLower.includes('এর') || msgLower.includes('এটি')
+  ));
+}
+
+/**
  * 1. Intelligent Sector & Intent Classifier
  * Accurately classifies user goal into explicit domain sectors.
+ * Dynamic Intent Adaptability: Always prioritizes the user's latest query topic over initial profile.
  */
 function classifyUserSector(message = '', userProfile = null) {
   if (isDiscoveryOrUnspecifiedQuery(message, userProfile)) {
     return 'Discovery';
   }
 
-  const text = (message + ' ' + (userProfile?.businessType || '')).toLowerCase();
-
-  // 1. Food Business (హోటల్, క్యాటరింగ్, ఆహార వ్యాపారం)
-  if (
-    text.includes('food') || text.includes('tiffin') || text.includes('hotel') || text.includes('canteen') ||
-    text.includes('restaurant') || text.includes('snack') || text.includes('tea stall') || text.includes('chai') ||
-    text.includes('bakery') || text.includes('catering') || text.includes('sweet shop') || text.includes('dhaba') ||
-    text.includes('టిఫిన్') || text.includes('హోటల్') || text.includes('భోజనం') || text.includes('ఆహారం') || text.includes('క్యాటరింగ్') ||
-    text.includes('होटल') || text.includes('टिफिन') || text.includes('चाय') || text.includes('खाना') || text.includes('भोजन') || text.includes('ढाबा') ||
-    text.includes('ಹೋಟೆಲ್') || text.includes('ತಿಂಡಿ') || text.includes('ಊಟ') || text.includes('ಚಹಾ') || text.includes('ಬೇಕರಿ') || text.includes('ಆಹಾರ') ||
-    text.includes('হোটেল') || text.includes('টিফিন') || text.includes('খাবার') || text.includes('চা') || text.includes('বেকারি') ||
-    text.includes('உணவு') || text.includes('ஹோட்டல்') || text.includes('டிபன்') || text.includes('கேட்டரிங்')
-  ) {
-    return 'Food Business';
+  // 1. Dynamic Intent Priority: User message intent STRICTLY overrides static userProfile
+  const sectorFromMsg = detectSectorFromText(message);
+  if (sectorFromMsg) {
+    return sectorFromMsg;
   }
 
-  // 2. Retail / Kirana Shop (కిరాణా, జనరల్ స్టోర్)
-  if (
-    text.includes('kirana') || text.includes('grocery') || text.includes('general store') || text.includes('supermarket') ||
-    (text.includes('retail') && !text.includes('garment')) || (text.includes('shop') && !text.includes('repair') && !text.includes('tea')) ||
-    text.includes('కిరాణా') || text.includes('జనరల్ స్టోర్') || text.includes('దుకాణం') ||
-    text.includes('किराना') || text.includes('जनरल स्टोर') || text.includes('दुकान') || text.includes('खुदरा') ||
-    text.includes('ಕಿರಾಣಿ') || text.includes('ಅಂಗಡಿ') || text.includes('ಜನರಲ್ ಸ್ಟೋರ್') ||
-    text.includes('মুদি') || text.includes('দোকান') || text.includes('খুচরা') ||
-    text.includes('மளிகை') || text.includes('சில்லறை')
-  ) {
-    return 'Retail / Kirana Shop';
+  // 2. Only if the message does NOT contain explicit domain keywords, fall back to userProfile
+  if (userProfile?.businessType) {
+    const sectorFromProfile = detectSectorFromText(userProfile.businessType);
+    if (sectorFromProfile) return sectorFromProfile;
   }
 
-  // 3. Street Vending (వీధి వ్యాపారం, తోపుడు బండ్లు)
-  if (
-    text.includes('street vendor') || text.includes('street vending') || text.includes('thela') || text.includes('cart') ||
-    text.includes('hawker') || text.includes('footpath') || text.includes('roadside') || text.includes('pushcart') ||
-    text.includes('తోపుడు బండి') || text.includes('తోపుడు') || text.includes('వీధి వ్యాపారం') || text.includes('ఫెరీవాలా') ||
-    text.includes('ठेला') || text.includes('रेहड़ी') || text.includes('पटरी') || text.includes('फेरीवाला') ||
-    text.includes('ತಳ್ಳುವ ಗಾಡಿ') || text.includes('ಬೀದಿ ವ್ಯಾಪಾರ') || text.includes('ಬೀದಿ ಬದಿ') ||
-    text.includes('হকার') || text.includes('ঠেলাগাড়ি') || text.includes('ফুটপাত') ||
-    text.includes('தள்ளுவண்டி') || text.includes('தெருவோர')
-  ) {
-    return 'Street Vending';
-  }
-
-  // 4. Textile & Garments (టైలరింగ్, వస్త్ర వ్యాపారం)
-  if (
-    text.includes('textile') || text.includes('garment') || text.includes('tailor') || text.includes('tailoring') ||
-    text.includes('boutique') || text.includes('dress') || text.includes('cloth') || text.includes('sewing') ||
-    text.includes('టైలరింగ్') || text.includes('వస్త్ర') || text.includes('దర్జీ') || text.includes('బట్టలు') ||
-    text.includes('टेलर') || text.includes('सिलाई') || text.includes('कपड़ा') || text.includes('दर्जी') || text.includes('परिधान') ||
-    text.includes('ಟೈಲರಿಂಗ್') || text.includes('ಜವಳಿ') || text.includes('ಬಟ್ಟೆ') || text.includes('ದರ್ಜಿ') ||
-    text.includes('দর্জি') || text.includes('পোশাক') || text.includes('বস্ত্র') || text.includes('সেলাই') ||
-    text.includes('தையல்') || text.includes('ஜவுளி') || text.includes('ஆடை')
-  ) {
-    return 'Textile & Garments';
-  }
-
-  // 5. Handicrafts & Handlooms (చేనేత, చేతివృత్తులు)
-  if (
-    text.includes('handicraft') || text.includes('handloom') || text.includes('artisan') || text.includes('weaver') ||
-    text.includes('potter') || text.includes('carpenter') || text.includes('blacksmith') || text.includes('coir') ||
-    text.includes('sculptor') || text.includes('vishwakarma') || text.includes('చేనేత') || text.includes('చేతివృత్తులు') ||
-    text.includes('వడ్రంగి') || text.includes('కమ్మరి') || text.includes('కుమ్మరి') ||
-    text.includes('हथकरघा') || text.includes('बुनकर') || text.includes('दस्तकार') || text.includes('कारीगर') || text.includes('बढ़ई') || text.includes('लोहार') || text.includes('कुम्हार') ||
-    text.includes('ನೇಕಾರ') || text.includes('ಕರಕುಶಲ') || text.includes('ಕುಂಬಾರ') || text.includes('ಕಮ್ಮಾರ') || text.includes('ಬಡಗಿ') ||
-    text.includes('তাঁতি') || text.includes('হস্তশিল্প') || text.includes('কারিগর') || text.includes('ছুতোর') || text.includes('কামার') || text.includes('কুমার') ||
-    text.includes('கைத்தறி') || text.includes('கைவினை') || text.includes('நெசவாளர்')
-  ) {
-    return 'Handicrafts & Handlooms';
-  }
-
-  // 6. Agriculture & Allied (వ్యవసాయం, పాడి పరిశ్రమ)
-  if (
-    text.includes('farm') || text.includes('agri') || text.includes('kisan') || text.includes('crop') ||
-    text.includes('tractor') || text.includes('dairy') || text.includes('cattle') || text.includes('cow') ||
-    text.includes('buffalo') || text.includes('milk') || text.includes('poultry') || text.includes('fish') ||
-    text.includes('aquaculture') || text.includes('రైతు') || text.includes('వ్యవసాయం') || text.includes('పంట') ||
-    text.includes('పాడి') || text.includes('చేపల') || text.includes('గొర్రెలు') || text.includes('ట్రాక్టర్') ||
-    text.includes('खेती') || text.includes('किसान') || text.includes('डेयरी') || text.includes('मत्स्य') || text.includes('पशुपालन') ||
-    text.includes('ಕೃಷಿ') || text.includes('ರೈತ') || text.includes('ಬೆಳೆ') || text.includes('ಹೈನುಗಾರಿಕೆ') || text.includes('ಹಾಲು') || text.includes('ಮೀನು') ||
-    text.includes('কৃষি') || text.includes('কৃষক') || text.includes('ফসল') || text.includes('দুগ্ধ') || text.includes('মাছ') ||
-    text.includes('விவசாயம்') || text.includes('பால் பண்ணை') || text.includes('பயிர்') || text.includes('மீன்')
-  ) {
-    return 'Agriculture & Allied';
-  }
-
-  // 7. Services / Repair Shop & Commercial Transport
-  if (
-    text.includes('repair') || text.includes('service center') || text.includes('garage') || text.includes('mechanic') ||
-    text.includes('auto') || text.includes('rickshaw') || text.includes('vehicle') || text.includes('lorry') ||
-    text.includes('truck') || text.includes('transport') || text.includes('taxi') || text.includes('driver') ||
-    text.includes('smartphone repair') || text.includes('electrical repair') ||
-    text.includes('రిపేర్') || text.includes('సర్వీస్') || text.includes('గ్యారేజ్') || text.includes('మెకానిక్') ||
-    text.includes('ఆటో') || text.includes('వాహనం') || text.includes('లారీ') || text.includes('రవాణా') || text.includes('డ్రైవర్') ||
-    text.includes('मरम्मत') || text.includes('गैरेज') || text.includes('सर्विस') || text.includes('गाड़ी') || text.includes('ऑटो') || text.includes('रिक्शा') || text.includes('ट्रक') ||
-    text.includes('ರಿಪೇರಿ') || text.includes('ಸೇವೆ') || text.includes('ಗ್ಯಾರೇಜ್') || text.includes('ವಾಹನ') || text.includes('ಆಟೋ') || text.includes('ಲಾರಿ') ||
-    text.includes('মেরামত') || text.includes('গ্যারেজ') || text.includes('গাড়ি') || text.includes('অটো') || text.includes('রিকশা') || text.includes('লরি') ||
-    text.includes('பழுது') || text.includes('கேரேஜ்') || text.includes('வாகனம்') || text.includes('ஆட்டோ')
-  ) {
-    return 'Services / Repair Shop';
-  }
-
-  // 8. Manufacturing & Fabrication (చిన్న తయారీ పరిశ్రమ)
-  if (
-    text.includes('manufacturing') || text.includes('fabrication') || text.includes('factory') || text.includes('workshop') ||
-    text.includes('industry') || text.includes('production') || text.includes('zed') || text.includes('unit') ||
-    text.includes('తయారీ పరిశ్రమ') || text.includes('ఫ్యాబ్రికేషన్') || text.includes('పరిశ్రమ') ||
-    text.includes('विनिर्माण') || text.includes('उद्योग') || text.includes('कारखाना') || text.includes('फैब्रिकेशन') ||
-    text.includes('ಉತ್ಪಾದನೆ') || text.includes('ಕೈಗಾರಿಕೆ') ||
-    text.includes('ম্যানুফ্যাকচারিং') || text.includes('কারখানা') || text.includes('উৎপাদন') ||
-    text.includes('உற்பத்தி') || text.includes('தொழிற்சாலை')
-  ) {
-    return 'Manufacturing & Fabrication';
-  }
-
-  // Differently Abled / Divyangjan
-  if (
-    text.includes('disability') || text.includes('pwd') || text.includes('divyang') || text.includes('handicap') ||
-    text.includes('దివ్యాంగుల') || text.includes('వైకల్యం') || text.includes('వికలాంగ') ||
-    text.includes('दिव्यांग') || text.includes('विकलांग') ||
-    text.includes('ವಿಕಲಚೇತನ') || text.includes('ಅಂಗವಿಕಲ') || text.includes('ದಿವ್ಯಾಂಗ') ||
-    text.includes('প্রতিবন্ধী') || text.includes('দিব্যাঙ্গ') ||
-    text.includes('மாற்றுத்திறனாளி') ||
-    userProfile?.hasDisability
-  ) {
+  if (userProfile?.hasDisability) {
     return 'Differently Abled / Divyangjan';
   }
-
-  // Education / Students
-  if (
-    text.includes('student') || text.includes('college') || text.includes('education') || text.includes('study') ||
-    text.includes('degree') || text.includes('fee') || text.includes('university') ||
-    text.includes('చదువు') || text.includes('విద్య') || text.includes('शिक्षण') || text.includes('विद्यार्थी') || text.includes('पढ़ाई') || text.includes('छात्र') ||
-    text.includes('ಶಿಕ್ಷಣ') || text.includes('ವಿದ್ಯಾರ್ಥಿ') ||
-    text.includes('শিক্ষা') || text.includes('ছাত্র') ||
-    text.includes('கல்வி') || text.includes('மாணவர்')
-  ) {
-    return 'Education / Youth';
-  }
-
-  // Women Entrepreneur
-  if (
-    text.includes('women') || text.includes('mahila') || text.includes('shg') || text.includes('female') ||
-    text.includes('మహిళ') || text.includes('ఆడ') || text.includes('महिला') ||
-    text.includes('ಮಹಿಳೆ') || text.includes('ಸ್ತ್ರೀ') ||
-    text.includes('মহিলা') || text.includes('নারী') ||
-    text.includes('பெண்') ||
-    userProfile?.category === 'Women Entrepreneur'
-  ) {
+  if (userProfile?.category === 'Women Entrepreneur') {
     return 'Women Entrepreneur';
   }
 
@@ -437,7 +513,7 @@ async function retrieveRelevantSchemes(query, userProfile = null) {
     candidateCodes = ['SAMARTH-TEXTILE', 'PM-VISHWAKARMA', 'PMEGP', 'PMMY'];
   } else if (detectedSector === 'Manufacturing & Fabrication') {
     candidateCodes = ['MSME-ZED', 'PMEGP', 'CGTMSE', 'STAND-UP'];
-  } else if (detectedSector === 'Services / Repair Shop') {
+  } else if (detectedSector === 'Services / Commercial Transport' || detectedSector === 'Services / Repair Shop') {
     candidateCodes = ['PMEGP-SERVICE', 'PMMY', 'STAND-UP', 'CGTMSE'];
   } else if (detectedSector === 'Street Vending') {
     candidateCodes = ['PM-SVANIDHI', 'DAY-NULM', 'PMMY'];
@@ -488,10 +564,20 @@ async function retrieveRelevantSchemes(query, userProfile = null) {
       if (code === 'MSME-ZED') score += 40;
       if (code === 'PMEGP') score += 38;
       if (code === 'CGTMSE') score += 35;
-    } else if (detectedSector === 'Services / Repair Shop') {
-      if (code === 'PMEGP-SERVICE') score += 40;
-      if (code === 'PMMY') score += 35;
-      if (code === 'STAND-UP' && (queryLower.includes('auto') || queryLower.includes('vehicle') || queryLower.includes('lorry'))) score += 35;
+    } else if (detectedSector === 'Services / Commercial Transport' || detectedSector === 'Services / Repair Shop') {
+      if (queryLower.includes('lorry') || queryLower.includes('truck') || queryLower.includes('commercial vehicle') || queryLower.includes('transport')) {
+        if (code === 'PMEGP-SERVICE') score += 45;
+        if (code === 'PMMY') score += 40;
+        if (code === 'STAND-UP') score += 38;
+      } else if (queryLower.includes('auto') || queryLower.includes('rickshaw')) {
+        if (code === 'PMMY') score += 45;
+        if (code === 'PMEGP-SERVICE') score += 40;
+        if (code === 'STAND-UP') score += 35;
+      } else {
+        if (code === 'PMEGP-SERVICE') score += 40;
+        if (code === 'PMMY') score += 35;
+        if (code === 'CGTMSE') score += 30;
+      }
     } else if (detectedSector === 'Street Vending') {
       if (code === 'PM-SVANIDHI') score += 40;
       if (code === 'DAY-NULM') score += 35;
@@ -1002,6 +1088,50 @@ function buildVernacularResponse(message, schemes, language = 'English', userPro
 }
 
 /**
+ * Intelligent Vernacular Financial Advisory Fallback
+ * Provides warm, expert advice on EMI, tenure, moratorium, interest rate, and application terms.
+ */
+function buildFinancialAdvisoryFallback(message, language = 'English', sector = 'General Advisory') {
+  const isTe = language === 'Telugu' || /[\u0C00-\u0C7F]/.test(message);
+  const isMr = language === 'Marathi';
+  const isHi = (language === 'Hindi' || /[\u0900-\u097F]/.test(message)) && !isMr;
+  const isTa = language === 'Tamil' || /[\u0B80-\u0BFF]/.test(message);
+  const isKn = language === 'Kannada' || /[\u0C80-\u0CFF]/.test(message);
+  const isBn = language === 'Bengali' || /[\u0980-\u09FF]/.test(message);
+
+  let msg = '';
+  if (isTe) {
+    msg = 'ఈ ప్రభుత్వ రుణ పథకానికి వడ్డీ రేటు సాధారణంగా సంవత్సరానికి 8.5% నుండి 11.5% వరకు ఉంటుంది. రుణాన్ని తిరిగి చెల్లించే కాలపరిమితి 36 నుండి 60 నెలల (3 నుండి 5 సంవత్సరాలు) వరకు సౌకర్యవంతంగా ఉంటుంది. వ్యాపారం స్థిరపడటానికి బ్యాంకులు 6 నుండి 12 నెలల మొరటోరియం (Moratorium - వాయిదాల విరామం) సదుపాయం కల్పిస్తాయి, దీని వలన ప్రారంభంలో ఆర్థిక ఇబ్బందులు లేకుండా వ్యాపారాన్ని అభివృద్ధి చేసుకోవచ్చు. మీరు ఎటువంటి ఆస్తి తాకట్టు పెట్టాల్సిన అవసరం లేదు.';
+  } else if (isMr) {
+    msg = 'या सरकारी योजना/कर्जासाठी व्याजदर साधारणपणे वार्षिक ८.५% ते ११.५% असतो. परतफेडीचा कालावधी ३६ ते ६० महिने (३ ते ५ वर्षे) असतो. व्यवसाय सुरू करण्यासाठी बँका ६ ते १२ महिन्यांचा मोरेटोरियम (हप्ता सवलत) कालावधी देतात. या कर्जासाठी कोणतीही मालमत्ता गहाण ठेवण्याची आवश्यकता नाही.';
+  } else if (isTa) {
+    msg = 'இந்த அரசு கடன் திட்டத்திற்கான வட்டி விகிதம் பொதுவாக ஆண்டுக்கு 8.5% முதல் 11.5% வரை இருக்கும். கடன் திருப்பிச் செலுத்தும் காலம் 36 முதல் 60 மாதங்கள் (3 முதல் 5 ஆண்டுகள்). தொழிலை நிலைநிறுத்த வங்கிகள் 6 முதல் 12 மாதங்கள் வரை தவணை அவகாசம் (Moratorium) வழங்குகின்றன. எந்தவித சொத்து பிணையமும் தேவையில்லை.';
+  } else if (isHi) {
+    msg = 'इस सरकारी योजना/ऋण के लिए ब्याज दर सामान्यतः 8.5% से 11.5% प्रति वर्ष होती है। ऋण चुकाने की अवधि (Tenure) 36 से 60 महीने (3 से 5 वर्ष) तक होती है। अधिकांश बैंक 6 से 12 महीने की मोरेटोरियम (छूट) अवधि प्रदान करते हैं ताकि ईएमआई शुरू होने से पहले व्यवसाय सुचारू रूप से स्थापित हो सके। इस ऋण के लिए कोई अचल संपत्ति गिरवी रखने की आवश्यकता नहीं होती है।';
+  } else if (isKn) {
+    msg = 'ಈ ಸರ್ಕಾರಿ ಸಾಲ ಯೋಜನೆಗೆ ಬಡ್ಡಿ ದರವು ಸಾಮಾನ್ಯವಾಗಿ ವಾರ್ಷಿಕ 8.5% ರಿಂದ 11.5% ಇರುತ್ತದೆ. ಸಾಲ ಮರುಪಾವತಿ ಅವಧಿಯು 36 ರಿಂದ 60 ತಿಂಗಳುಗಳು (3 ರಿಂದ 5 ವರ್ಷಗಳು). ನಿಮ್ಮ ವ್ಯವಹಾರವನ್ನು ಸ್ಥಿರಗೊಳಿಸಲು ಬ್ಯಾಂಕುಗಳು 6 ರಿಂದ 12 ತಿಂಗಳ ಮೊರಟೋರಿಯಂ (ಕಂತು ವಿರಾಮ) ನೀಡುತ್ತವೆ. ಈ ಸಾಲಕ್ಕೆ ಯಾವುದೇ ಆಸ್ತಿಯನ್ನು ಅಡಮಾನವಿಡುವ ಅಗತ್ಯವಿಲ್ಲ.';
+  } else if (isBn) {
+    msg = 'এই সরকারি ঋণ প্রকল্পের সুদের হার সাধারণত বার্ষিক ৮.৫% থেকে ১১.৫% পর্যন্ত হয়। ঋণ পরিশোধের মেয়াদ ৩৬ থেকে ৬০ মাস (৩ থেকে ৫ বছর)। ব্যবসা শুরু এবং স্থিতিশীল করার জন্য ব্যাংকগুলি ৬ থেকে ১২ মাসের মোরেটোরিয়াম (কিস্তির বিরতি) সুবিধা দেয়। এই ঋণের জন্য কোনো সম্পত্তি বন্ধক রাখার প্রয়োজন নেই।';
+  } else {
+    msg = 'For this government enterprise credit scheme, interest rates typically range between 8.5% and 11.5% per annum. The repayment tenure extends comfortably from 36 to 60 months (3 to 5 years). Banks provide a moratorium period of 6 to 12 months so your enterprise can generate steady cash flow before regular EMI installments begin, with 100% collateral-free terms under government guarantee.';
+  }
+
+  return {
+    type: 'financial_advisory',
+    message: msg,
+    target_sector: sector,
+    schemes: [],
+    business_options: [],
+    reply: msg,
+    recommendedSchemes: [],
+    detectedSector: sector,
+    source: 'Udyam Setu Financial Advisor Engine',
+    language,
+    bhashiniVoiceEnabled: true
+  };
+}
+
+/**
  * 4. Master Conversational RAG Handler with Gemini 2.5/3.6 Flash & Autonomous Fallback
  */
 async function handleRAGConversationalChat({
@@ -1026,9 +1156,7 @@ async function handleRAGConversationalChat({
   }
 
   // 2. Classify sector & retrieve strictly relevant schemes
-  // 2. Classify sector & check for discovery
   const detectedSector = classifyUserSector(message, userProfile);
-  const isDiscovery = (detectedSector === 'Discovery') || isDiscoveryOrUnspecifiedQuery(message, userProfile);
 
   const languageRules = effectiveLang === 'Kannada' ? `
 🚨 ABSOLUTE MANDATORY: 100% PURE KANNADA (ಕನ್ನಡ) SCRIPT ONLY!
@@ -1046,29 +1174,59 @@ async function handleRAGConversationalChat({
 🚨 ABSOLUTE MANDATORY: 100% PURE HINDI (हिन्दी देवनागरी) SCRIPT ONLY!
 - Every single word, message, option label, title, and description MUST be in pure Hindi script.
 - Zero English words.
+` : effectiveLang === 'Marathi' ? `
+🚨 ABSOLUTE MANDATORY: 100% PURE MARATHI (मराठी देवनागरी) SCRIPT ONLY!
+- Every single word, message, option label, title, and description MUST be in pure Marathi script.
+- Zero English words.
+` : effectiveLang === 'Tamil' ? `
+🚨 ABSOLUTE MANDATORY: 100% PURE TAMIL (தமிழ்) SCRIPT ONLY!
+- Every single word, message, option label, title, and description MUST be in pure Tamil script.
+- Zero English words.
 ` : `
 - Output clear, reassuring Indian English.
 `;
 
-  // Helper for resilient Gemini API calls across models
-  const callGeminiWithModels = async (systemPrompt) => {
+  // Helper for resilient Gemini API calls across models with multi-turn memory
+  const callGeminiWithModels = async (prompt, conversationHistory = [], systemInstructionText = '') => {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return null;
-    const candidateModels = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest'];
+    const candidateModels = ['gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-3.5-flash', 'gemini-3.6-flash'];
+
+    const contents = [];
+    if (Array.isArray(conversationHistory) && conversationHistory.length > 0) {
+      for (const item of conversationHistory.slice(-6)) {
+        if (item.role === 'user' && item.text) {
+          contents.push({ role: 'user', parts: [{ text: item.text }] });
+        } else if ((item.role === 'model' || item.role === 'assistant') && (item.text || item.message || item.reply)) {
+          contents.push({ role: 'model', parts: [{ text: item.text || item.message || item.reply }] });
+        }
+      }
+    }
+    contents.push({ role: 'user', parts: [{ text: prompt }] });
+
     for (const model of candidateModels) {
       try {
+        const requestBody = {
+          contents,
+          generationConfig: {
+            temperature: 0.2,
+            maxOutputTokens: 3500,
+            responseMimeType: 'application/json'
+          }
+        };
+
+        if (systemInstructionText) {
+          requestBody.systemInstruction = {
+            parts: [{ text: systemInstructionText }]
+          };
+        }
+
         const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: systemPrompt }] }],
-            generationConfig: {
-              temperature: 0.2,
-              maxOutputTokens: 3500,
-              responseMimeType: 'application/json'
-            }
-          })
+          body: JSON.stringify(requestBody)
         });
+
         if (geminiRes.status === 200) {
           const geminiData = await geminiRes.json();
           const aiText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -1090,7 +1248,77 @@ async function handleRAGConversationalChat({
     return null;
   };
 
-  // 3. CASE A: Conversational Discovery (User clicked "Ask", said "help", or business is not specified)
+  const DYNAMIC_PERSONA_SYSTEM_INSTRUCTION = `
+You are Udyam Setu AI, an expert, conversational government scheme advisor.
+Your behavior rules:
+1. Dynamic Intent Adaptability:
+   - Always prioritize the user's latest query topic over their initial profile.
+   - If a user with a food profile asks about agriculture, farming, transport (e.g., buying a lorry), or education, immediately pivot: "Nice! If you are exploring the agriculture/transport sector..." and recommend schemes matching that specific inquiry.
+2. In-Depth Follow-Up Conversations:
+   - When the user asks follow-up questions (e.g., "What is the loan amount?", "What are the EMI terms?", "What is the interest rate?"), act as a genuine AI financial advisor.
+   - Explain loan limits, interest subsidies, moratorium periods, and repayment/EMI tenures (e.g., 36-60 months) in detail.
+   - Do NOT just spit out generic, static scheme cards when asked deep follow-up questions. Answer conversationally.
+3. Natural Multilingual Capability:
+   - Always generate your response, scheme explanations, loan details, and EMI breakdowns entirely in the target user language: ${effectiveLang}.
+   - Use natural, grammatically correct vernacular phrasing in pure native script (Telugu, Hindi, Kannada, Bengali, Marathi, Tamil, or English).
+4. Interactive Scheme Cards:
+   - Accompany your recommendations with structured scheme card metadata:
+     - scheme_id (e.g., "PMMY", "PMEGP", "AIF", "KCC")
+     - title
+     - sector
+     - max_amount
+     - redirect_url (format: "/schemes/<scheme_id>")
+`;
+
+  // 3. CASE FOLLOW-UP: Deep Conversational Financial Advisory (EMI, interest, moratorium, repayment terms)
+  const isFollowUp = isFollowUpInquiry(message, conversationHistory);
+  if (isFollowUp && Array.isArray(conversationHistory) && conversationHistory.length > 0) {
+    const followUpSystemPrompt = `
+USER'S FOLLOW-UP INQUIRY: "${message}"
+
+ACT AS AN EXPERT FINANCIAL ADVISOR.
+The user is asking an in-depth follow-up financial question (e.g., loan amounts, EMI terms, interest rate, moratorium period, repayment tenure, required documents, or application procedure) regarding government schemes previously discussed.
+
+BEHAVIOR RULES:
+1. IN-DEPTH ADVISORY:
+   - Explain loan limits, interest subsidies, moratorium periods (e.g., 3 to 12 months grace period to establish enterprise before regular EMI installments begin), and repayment/EMI tenures (e.g., 36-60 months / 3-5 years) in detail.
+   - Answer conversationally in ${effectiveLang}.
+   - Do NOT just spit out generic, static scheme cards. Set "type": "financial_advisory" and "schemes": [].
+2. LANGUAGE:
+   - Respond in ${effectiveLang}.
+   ${languageRules}
+3. STRICT JSON SCHEMA:
+{
+  "type": "financial_advisory",
+  "message": "<Conversational financial explanation covering EMI, interest rate, moratorium, and repayment terms in ${effectiveLang}>",
+  "target_sector": "${detectedSector}",
+  "schemes": []
+}
+`;
+
+    const geminiResult = await callGeminiWithModels(followUpSystemPrompt, conversationHistory, DYNAMIC_PERSONA_SYSTEM_INSTRUCTION);
+    if (geminiResult && geminiResult.parsed && geminiResult.parsed.message) {
+      const parsed = geminiResult.parsed;
+      return {
+        type: 'financial_advisory',
+        message: parsed.message,
+        target_sector: parsed.target_sector || detectedSector,
+        schemes: [],
+        business_options: [],
+        reply: parsed.message,
+        recommendedSchemes: [],
+        detectedSector: parsed.target_sector || detectedSector,
+        source: `Google Gemini (${geminiResult.model}) (Conversational Advisor)`,
+        language: effectiveLang,
+        bhashiniVoiceEnabled: true
+      };
+    }
+
+    return buildFinancialAdvisoryFallback(message, effectiveLang, detectedSector);
+  }
+
+  // 4. CASE A: Conversational Discovery (User clicked "Ask", said "help", or business is not specified)
+  const isDiscovery = (detectedSector === 'Discovery') || isDiscoveryOrUnspecifiedQuery(message, userProfile);
   if (isDiscovery) {
     const discoverySystemPrompt = `
 You are "Udyam Setu AI", an intelligent government scheme advisory engine.
@@ -1107,7 +1335,7 @@ BEHAVIOR RULES:
      4. Agriculture & Allied / Farming / Dairy / KCC
      5. Textile & Garments / Tailoring Boutique
      6. Manufacturing & Fabrication / Small Industry
-     7. Services / Repair Shop / Auto Garage / Transport
+     7. Services / Commercial Transport / Auto Garage
      8. Street Vending / Thela / Pushcart Vendor
 2. LANGUAGE:
    - Detect and respond in the requested language: ${effectiveLang}.
@@ -1126,7 +1354,7 @@ BEHAVIOR RULES:
 USER QUERY: "${message}"
 `;
 
-    const geminiResult = await callGeminiWithModels(discoverySystemPrompt);
+    const geminiResult = await callGeminiWithModels(discoverySystemPrompt, conversationHistory, DYNAMIC_PERSONA_SYSTEM_INSTRUCTION);
     if (geminiResult && geminiResult.parsed && geminiResult.parsed.message) {
       const parsed = geminiResult.parsed;
       const options = (Array.isArray(parsed.business_options) && parsed.business_options.length >= 4)
@@ -1152,7 +1380,7 @@ USER QUERY: "${message}"
     return buildDiscoveryResponse(effectiveLang);
   }
 
-  // 4. CASE B: User specified their business domain / vehicle / activity -> Autonomous Scheme Recommendation
+  // 5. CASE B: User specified their business domain / vehicle / activity -> Autonomous Scheme Recommendation
   const relevantSchemes = await retrieveRelevantSchemes(message, userProfile);
 
   const schemesContext = relevantSchemes.map(s => `
@@ -1173,8 +1401,9 @@ You are "Udyam Setu AI", an intelligent government scheme advisory engine.
 BEHAVIOR RULES:
 1. DYNAMIC RELEVANCE & AUTONOMOUS THINKING:
    - Think on your own autonomously. Evaluate the user's specific query, business, and profile against the ground truth schemes.
-   - Match schemes strictly based on the user's exact goal or domain.
-   - Example (Commercial Transport): If user asks for commercial vehicle, auto-rickshaw, or lorry, recommend Stand-Up India, Mudra Kishor/Tarun, or PMEGP. Strictly DO NOT suggest street vendor or agriculture schemes.
+   - Always prioritize the user's latest query topic over their initial profile.
+   - If a user with a food profile asks about agriculture, farming, transport (e.g., buying a lorry), or education, immediately pivot: "Nice! If you are exploring the agriculture/transport sector..." and recommend schemes matching that specific inquiry.
+   - Example (Commercial Transport / Vehicle): If user asks for commercial vehicle, auto-rickshaw, or lorry, recommend Stand-Up India, Mudra Kishor/Tarun, or PMEGP. Strictly DO NOT suggest street vendor or agriculture schemes.
    - Example (Food Business): Recommend Mudra Shishu, PM SVANidhi, or PMEGP.
    - Recommend up to 3 most relevant schemes.
    - In "message", explain why you are recommending these schemes for their specific business.
@@ -1214,15 +1443,25 @@ ${schemesContext}
 USER'S MESSAGE: "${message}"
 `;
 
-  const geminiResult = await callGeminiWithModels(recommendationSystemPrompt);
+  const geminiResult = await callGeminiWithModels(recommendationSystemPrompt, conversationHistory, DYNAMIC_PERSONA_SYSTEM_INSTRUCTION);
 
   if (geminiResult && geminiResult.parsed && geminiResult.parsed.message && Array.isArray(geminiResult.parsed.schemes)) {
     const parsed = geminiResult.parsed;
-    parsed.schemes = parsed.schemes.map(s => ({
-      ...s,
-      scheme_id: s.scheme_id || 'PMMY',
-      redirect_url: `/schemes/${s.scheme_id || 'PMMY'}`
-    }));
+    parsed.schemes = parsed.schemes.map(s => {
+      const groundTruth = relevantSchemes.find(gt => 
+        (gt.shortCode && gt.shortCode.toLowerCase() === (s.scheme_id || '').toLowerCase()) ||
+        (gt.schemeId && gt.schemeId.toLowerCase() === (s.scheme_id || '').toLowerCase()) ||
+        (gt.schemeName && gt.schemeName.toLowerCase().includes((s.title || '').toLowerCase())) ||
+        (s.title && s.title.toLowerCase().includes((gt.shortCode || '').toLowerCase()))
+      );
+
+      const exactId = groundTruth ? (groundTruth.shortCode || groundTruth.schemeId) : (s.scheme_id || 'PMMY');
+      return {
+        ...s,
+        scheme_id: exactId,
+        redirect_url: `/schemes/${exactId}`
+      };
+    });
 
     const isKn = effectiveLang === 'Kannada';
     const isBn = effectiveLang === 'Bengali';
@@ -1269,8 +1508,10 @@ module.exports = {
   retrieveRelevantSchemes,
   classifyUserSector,
   isGreetingMessage,
+  isFollowUpInquiry,
   isDiscoveryOrUnspecifiedQuery,
   buildDiscoveryResponse,
+  buildFinancialAdvisoryFallback,
   DISCOVERY_BUSINESS_OPTIONS
 };
 
