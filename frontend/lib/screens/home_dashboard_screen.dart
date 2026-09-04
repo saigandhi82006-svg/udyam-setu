@@ -32,10 +32,40 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
           index: _currentBottomNavIndex,
           children: [
             _buildHomeContent(),
-            const AiChatScreen(),
             const SavedSchemesScreen(),
             ProfileScreen(user: _user),
           ],
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: FloatingActionButton.extended(
+        elevation: 4,
+        highlightElevation: 8,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28),
+        ),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AiChatScreen(),
+            ),
+          );
+        },
+        backgroundColor: AppTheme.darkGreen,
+        icon: const Icon(
+          Icons.smart_toy_outlined,
+          color: Colors.white,
+          size: 24,
+        ),
+        label: const Text(
+          'AI',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+            fontSize: 15,
+            letterSpacing: 0.5,
+          ),
         ),
       ),
       bottomNavigationBar: Container(
@@ -54,23 +84,21 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
           onTap: (index) => setState(() => _currentBottomNavIndex = index),
           selectedItemColor: AppTheme.primaryGreen,
           unselectedItemColor: Colors.grey.shade400,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
           showUnselectedLabels: true,
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.white,
           elevation: 0,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_filled),
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home_rounded),
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline_rounded),
-              activeIcon: Icon(Icons.chat_bubble_rounded),
-              label: 'Chat',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_border_rounded),
-              activeIcon: Icon(Icons.favorite_rounded),
+              icon: Icon(Icons.bookmark_outline_rounded),
+              activeIcon: Icon(Icons.bookmark_rounded),
               label: 'Saved',
             ),
             BottomNavigationBarItem(
@@ -121,7 +149,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                 ],
               ),
               GestureDetector(
-                onTap: () => setState(() => _currentBottomNavIndex = 3),
+                onTap: () => setState(() => _currentBottomNavIndex = 2),
                 child: CircleAvatar(
                   radius: 22,
                   backgroundColor: AppTheme.lightGreen,
