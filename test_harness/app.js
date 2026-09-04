@@ -1567,8 +1567,23 @@ function updateEMICalculator() {
   } else {
     document.getElementById('calculatedEmiText').innerText = `₹ ${displayEmi.toLocaleString('en-IN')} ${perMonthWord}`;
   }
+
   document.getElementById('calcPrincipalText').innerText = `₹ ${P.toLocaleString('en-IN')}`;
   document.getElementById('calcInterestText').innerText = `₹ ${totalInterest.toLocaleString('en-IN')}`;
+
+  const calcTotalText = document.getElementById('calcTotalPayableText');
+  if (calcTotalText) calcTotalText.innerText = `₹ ${totalPayment.toLocaleString('en-IN')}`;
+
+  // Update Dynamic Pie Chart SVG & Percentage
+  const principalRatio = P / totalPayment;
+  const principalPct = Math.round(principalRatio * 100);
+  const circumference = 238.76;
+  const principalOffset = circumference * (1 - principalRatio);
+
+  const pArc = document.getElementById('principalArc');
+  const pPctText = document.getElementById('principalPctText');
+  if (pArc) pArc.style.strokeDashoffset = principalOffset;
+  if (pPctText) pPctText.innerText = principalPct + '%';
 }
 
 // 6. Nearby Channel Partners (Screen 9)

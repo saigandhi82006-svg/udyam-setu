@@ -38,13 +38,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: FloatingActionButton.extended(
-        elevation: 4,
-        highlightElevation: 8,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(28),
-        ),
-        onPressed: () {
+      floatingActionButton: _FloatingRobotMascotFab(
+        onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -52,21 +47,6 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
             ),
           );
         },
-        backgroundColor: AppTheme.darkGreen,
-        icon: const Icon(
-          Icons.smart_toy_outlined,
-          color: Colors.white,
-          size: 24,
-        ),
-        label: const Text(
-          'AI',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
-            fontSize: 15,
-            letterSpacing: 0.5,
-          ),
-        ),
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -476,6 +456,244 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _FloatingRobotMascotFab extends StatefulWidget {
+  final VoidCallback onTap;
+  const _FloatingRobotMascotFab({required this.onTap});
+
+  @override
+  State<_FloatingRobotMascotFab> createState() => _FloatingRobotMascotFabState();
+}
+
+class _FloatingRobotMascotFabState extends State<_FloatingRobotMascotFab>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+    _animation = Tween<double>(begin: 0, end: -6).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: AnimatedBuilder(
+        animation: _animation,
+        builder: (context, child) {
+          final translateY = _animation.value;
+          final shadowScale = 1.0 - (translateY / -4) * 0.25;
+
+          return SizedBox(
+            width: 52,
+            height: 72,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                // Light Shadow below logo
+                Positioned(
+                  bottom: 2,
+                  child: Transform.scale(
+                    scale: shadowScale,
+                    child: Container(
+                      width: 30,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.18),
+                        borderRadius: const BorderRadius.all(Radius.elliptical(30, 5)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.12),
+                            blurRadius: 3,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Floating Cartoon Robot Mascot matching user sketch & image
+                Positioned(
+                  bottom: 8 - translateY,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Robot Head
+                      Container(
+                        width: 40,
+                        height: 26,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(13),
+                          border: Border.all(color: const Color(0xFF1E293B), width: 2.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            )
+                          ],
+                        ),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // Top cyan accent strip
+                            Positioned(
+                              top: 2,
+                              child: Container(
+                                width: 14,
+                                height: 3,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF38BDF8),
+                                  borderRadius: BorderRadius.circular(1.5),
+                                ),
+                              ),
+                            ),
+                            // Black visor screen
+                            Container(
+                              width: 30,
+                              height: 15,
+                              margin: const EdgeInsets.only(top: 3),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0F172A),
+                                borderRadius: BorderRadius.circular(7.5),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  // Left Eye
+                                  Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFF38BDF8),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: Container(
+                                        width: 2.5,
+                                        height: 2.5,
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFF0F172A),
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  // Right Eye
+                                  Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFF38BDF8),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: Container(
+                                        width: 2.5,
+                                        height: 2.5,
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFF0F172A),
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Neck connector
+                      Container(
+                        width: 7,
+                        height: 2,
+                        color: const Color(0xFF1E293B),
+                      ),
+
+                      // Robot Torso Body
+                      Container(
+                        width: 34,
+                        height: 26,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(13),
+                          border: Border.all(color: const Color(0xFF1E293B), width: 2.0),
+                        ),
+                        child: Center(
+                          child: Container(
+                            width: 20,
+                            height: 15,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0F172A),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'AI',
+                                style: TextStyle(
+                                  color: Color(0xFF38BDF8),
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Robot Feet
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 4,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF1E293B),
+                              borderRadius: BorderRadius.vertical(bottom: Radius.circular(2)),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            width: 6,
+                            height: 4,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF1E293B),
+                              borderRadius: BorderRadius.vertical(bottom: Radius.circular(2)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

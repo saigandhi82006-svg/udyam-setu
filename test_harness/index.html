@@ -371,16 +371,25 @@
                   <small data-i18n="screen3.nav_profile">Profile</small>
                 </div>
               </div>
-              <button class="ai-fab-btn" onclick="showScreen(4)" title="AI Chat Assistant">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="11" width="18" height="10" rx="2" />
-                  <circle cx="12" cy="5" r="2" />
-                  <path d="M12 7v4" />
-                  <line x1="8" y1="15" x2="8" y2="17" />
-                  <line x1="16" y1="15" x2="16" y2="17" />
-                </svg>
-                <span>AI</span>
-              </button>
+              <div class="ai-robot-mascot-fab" onclick="showScreen(4)" title="AI Chat Assistant">
+                <div class="robot-shadow"></div>
+                <div class="robot-body-wrapper">
+                  <div class="robot-head">
+                    <div class="top-accent"></div>
+                    <div class="robot-visor">
+                      <span class="robot-eye"></span>
+                      <span class="robot-eye"></span>
+                    </div>
+                  </div>
+                  <div class="robot-neck"></div>
+                  <div class="robot-torso">
+                    <span class="robot-ai-badge">AI</span>
+                  </div>
+                  <div class="robot-feet">
+                    <span></span><span></span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -699,14 +708,43 @@
                 <input type="range" id="tenureRange" min="1" max="10" step="1" value="3" oninput="updateEMICalculator()">
               </div>
 
-              <!-- Estimated EMI Card (Matches Screen 8) -->
-              <div class="emi-result-card">
-                <small data-i18n="screen8.estimated_emi">Estimated EMI</small>
-                <h2 id="calculatedEmiText">₹ 16,109 / month</h2>
-                <span class="approx-note" data-i18n="screen8.approx_note">*Values are approximate</span>
-                <div class="emi-breakdown">
-                  <div><span data-i18n="screen8.principal_label">Principal:</span> <strong id="calcPrincipalText">₹ 5,00,000</strong></div>
-                  <div><span data-i18n="screen8.total_interest_label">Total Interest:</span> <strong id="calcInterestText">₹ 79,924</strong></div>
+              <!-- Estimated EMI Card with Left Dynamic Pie Chart -->
+              <div class="emi-result-card-v2">
+                <div class="emi-card-top">
+                  <div class="pie-chart-box">
+                    <svg class="pie-svg" width="90" height="90" viewBox="0 0 100 100">
+                      <circle cx="50" cy="50" r="38" fill="none" stroke="#E2E8F0" stroke-width="12" />
+                      <circle id="principalArc" cx="50" cy="50" r="38" fill="none" stroke="#10B981" stroke-width="12" stroke-dasharray="238.76" stroke-dashoffset="35" transform="rotate(-90 50 50)" />
+                      <circle id="interestArc" cx="50" cy="50" r="38" fill="none" stroke="#F59E0B" stroke-width="12" stroke-dasharray="238.76" stroke-dashoffset="203" transform="rotate(-90 50 50)" />
+                    </svg>
+                    <div class="pie-center-text">
+                      <strong id="principalPctText">86%</strong>
+                      <span>Principal</span>
+                    </div>
+                  </div>
+                  <div class="emi-card-details">
+                    <small data-i18n="screen8.estimated_emi">ESTIMATED EMI</small>
+                    <h2 id="calculatedEmiText">₹ 16,109</h2>
+                    <span class="per-month-text">per month</span>
+                    <span class="low-interest-badge">✓ Low Interest EMI</span>
+                  </div>
+                </div>
+                <div class="emi-breakdown-row">
+                  <div>
+                    <span class="dot green"></span>
+                    <span data-i18n="screen8.principal_label">Principal:</span>
+                    <strong id="calcPrincipalText">₹ 5,00,000</strong>
+                  </div>
+                  <div>
+                    <span class="dot amber"></span>
+                    <span data-i18n="screen8.total_interest_label">Interest:</span>
+                    <strong id="calcInterestText">₹ 79,924</strong>
+                  </div>
+                  <div>
+                    <span class="dot dark"></span>
+                    <span>Total:</span>
+                    <strong id="calcTotalPayableText">₹ 5,79,924</strong>
+                  </div>
                 </div>
               </div>
 

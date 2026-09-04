@@ -98,7 +98,7 @@ class MyApplicationsScreen extends StatelessWidget {
                           const Icon(Icons.info_outline, size: 16, color: Colors.grey),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(app.remarks, style: const TextStyle(fontSize: 11, color: Colors.black800)),
+                            child: Text(app.remarks, style: const TextStyle(fontSize: 11, color: Color(0xFF1E293B))),
                           ),
                         ],
                       ),
