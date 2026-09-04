@@ -268,7 +268,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 _buildPromptChip('🏭 Small Industry / MSME'),
                 _buildPromptChip('👩‍💼 Women Entrepreneur'),
                 _buildPromptChip('♿ Divyangjan Loan (NHFDC)'),
-                _buildPromptChip('✨ Check Matching Schemes', isAction: true),
+                _buildPromptChip('🎯 Match Schemes Now', isAction: true),
               ],
             ),
           ),

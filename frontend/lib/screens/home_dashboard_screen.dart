@@ -246,7 +246,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
             childAspectRatio: 0.95,
             children: [
               _buildQuickCard(
-                icon: Icons.hub_outlined,
+                icon: Icons.shield_rounded,
                 iconColor: AppTheme.primaryGreen,
                 label: 'Match Schemes',
                 onTap: () {
@@ -257,7 +257,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                 },
               ),
               _buildQuickCard(
-                icon: Icons.calculate_outlined,
+                icon: Icons.calculate_rounded,
                 iconColor: const Color(0xFF0284C7),
                 label: 'EMI Calculator',
                 onTap: () {
@@ -268,7 +268,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                 },
               ),
               _buildQuickCard(
-                icon: Icons.fact_check_outlined,
+                icon: Icons.assignment_turned_in_rounded,
                 iconColor: const Color(0xFFD97706),
                 label: 'My Applications',
                 onTap: () {
@@ -279,7 +279,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                 },
               ),
               _buildQuickCard(
-                icon: Icons.description_outlined,
+                icon: Icons.folder_special_rounded,
                 iconColor: const Color(0xFF7C3AED),
                 label: 'Documents',
                 onTap: () {
@@ -292,7 +292,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                 },
               ),
               _buildQuickCard(
-                icon: Icons.near_me_outlined,
+                icon: Icons.store_mall_directory_rounded,
                 iconColor: const Color(0xFF059669),
                 label: 'Channel Partners',
                 onTap: () {
@@ -303,7 +303,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                 },
               ),
               _buildQuickCard(
-                icon: Icons.support_agent_rounded,
+                icon: Icons.headset_mic_rounded,
                 iconColor: const Color(0xFFDC2626),
                 label: 'Help & Support',
                 onTap: () => setState(() => _currentBottomNavIndex = 1),
