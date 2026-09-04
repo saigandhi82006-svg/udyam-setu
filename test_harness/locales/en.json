@@ -249,5 +249,41 @@
     "shishu_loan": "Shishu Loan",
     "zero_paperwork": "Zero Paperwork",
     "quick_disbursal": "Quick Disbursal"
+  },
+  "docs": {
+    "aadhaar_card": "Aadhaar Card",
+    "pan_card": "PAN Card",
+    "business_plan": "Business Project Report (DPR)",
+    "bank_statement": "Bank Statement (Last 6 Months)",
+    "address_proof": "Address Proof (Electricity Bill / Rent Agreement)",
+    "dpr": "Detailed Project Report (DPR)",
+    "fssai_license": "FSSAI Food Safety Registration / License",
+    "caste_certificate": "Caste / Social Category Certificate",
+    "quotation_estimate": "Machinery Quotation & Purchase Estimate",
+    "udid_card": "UDID Disability Certificate Card",
+    "voter_id": "Voter ID Card",
+    "passport_photos": "Passport Size Photographs (2 Copies)",
+    "vendor_vending_id": "Street Vendor ID (Certificate of Vending / LOR)",
+    "artisan_card": "PM Vishwakarma Artisan ID / Skill Certificate",
+    "land_record": "Land Revenue Record (Pattadar Passbook / ROR)",
+    "training_certificate": "Skill Training / EDP Certificate"
+  },
+  "partner_details": {
+    "andhra_grameena_bank": "Andhra Grameena Bank (RRB)",
+    "kvk_center": "KVK Business & Technology Center",
+    "sbi_msme": "State Bank of India (MSME Specialized Branch)",
+    "csc_center": "CSC Digital Seva Kendra (Common Service Center)",
+    "dic_center": "District Industries Centre (DIC) Hyderabad",
+    "call_partner": "Call Partner",
+    "call_alert": "Connecting call to {phone}...",
+    "app_submitted": "Application successfully submitted to {partner}!\nTracking ID: #UDS-847291",
+    "docs_uploaded_text": "{uploaded} of {total} Documents Uploaded",
+    "percent_ready_text": "{pct}% Ready"
+  },
+  "partner_types": {
+    "bank": "Bank Branch",
+    "kvk": "Krishi Vigyan Kendra (KVK)",
+    "csc": "Common Service Center (CSC)",
+    "dic": "District Industries Centre (DIC)"
   }
 }

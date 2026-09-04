@@ -1444,7 +1444,15 @@ function switchDetailTab(tab, element = null) {
       <div class="spec-row"><span>${labelPurpose}</span><strong>${purpose}</strong></div>
     `;
   } else if (tab === 'benefits') {
-    const list = (s.benefits && s.benefits.length) ? s.benefits : [s.tagline || 'Zero collateral required', 'Interest subvention available', 'Government institutional handholding'];
+    const rawList = (s.benefits && s.benefits.length) ? s.benefits : [
+      s.tagline || '100% Collateral-free credit support',
+      'Direct subsidy & interest subvention benefits',
+      'Simplified application and priority banking sanction'
+    ];
+    const list = (window.UdyamI18n && typeof window.UdyamI18n.localizeBenefits === 'function')
+      ? window.UdyamI18n.localizeBenefits(rawList, curLang)
+      : rawList;
+
     content.innerHTML = `
       <h5 style="margin-bottom: 10px; font-size: 13px;">${labelKeyAdvantages}</h5>
       <ul style="padding-left: 18px; line-height: 1.8;">
@@ -1452,8 +1460,36 @@ function switchDetailTab(tab, element = null) {
       </ul>
     `;
   } else if (tab === 'eligibility') {
-    const cats = (s.eligibleCategories && s.eligibleCategories.length) ? s.eligibleCategories : ['General', 'OBC', 'SC', 'ST', 'Women Entrepreneur'];
-    const bizTypes = (s.eligibleBusinessTypes && s.eligibleBusinessTypes.length) ? s.eligibleBusinessTypes : ['All Micro-Enterprises'];
+    const rawCats = (s.eligibleCategories && s.eligibleCategories.length) ? s.eligibleCategories : ['General', 'OBC', 'SC', 'ST', 'Women Entrepreneur'];
+    const cats = rawCats.map(c => {
+      if (curLang === 'en') return c;
+      const slug = c.toString().toLowerCase().replace(/[^a-z0-9]/g, '_');
+      if (slug.includes('obc')) return t('screen5.cat_obc', c).split('(')[0].trim();
+      if (slug.includes('sc')) return t('screen5.cat_sc', c).split('(')[0].trim();
+      if (slug.includes('st')) return t('screen5.cat_st', c).split('(')[0].trim();
+      if (slug.includes('women')) return t('screen5.cat_women', c);
+      if (slug.includes('general')) return t('screen5.cat_general', c);
+      if (slug.includes('minority')) return t('screen5.cat_minority', c);
+      if (slug.includes('divyang') || slug.includes('disab')) return t('screen5.cat_pwd', c);
+      if (slug.includes('artisan') || slug.includes('vishwakarma')) return t('tags.traditional_crafts', c);
+      return c;
+    });
+
+    const rawBizTypes = (s.eligibleBusinessTypes && s.eligibleBusinessTypes.length) ? s.eligibleBusinessTypes : ['All Micro-Enterprises'];
+    const bizTypes = rawBizTypes.map(b => {
+      if (curLang === 'en') return b;
+      const slug = b.toString().toLowerCase().replace(/[^a-z0-9]/g, '_');
+      if (slug.includes('food')) return t('screen5.biz_food', b).split('(')[0].trim();
+      if (slug.includes('retail') || slug.includes('kirana')) return t('screen5.biz_retail', b).split('(')[0].trim();
+      if (slug.includes('handicraft') || slug.includes('handloom')) return t('screen5.biz_handicrafts', b).split('(')[0].trim();
+      if (slug.includes('agri') || slug.includes('farm')) return t('screen5.biz_agri', b).split('(')[0].trim();
+      if (slug.includes('textile') || slug.includes('tailor') || slug.includes('garment')) return t('screen5.biz_textile', b).split('(')[0].trim();
+      if (slug.includes('mfg') || slug.includes('fabricat')) return t('screen5.biz_mfg', b).split('(')[0].trim();
+      if (slug.includes('service') || slug.includes('repair')) return t('screen5.biz_services', b).split('(')[0].trim();
+      if (slug.includes('vending') || slug.includes('street') || slug.includes('thela')) return t('screen5.biz_vending', b).split('(')[0].trim();
+      return b;
+    });
+
     content.innerHTML = `
       <div class="spec-row"><span>${labelMinAge}</span><strong>${s.minAge || '18 ' + (typeof t === 'function' ? t('common.years', 'Years') : 'Years')}</strong></div>
       <div class="spec-row"><span>${labelEligibleCats}</span><strong>${cats.join(', ')}</strong></div>
@@ -1461,14 +1497,20 @@ function switchDetailTab(tab, element = null) {
       <div class="spec-row"><span>${labelIncomeCap}</span><strong>${s.incomeCap || (s.maxIncome ? 'Up to ₹' + Number(s.maxIncome).toLocaleString('en-IN') : (typeof t === 'function' ? t('common.no_restrictive_ceiling', 'No restrictive ceiling') : 'No restrictive ceiling'))}</strong></div>
     `;
   } else if (tab === 'documents') {
-    const docs = (s.requiredDocuments && s.requiredDocuments.length)
-      ? s.requiredDocuments.map(d => ({ docName: d.docName || d, status: d.status || 'Pending' }))
-      : currentDocuments;
+    const rawDocs = (s.requiredDocuments && s.requiredDocuments.length)
+      ? s.requiredDocuments.map(d => ({
+          docName: (window.UdyamI18n && typeof window.UdyamI18n.localizeDocumentName === 'function') ? window.UdyamI18n.localizeDocumentName(d.docName || d, curLang) : (d.docName || d),
+          status: d.status || 'Pending'
+        }))
+      : currentDocuments.map(d => ({
+          docName: (window.UdyamI18n && typeof window.UdyamI18n.localizeDocumentName === 'function') ? window.UdyamI18n.localizeDocumentName(d.docName, curLang) : d.docName,
+          status: d.status || 'Pending'
+        }));
     content.innerHTML = `
       <h5 style="margin-bottom: 8px;">${labelDocChecklist}</h5>
       <p style="color: #64748B; font-size: 11px; margin-bottom: 12px;">${labelDocSub}</p>
       <div class="doc-list">
-        ${docs.map(d => `
+        ${rawDocs.map(d => `
           <div class="doc-item">
             <div class="doc-meta">
               <h5>${d.docName}</h5>
@@ -1554,23 +1596,29 @@ function renderPartners(partners) {
   container.innerHTML = '';
   const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
   const kmAwayWord = (typeof t === 'function') ? t('common.km_away', 'km away') : 'km away';
+  const callTooltip = (typeof t === 'function') ? t('partner_details.call_partner', 'Call Partner') : 'Call Partner';
 
   partners.slice(0, 3).forEach(p => {
-    let pType = p.type;
-    if (curLang === 'te') {
-      pType = p.type === 'Bank' ? 'బ్యాంకు శాఖ' : (p.type === 'KVK' ? 'వ్యవసాయ విజ్ఞాన కేంద్రం (KVK)' : 'డిజిటల్ సేవా కేంద్రం (CSC)');
-    } else if (curLang === 'hi') {
-      pType = p.type === 'Bank' ? 'बैंक शाखा' : (p.type === 'KVK' ? 'कृषि विज्ञान केंद्र' : 'डिजिटल सेवा केंद्र');
-    }
+    const pName = (window.UdyamI18n && typeof window.UdyamI18n.localizePartnerName === 'function')
+      ? window.UdyamI18n.localizePartnerName(p.partnerName, curLang)
+      : p.partnerName;
+
+    const pType = (window.UdyamI18n && typeof window.UdyamI18n.localizePartnerType === 'function')
+      ? window.UdyamI18n.localizePartnerType(p.type, curLang)
+      : p.type;
+
+    const callAlertText = (typeof t === 'function') 
+      ? t('partner_details.call_alert', `Calling ${p.contactPhone}...`).replace('{phone}', p.contactPhone)
+      : `Calling ${p.contactPhone}...`;
 
     const card = document.createElement('div');
     card.className = 'partner-card';
     card.innerHTML = `
       <div class="partner-info">
-        <h5>${p.partnerName}</h5>
+        <h5>${pName}</h5>
         <p>${p.distanceKm} ${kmAwayWord} • ${pType}</p>
       </div>
-      <button class="call-btn" title="Call Partner" onclick="alert('Calling ${p.contactPhone}...')">📞</button>
+      <button class="call-btn" title="${callTooltip}" onclick="alert('${escapeTextForAttr(callAlertText)}')">📞</button>
     `;
     container.appendChild(card);
   });
@@ -1582,56 +1630,13 @@ function renderDocumentChecklist() {
   container.innerHTML = '';
   const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
 
-  const docNamesMap = {
-    te: {
-      'Aadhaar Card': 'ఆధార్ కార్డు',
-      'PAN Card': 'పాన్ కార్డు',
-      'Business Plan': 'వ్యాపార ప్రణాళిక పత్రం',
-      'Bank Statement': 'గత 6 నెలల బ్యాంక్ స్టేట్‌మెంట్',
-      'Address Proof': 'చిరునామా రుజువు (కరెంట్ బిల్లు / అద్దె ఒప్పందం)'
-    },
-    hi: {
-      'Aadhaar Card': 'आधार कार्ड',
-      'PAN Card': 'पैन कार्ड',
-      'Business Plan': 'व्यावसायिक योजना',
-      'Bank Statement': 'बैंक विवरण',
-      'Address Proof': 'पते का प्रमाण'
-    },
-    kn: {
-      'Aadhaar Card': 'ಆಧಾರ್ ಕಾರ್ಡ್',
-      'PAN Card': 'ಪ್ಯಾನ್ ಕಾರ್ಡ್',
-      'Business Plan': 'ವ್ಯವಹಾರ ಯೋಜನೆ',
-      'Bank Statement': 'ಬ್ಯಾಂಕ್ ವಿವರಣೆ',
-      'Address Proof': 'ವಿಳಾಸ ಪುರಾವೆ'
-    },
-    ta: {
-      'Aadhaar Card': 'ஆதார் அட்டை',
-      'PAN Card': 'பான் அட்டை',
-      'Business Plan': 'வணிகத் திட்டம்',
-      'Bank Statement': 'வங்கி அறிக்கை',
-      'Address Proof': 'முகவரி சான்று'
-    },
-    mr: {
-      'Aadhaar Card': 'आधार कार्ड',
-      'PAN Card': 'पॅन कार्ड',
-      'Business Plan': 'व्यवसाय योजना',
-      'Bank Statement': 'बँक स्टेटमेंट',
-      'Address Proof': 'पत्ता पुरावा'
-    },
-    bn: {
-      'Aadhaar Card': 'আধার কার্ড',
-      'PAN Card': 'প্যান কার্ড',
-      'Business Plan': 'ব্যবসায়িক পরিকল্পনা',
-      'Bank Statement': 'ব্যাংক স্টেটমেন্ট',
-      'Address Proof': 'ঠিকানার প্রমাণ'
-    }
-  };
-
   let uploadedCount = 0;
   currentDocuments.forEach((doc, idx) => {
     if (doc.status === 'Uploaded') uploadedCount++;
 
-    const localizedDocName = (docNamesMap[curLang] && docNamesMap[curLang][doc.docName]) || doc.docName;
+    const localizedDocName = (window.UdyamI18n && typeof window.UdyamI18n.localizeDocumentName === 'function')
+      ? window.UdyamI18n.localizeDocumentName(doc.docName, curLang)
+      : doc.docName;
     const localizedStatus = (typeof t === 'function')
       ? (doc.status === 'Uploaded' ? t('common.uploaded', 'Uploaded') : t('common.pending', 'Pending'))
       : doc.status;
@@ -1651,21 +1656,20 @@ function renderDocumentChecklist() {
   });
 
   const totalDocs = currentDocuments.length;
-  if (curLang === 'te') {
-    document.getElementById('docCountText').innerText = `${totalDocs} లో ${uploadedCount} పత్రాలు అప్‌లోడ్ అయ్యాయి`;
-    const readyEl = document.querySelector('.ready-badge');
-    if (readyEl) readyEl.innerText = `${Math.round((uploadedCount / totalDocs) * 100)}% సిద్ధంగా ఉంది`;
-  } else if (curLang === 'hi') {
-    document.getElementById('docCountText').innerText = `${totalDocs} में से ${uploadedCount} दस्तावेज अपलोड हुए`;
-    const readyEl = document.querySelector('.ready-badge');
-    if (readyEl) readyEl.innerText = `${Math.round((uploadedCount / totalDocs) * 100)}% तैयार`;
-  } else {
-    document.getElementById('docCountText').innerText = `${uploadedCount} of ${totalDocs} Documents Uploaded`;
-    const pct = Math.round((uploadedCount / totalDocs) * 100);
-    const readyEl = document.querySelector('.ready-badge');
-    if (readyEl) readyEl.innerText = `${pct}% Ready`;
-  }
   const pct = Math.round((uploadedCount / totalDocs) * 100);
+
+  const docCountFormat = (typeof t === 'function') ? t('partner_details.docs_uploaded_text', '{uploaded} of {total} Documents Uploaded') : '{uploaded} of {total} Documents Uploaded';
+  const readyFormat = (typeof t === 'function') ? t('partner_details.percent_ready_text', '{pct}% Ready') : '{pct}% Ready';
+
+  const docCountText = docCountFormat.replace('{total}', totalDocs).replace('{uploaded}', uploadedCount);
+  const readyText = readyFormat.replace('{pct}', pct);
+
+  const docCountEl = document.getElementById('docCountText');
+  if (docCountEl) docCountEl.innerText = docCountText;
+
+  const readyEl = document.querySelector('.ready-badge');
+  if (readyEl) readyEl.innerText = readyText;
+
   const progEl = document.getElementById('docProgressBar');
   if (progEl) progEl.style.width = `${pct}%`;
 }
@@ -1679,7 +1683,14 @@ function toggleDocStatus(index) {
 }
 
 function handleSubmitApplication() {
-  alert('Application successfully submitted to nearest partner (Andhra Grameena Bank)!\nTracking ID: #UDS-847291');
+  const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
+  const partnerName = (window.UdyamI18n && typeof window.UdyamI18n.localizePartnerName === 'function')
+    ? window.UdyamI18n.localizePartnerName('Andhra Grameena Bank (RRB)', curLang)
+    : 'Andhra Grameena Bank (RRB)';
+  const msgFormat = (typeof t === 'function')
+    ? t('partner_details.app_submitted', 'Application successfully submitted to {partner}!\nTracking ID: #UDS-847291')
+    : 'Application successfully submitted to {partner}!\nTracking ID: #UDS-847291';
+  alert(msgFormat.replace('{partner}', partnerName));
   showScreen(3);
 }
 

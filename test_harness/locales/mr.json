@@ -249,5 +249,41 @@
     "shishu_loan": "शिशू कर्ज",
     "zero_paperwork": "कागदपत्र मुक्त प्रक्रिया",
     "quick_disbursal": "त्वरित कर्ज वितरण"
+  },
+  "docs": {
+    "aadhaar_card": "आधार कार्ड",
+    "pan_card": "पॅन कार्ड",
+    "business_plan": "सविस्तर व्यवसाय प्रकल्प अहवाल (DPR)",
+    "bank_statement": "मागील 6 महिन्यांचे बँक स्टेटमेंट",
+    "address_proof": "पत्ता पुरावा (वीज बिल / भाडे करार)",
+    "dpr": "सविस्तर प्रकल्प अहवाल (DPR)",
+    "fssai_license": "FSSAI अन्न सुरक्षा नोंदणी / परवाना",
+    "caste_certificate": "जात / सामाजिक प्रवर्ग प्रमाणपत्र",
+    "quotation_estimate": "यंत्रसामग्री कोटेशन आणि खरेदी अंदाज",
+    "udid_card": "युडीआयडी दिव्यांगता प्रमाणपत्र कार्ड (UDID)",
+    "voter_id": "मतदार ओळखपत्र",
+    "passport_photos": "पासपोर्ट आकाराची छायाचित्रे (2 प्रती)",
+    "vendor_vending_id": "स्ट्रीट वेंडर ओळखपत्र (LOR / वेंडिंग प्रमाणपत्र)",
+    "artisan_card": "पीएम विश्वकर्मा कारागीर ओळखपत्र",
+    "land_record": "जमीन महसूल नोंद (7/12 उतारा)",
+    "training_certificate": "कौशल्य प्रशिक्षण प्रमाणपत्र (EDP)"
+  },
+  "partner_details": {
+    "andhra_grameena_bank": "आंध्रा ग्रामीण बँक (RRB)",
+    "kvk_center": "केव्हीके व्यवसाय आणि तंत्रज्ञान केंद्र",
+    "sbi_msme": "स्टेट बँक ऑफ इंडिया (MSME विशेष शाखा)",
+    "csc_center": "सीएससी डिजिटल सेवा केंद्र (CSC)",
+    "dic_center": "जिल्हा उद्योग केंद्र (DIC)",
+    "call_partner": "भागीदारास कॉल करा",
+    "call_alert": "{phone} वर कॉल जोडला जात आहे...",
+    "app_submitted": "अर्ज यशस्वीरीत्या {partner} कडे सादर केला गेला आहे!\nट्रॅकिंग आयडी: #UDS-847291",
+    "docs_uploaded_text": "{total} पैकी {uploaded} कागदपत्रे अपलोड झाली",
+    "percent_ready_text": "{pct}% तयार"
+  },
+  "partner_types": {
+    "bank": "बँक शाखा",
+    "kvk": "कृषी विज्ञान केंद्र (KVK)",
+    "csc": "डिजिटल सेवा केंद्र (CSC)",
+    "dic": "जिल्हा उद्योग केंद्र (DIC)"
   }
 }
