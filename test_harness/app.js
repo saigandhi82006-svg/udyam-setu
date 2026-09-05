@@ -68,7 +68,20 @@ window.addEventListener('udyam:languageChanged', (event) => {
 });
 
 // Screen Switcher
+let currentActiveScreen = 1;
+let previousScreenBeforeDocuments = 3;
+
+function handleBackFromDocuments() {
+  showScreen(previousScreenBeforeDocuments || 3);
+}
+window.handleBackFromDocuments = handleBackFromDocuments;
+
 function showScreen(screenNumber) {
+  if (screenNumber === 10 && currentActiveScreen !== 10) {
+    previousScreenBeforeDocuments = currentActiveScreen;
+  }
+  currentActiveScreen = screenNumber;
+
   for (let i = 1; i <= 12; i++) {
     const s = document.getElementById(`screen-${i}`);
     if (s) s.classList.remove('active');
