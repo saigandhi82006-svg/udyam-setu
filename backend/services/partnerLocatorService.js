@@ -1,6 +1,6 @@
 const https = require('https');
 
-// In-memory cache for live POI queries: key = `lat_lng_radius` -> { timestamp, data }
+// In-memory cache for live POI queries: key = `lat_lng_radius_type` -> { timestamp, data }
 const poiCache = new Map();
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
@@ -21,55 +21,69 @@ function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
  * post offices / CSCs, village secretariats, and rural centers.
  */
 async function fetchOverpassPOIs(lat, lng, radiusMeters = 15000) {
-  const query = `[out:json][timeout:10];
+  const query = `[out:json][timeout:15];
 (
   node["amenity"~"bank|atm|post_office|townhall|community_centre|public_building"](around:${radiusMeters},${lat},${lng});
   way["amenity"~"bank|atm|post_office|townhall|community_centre|public_building"](around:${radiusMeters},${lat},${lng});
   node["office"~"government|administrative|financial"](around:${radiusMeters},${lat},${lng});
   way["office"~"government|administrative|financial"](around:${radiusMeters},${lat},${lng});
 );
-out center 35;`;
+out center 40;`;
 
-  return new Promise((resolve) => {
-    const postData = 'data=' + encodeURIComponent(query);
-    const options = {
-      hostname: 'overpass-api.de',
-      port: 443,
-      path: '/api/interpreter',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Content-Length': Buffer.byteLength(postData),
-        'User-Agent': 'UdyamSetu-App/1.0 (partner-locator@udyamsetu.gov.in)'
-      },
-      timeout: 8000
-    };
+  const hosts = ['overpass-api.de', 'lz4.overpass-api.de', 'overpass.kumi.systems'];
 
-    const req = https.request(options, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try {
-          const json = JSON.parse(data);
-          resolve(json.elements || []);
-        } catch (e) {
-          resolve([]);
-        }
+  for (const host of hosts) {
+    try {
+      const res = await new Promise((resolve) => {
+        const postData = 'data=' + encodeURIComponent(query);
+        const options = {
+          hostname: host,
+          port: 443,
+          path: '/api/interpreter',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Length': Buffer.byteLength(postData),
+            'User-Agent': 'UdyamSetu-App/1.0 (partner-locator@udyamsetu.gov.in)'
+          },
+          timeout: 10000
+        };
+
+        const req = https.request(options, (res) => {
+          let data = '';
+          res.on('data', chunk => data += chunk);
+          res.on('end', () => {
+            try {
+              const json = JSON.parse(data);
+              resolve(json.elements || []);
+            } catch (e) {
+              resolve(null);
+            }
+          });
+        });
+
+        req.on('timeout', () => {
+          req.destroy();
+          resolve(null);
+        });
+
+        req.on('error', () => {
+          resolve(null);
+        });
+
+        req.write(postData);
+        req.end();
       });
-    });
 
-    req.on('timeout', () => {
-      req.destroy();
-      resolve([]);
-    });
+      if (res && res.length > 0) {
+        return res;
+      }
+    } catch (err) {
+      // try next host
+    }
+  }
 
-    req.on('error', () => {
-      resolve([]);
-    });
-
-    req.write(postData);
-    req.end();
-  });
+  return [];
 }
 
 function classifyAndFormatPOI(el, userLat, userLng, defaultPlace, defaultDistrict) {
@@ -139,7 +153,6 @@ function classifyAndFormatPOI(el, userLat, userLng, defaultPlace, defaultDistric
     contactPhone,
     contactPerson,
     servicesOffered: services,
-    rating: parseFloat((4.6 + (Math.abs(lat * 100) % 4) * 0.1).toFixed(1)),
     workingHours,
     distanceKm,
     searchQuery: `${partnerName} ${address}`
@@ -206,7 +219,6 @@ async function getDynamicNearbyPartners(userLat, userLng, radiusKm = 25, typeFil
         contactPhone: '+91 1902 (Govt Helpdesk)',
         contactPerson: 'Panchayat Secretary / Digital Assistant',
         servicesOffered: ['Udyam Registration', 'PMEGP Subsidy Handholding', 'PM Vishwakarma Enrolment', 'Aadhaar e-KYC', 'Income & Caste Certificates'],
-        rating: 4.9,
         workingHours: '9:00 AM - 6:00 PM (Mon-Sat)',
         distanceKm: calculateHaversineDistance(lat, lng, lat - 0.0018, lng + 0.0022),
         searchQuery: `Grama Sachivalayam near ${defaultPlace} ${defaultDistrict}`
@@ -225,7 +237,6 @@ async function getDynamicNearbyPartners(userLat, userLng, radiusKm = 25, typeFil
         contactPhone: '+91 1800 425 0302',
         contactPerson: 'Village Agriculture / Horticulture Assistant',
         servicesOffered: ['Agri-Infrastructure Fund Support', 'PMFME Micro Food Processing Subsidies', 'PM-Kisan & KCC Handholding', 'Dairy & Animal Husbandry Loans'],
-        rating: 4.8,
         workingHours: '9:30 AM - 5:30 PM (Mon-Fri)',
         distanceKm: calculateHaversineDistance(lat, lng, lat + 0.0030, lng - 0.0035),
         searchQuery: `Rythu Bharosa Kendra near ${defaultPlace} ${defaultDistrict}`
@@ -244,7 +255,6 @@ async function getDynamicNearbyPartners(userLat, userLng, radiusKm = 25, typeFil
         contactPhone: '+91 1800 11 2211',
         contactPerson: 'Branch Manager / Chief Credit Officer',
         servicesOffered: ['PM MUDRA Yojana (Shishu/Kishore/Tarun)', 'PMEGP Capital Subsidy Credit', 'CGTMSE Collateral-Free Loans', 'SHG Bank Linkage'],
-        rating: 4.8,
         workingHours: '10:00 AM - 4:30 PM (Mon-Sat)',
         distanceKm: calculateHaversineDistance(lat, lng, lat + 0.0032, lng + 0.0038),
         searchQuery: `Bank near ${defaultPlace} ${defaultDistrict}`
@@ -263,7 +273,6 @@ async function getDynamicNearbyPartners(userLat, userLng, radiusKm = 25, typeFil
         contactPhone: '1800 266 6868',
         contactPerson: 'Sub Postmaster',
         servicesOffered: ['IPPB Micro Loans', 'PM Vishwakarma Biometric Verification', 'Aadhaar Updates & e-KYC', 'Postal Life Insurance'],
-        rating: 4.7,
         workingHours: '9:00 AM - 5:00 PM (Mon-Sat)',
         distanceKm: calculateHaversineDistance(lat, lng, lat - 0.0025, lng - 0.0018),
         searchQuery: `Post Office near ${defaultPlace} ${defaultDistrict}`

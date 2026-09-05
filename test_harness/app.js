@@ -2526,6 +2526,18 @@ async function loadNearbyPartners(filterType = null) {
   }
 }
 
+function calculateClientHaversine(lat1, lon1, lat2, lon2) {
+  const R = 6371; // km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 function renderPartners(partners) {
   const container = document.getElementById('partnerListContainer');
   if (!container) return;
@@ -2533,6 +2545,7 @@ function renderPartners(partners) {
 
   const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
   const kmAwayWord = (typeof t === 'function') ? t('common.km_away', 'km away') : 'km away';
+  const metersAwayWord = (typeof t === 'function') ? t('common.m_away', 'm away') : 'm away';
 
   if (!partners || partners.length === 0) {
     const categoryName = currentPartnerFilter === 'All' ? 'places' : (currentPartnerFilter === 'Bank' ? 'Banks' : (currentPartnerFilter === 'CSC' ? 'Grama Sachivalayam' : 'Rythu Bharosa Kendram (RBK)'));
@@ -2549,7 +2562,25 @@ function renderPartners(partners) {
     return;
   }
 
-  partners.forEach(p => {
+  const userLat = window.userLiveLocation.lat || 17.3850;
+  const userLng = window.userLiveLocation.lng || 78.4867;
+
+  // Recalculate exact real-time client distance from current GPS and sort strictly by distance
+  const enrichedPartners = partners.map(p => {
+    let exactDistKm = typeof p.distanceKm === 'number' ? p.distanceKm : 1.0;
+    if (p.location && p.location.coordinates && p.location.coordinates.length >= 2) {
+      const pLng = parseFloat(p.location.coordinates[0]);
+      const pLat = parseFloat(p.location.coordinates[1]);
+      if (!isNaN(pLng) && !isNaN(pLat)) {
+        exactDistKm = calculateClientHaversine(userLat, userLng, pLat, pLng);
+      }
+    }
+    return { ...p, exactDistKm };
+  }).sort((a, b) => a.exactDistKm - b.exactDistKm);
+
+  window.__lastPartners = enrichedPartners;
+
+  enrichedPartners.forEach(p => {
     const pName = (window.UdyamI18n && typeof window.UdyamI18n.localizePartnerName === 'function')
       ? window.UdyamI18n.localizePartnerName(p.partnerName, curLang)
       : p.partnerName;
@@ -2570,6 +2601,14 @@ function renderPartners(partners) {
       iconEmoji = '🌾';
     }
 
+    let distFormatted = '';
+    if (p.exactDistKm < 1.0) {
+      const meters = Math.round(p.exactDistKm * 1000);
+      distFormatted = `${meters} ${metersAwayWord}`;
+    } else {
+      distFormatted = `${p.exactDistKm.toFixed(1)} ${kmAwayWord}`;
+    }
+
     const card = document.createElement('div');
     card.className = 'partner-card';
     card.title = 'Click to open Google Maps for this place';
@@ -2582,14 +2621,13 @@ function renderPartners(partners) {
       <div class="partner-info">
         <h5>${pName}</h5>
         <div class="partner-meta-row">
-          <span class="partner-dist-badge">📍 ${p.distanceKm} ${kmAwayWord}</span>
+          <span class="partner-dist-badge">📍 ${distFormatted}</span>
           <span>•</span>
           <span class="partner-type-tag">${pType}</span>
-          ${p.rating ? `<span>•</span> <span style="color: #F59E0B; font-weight: 700;">★ ${p.rating}</span>` : ''}
         </div>
         <p class="partner-addr-text">${p.address || window.userLiveLocation.label}</p>
       </div>
-      <div class="partner-map-action" title="Show turn-by-turn driving route on Google Maps" onclick="event.stopPropagation(); openGoogleMapsForPartner(window.__lastPartners.find(x => x.partnerName === '${p.partnerName.replace(/'/g, "\\'")}'))">
+      <div class="partner-map-action" title="Show turn-by-turn driving route on Google Maps" onclick="event.stopPropagation(); openGoogleMapsForPartner(p)">
         <span>🧭</span>
         <span style="font-weight: 700; color: #0284C7;">Route ➔</span>
       </div>
