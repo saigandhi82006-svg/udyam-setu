@@ -285,5 +285,11 @@
     "kvk": "Krishi Vigyan Kendra (KVK)",
     "csc": "Common Service Center (CSC)",
     "dic": "District Industries Centre (DIC)"
+  },
+  "screen11": {
+    "header": "My Applications",
+    "sub": "Track applied loan & subsidy status",
+    "apply_new_btn": "+ Apply for Another Scheme",
+    "go_home_btn": "🏠 Go to Home Dashboard"
   }
 }
