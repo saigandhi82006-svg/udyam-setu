@@ -823,13 +823,17 @@
 
           <!-- SCREEN 9: NEAREST PARTNER FINDER -->
           <div class="screen" id="screen-9">
-            <div class="sub-header">
+            <div class="sub-header partner-sub-header">
               <button class="back-btn" onclick="navigateBack()">‹</button>
               <div class="center-title">
-                <h4 data-i18n="screen9.header">Nearby Partners</h4>
-                <small id="partnerLocSubText" data-i18n="screen9.sub_header">Detecting Your Location...</small>
+                <h4 data-i18n="screen9.header">Nearby Centres</h4>
+                <div class="live-location-chip" onclick="requestUserLiveLocation(true)" title="Tap to refresh live GPS location">
+                  <span class="live-dot pulse"></span>
+                  <span id="partnerLocSubText" data-i18n="screen9.sub_header">Detecting Location...</span>
+                  <span class="refresh-icon">🔄</span>
+                </div>
               </div>
-              <button class="gps-refresh-btn" onclick="requestUserLiveLocation(true)" title="Detect Your Live GPS Location">🎯 My GPS</button>
+              <button class="gps-pill-btn" onclick="requestUserLiveLocation(true)" title="Detect Your Live GPS Location">🎯 GPS</button>
             </div>
 
             <!-- Optional Live Location Permission Banner -->
@@ -844,22 +848,25 @@
               </div>
             </div>
 
-            <!-- Partner Type Filter Bar -->
-            <div class="gmaps-filter-bar">
-              <button class="gmaps-chip active" onclick="filterGMap('All', this)">All Places</button>
-              <button class="gmaps-chip" onclick="filterGMap('CSC', this)">🏛️ Grama Sachivalayam</button>
-              <button class="gmaps-chip" onclick="filterGMap('KVK', this)">🌾 Rythu Bharosa Kendram</button>
-              <button class="gmaps-chip" onclick="filterGMap('Bank', this)">🏦 Bank Branch</button>
-            </div>
+            <!-- Sleek Unified Controls Wrapper -->
+            <div class="partner-controls-wrapper">
+              <!-- Partner Category Filter Chips -->
+              <div class="gmaps-filter-bar">
+                <button class="gmaps-chip active" onclick="filterGMap('All', this)">🌐 All</button>
+                <button class="gmaps-chip" onclick="filterGMap('Bank', this)">🏦 Banks</button>
+                <button class="gmaps-chip" onclick="filterGMap('CSC', this)">🏛️ Grama Sachivalayam</button>
+                <button class="gmaps-chip" onclick="filterGMap('KVK', this)">🌾 Rythu Kendram</button>
+              </div>
 
-            <!-- Search Radius Filter Selector -->
-            <div class="radius-filter-bar" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; background: #F8FAFC; padding: 6px 10px; border-radius: 10px; border: 1px solid #E2E8F0;">
-              <span style="font-size: 11px; font-weight: 700; color: #475569;">📏 Radius:</span>
-              <div style="display: flex; gap: 6px;">
-                <button class="radius-chip" id="rad-5" onclick="setSearchRadius(5, this)">5 km</button>
-                <button class="radius-chip active" id="rad-10" onclick="setSearchRadius(10, this)">10 km</button>
-                <button class="radius-chip" id="rad-15" onclick="setSearchRadius(15, this)">15 km</button>
-                <button class="radius-chip" id="rad-25" onclick="setSearchRadius(25, this)">25 km</button>
+              <!-- Compact Radius Filter -->
+              <div class="compact-radius-row">
+                <span class="radius-label">📏 Radius:</span>
+                <div class="radius-chips-group">
+                  <button class="radius-chip" id="rad-5" onclick="setSearchRadius(5, this)">5 km</button>
+                  <button class="radius-chip active" id="rad-10" onclick="setSearchRadius(10, this)">10 km</button>
+                  <button class="radius-chip" id="rad-15" onclick="setSearchRadius(15, this)">15 km</button>
+                  <button class="radius-chip" id="rad-25" onclick="setSearchRadius(25, this)">25 km</button>
+                </div>
               </div>
             </div>
 
@@ -873,9 +880,10 @@
                 loading="lazy"
                 referrerpolicy="no-referrer-when-downgrade">
               </iframe>
-              <div class="gmaps-live-bar">
+              <div class="gmaps-live-bar" onclick="openGoogleMapsGeneral()" title="Click to open in Google Maps">
                 <span class="live-dot pulse"></span>
                 <span class="live-loc-text">📍 <strong>Hyderabad, TS</strong> (17.3850° N, 78.4867° E)</span>
+                <span class="gmaps-expand-icon">↗</span>
               </div>
             </div>
 

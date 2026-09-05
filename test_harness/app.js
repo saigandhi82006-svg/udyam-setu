@@ -2357,7 +2357,7 @@ async function requestUserLiveLocation(forcePrompt = false) {
       };
 
       if (subText) {
-        subText.innerHTML = `📍 <span style="color: var(--primary-green); font-weight: 700;">Live GPS: ${locLabel}</span>`;
+        subText.innerText = locLabel;
       }
 
       updateLiveGMapDisplay(lat, lng, locLabel, accuracy);
@@ -2366,7 +2366,7 @@ async function requestUserLiveLocation(forcePrompt = false) {
     (error) => {
       console.warn('Geolocation permission error:', error.code, error.message);
       if (banner) banner.style.display = 'block';
-      if (subText) subText.innerText = '📍 Default Area (Hyderabad)';
+      if (subText) subText.innerText = 'Hyderabad, TS';
 
       updateLiveGMapDisplay(window.userLiveLocation.lat, window.userLiveLocation.lng, window.userLiveLocation.label, null, false);
       loadNearbyPartners(currentPartnerFilter);
@@ -2419,7 +2419,7 @@ function updateLiveGMapDisplay(lat, lng, label, accuracy = null, isLive = true) 
   const locLabel = label || `${lat.toFixed(4)},${lng.toFixed(4)}`;
 
   if (iframe) {
-    let q = `Grama Sachivalayam, Rythu Bharosa Kendram and Banks near ${locLabel}`;
+    let q = `Banks, Grama Sachivalayam and Post Office near ${locLabel}`;
     if (currentPartnerFilter === 'Bank') q = `Banks near ${locLabel}`;
     else if (currentPartnerFilter === 'CSC') q = `Grama Sachivalayam near ${locLabel}`;
     else if (currentPartnerFilter === 'KVK') q = `Rythu Bharosa Kendram near ${locLabel}`;
@@ -2430,10 +2430,11 @@ function updateLiveGMapDisplay(lat, lng, label, accuracy = null, isLive = true) 
   if (liveBar) {
     const dotClass = isLive ? 'live-dot pulse' : 'live-dot';
     const dotColor = isLive ? '#10B981' : '#F59E0B';
-    const accText = accuracy ? ` • ±${accuracy}m` : '';
+    const accText = accuracy ? ` (±${accuracy}m)` : '';
     liveBar.innerHTML = `
       <span class="${dotClass}" style="background: ${dotColor};"></span>
-      <span class="live-loc-text">📍 <strong>${label}</strong> (${lat.toFixed(4)}°, ${lng.toFixed(4)}°)${accText}</span>
+      <span class="live-loc-text">📍 <strong>${label}</strong>${accText}</span>
+      <span class="gmaps-expand-icon">↗</span>
     `;
   }
 }
