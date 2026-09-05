@@ -1218,9 +1218,7 @@ async function sendChatMessage(autoSpeak = false) {
   try {
     if (!Array.isArray(chatHistory)) chatHistory = [];
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
-
+    // 1. Try Live Backend / API endpoint
     const response = await fetch(`${API_BASE}/ai/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1230,27 +1228,48 @@ async function sendChatMessage(autoSpeak = false) {
         languageCode: langCode,
         userProfile: currentProfile,
         conversationHistory: chatHistory
-      }),
-      signal: controller.signal
+      })
     });
-    clearTimeout(timeoutId);
 
     if (response.ok) {
       const resData = await response.json();
-      if (resData.success) {
+      if (resData && (resData.success || resData.message || resData.reply)) {
         data = resData;
       }
     }
   } catch (e) {
-    console.log('[Mobile AI Engine Fallback Active]');
+    console.warn('[Network/Server offline - Switching to Autonomous Client RAG Engine]', e.message);
   }
 
-  // If backend unreachable on mobile device, generate smart Vernacular AI response
-  if (!data) {
-    data = generateSmartVernacularAIResponse(message, lang, langCode);
+  // 2. If backend unreachable on standalone mobile device or offline, execute full autonomous RAG engine
+  if (!data && window.UdyamRAGEngine && typeof window.UdyamRAGEngine.handleRAGConversationalChat === 'function') {
+    try {
+      data = await window.UdyamRAGEngine.handleRAGConversationalChat(message, lang, currentProfile, chatHistory);
+    } catch (ragErr) {
+      console.error('[Client RAG Error]', ragErr);
+    }
   }
 
   typingBubble.remove();
+
+  if (!data) {
+    const errorNotice = lang === 'Telugu'
+      ? 'క్షమించండి, సర్వర్ కనెక్ట్ కాలేదు లేదా నెట్‌వర్క్ సమస్య ఉంది. దయచేసి మళ్ళీ ప్రయత్నించండి.'
+      : (lang === 'Hindi'
+        ? 'क्षमा करें, सर्वर से कनेक्शन नहीं हो सका। कृपया पुनः प्रयास करें।'
+        : (lang === 'Kannada'
+          ? 'ಕ್ಷಮಿಸಿ, ಸರ್ವರ್ ಸಂಪರ್ಕ ಸಾಧಿಸಲಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.'
+          : (lang === 'Bengali'
+            ? 'দুঃখিত, সার্ভারের সাথে সংযোগ করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।'
+            : 'Sorry, could not connect to the AI service. Please check your network and try again.')));
+
+    const aiBubble = document.createElement('div');
+    aiBubble.className = 'chat-bubble ai error-notice';
+    aiBubble.innerHTML = `<div style="color:#DC2626;">⚠️ ${errorNotice}</div>`;
+    chatContainer.appendChild(aiBubble);
+    scrollToBottomChat();
+    return;
+  }
 
   // Track multi-turn conversation history
   chatHistory.push({ role: 'user', text: message });
@@ -1260,7 +1279,90 @@ async function sendChatMessage(autoSpeak = false) {
   // Build dynamic interactive content container
   const interactiveContainer = document.createElement('div');
 
-  if (data.schemes && data.schemes.length > 0) {
+  if (data.type === 'business_selection' || (data.business_options && data.business_options.length > 0)) {
+    const options = data.business_options || [];
+    const isTe = lang === 'Telugu';
+    const isHi = lang === 'Hindi';
+    const isKn = lang === 'Kannada';
+    const isBn = lang === 'Bengali';
+
+    const titleText = isTe
+      ? 'క్రింది వ్యాపార రంగాలలో ఒకదాన్ని ఎంచుకోండి:'
+      : (isHi
+        ? 'नीचे दिए गए व्यवसाय क्षेत्रों में से एक चुनें:'
+        : (isKn
+          ? 'ಕೆಳಗಿನ ವ್ಯವಹಾರ ಕ್ಷೇತ್ರಗಳಲ್ಲಿ ಒಂದನ್ನು ಆರಿಸಿ:'
+          : (isBn
+            ? 'নিচের ব্যবসা ক্ষেত্রগুলির মধ্যে একটি বেছে নিন:'
+            : 'Select one of the business sectors below:')));
+
+    const selDiv = document.createElement('div');
+    selDiv.className = 'business-selection-container';
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'selection-title';
+    titleDiv.innerText = titleText;
+    selDiv.appendChild(titleDiv);
+
+    const gridDiv = document.createElement('div');
+    gridDiv.className = 'business-chips-grid';
+
+    options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'business-option-chip';
+      btn.innerHTML = `<span class="chip-label">${opt.label}</span><span class="chip-arrow">➔</span>`;
+      btn.addEventListener('click', () => {
+        sendSuggestedPrompt(opt.prompt || opt.label);
+      });
+      gridDiv.appendChild(btn);
+    });
+    selDiv.appendChild(gridDiv);
+    interactiveContainer.appendChild(selDiv);
+
+  } else if (data.type === 'greeting') {
+    const isTe = lang === 'Telugu';
+    const isHi = lang === 'Hindi';
+    const isKn = lang === 'Kannada';
+    const isBn = lang === 'Bengali';
+
+    const greetingPrompts = [
+      {
+        label: isTe ? "🛺 కమర్షియల్ ఆటో రుణం" : (isHi ? "🛺 कमर्शियल ऑटो लोन" : (isKn ? "🛺 ಕಮರ್ಷಿಯಲ್ ಸಾಲ" : (isBn ? "🛺 বাণিজ্যিক অটো লোন" : "🛺 Commercial Auto Loan"))),
+        prompt: isTe ? "నాకు కమర్షియల్ ఆటో కొనడానికి లోన్ కావాలి" : (isHi ? "मुझे कमर्शियल ऑटो रिक्शा खरीदने के लिए लोन चाहिए" : (isKn ? "ನನಗೆ ಕಮರ್ಷಿಯಲ್ ಆಟೋ ರಿಕ್ಷಾ ಖರೀದಿಸಲು ಸಾಲ ಬೇಕು" : (isBn ? "আমার বাণিজ্যিক অটো রিকশা কেনার জন্য ঋণ প্রয়োজন" : "I want a commercial auto-rickshaw loan")))
+      },
+      {
+        label: isTe ? "🍲 టిఫిన్ సెంటర్ / ఫుడ్ లోన్" : (isHi ? "🍲 टिफिन सेंटर / फ़ूड लोन" : (isKn ? "🍲 ಹೋಟೆಲ್ / ತಿಂಡಿ ಕೇಂದ್ರ" : (isBn ? "🍲 টিফিন সেন্টার / খাবার ব্যবসা" : "🍲 Food / Tiffin Center"))),
+        prompt: isTe ? "నాకు టిఫిన్ సెంటర్ / ఫుడ్ బిజినెస్ లోన్ కావాలి" : (isHi ? "मुझे टिफिन सेंटर / फूड बिजनेस लोन चाहिए" : (isKn ? "ನನಗೆ ಹೋಟೆಲ್ / ತಿಂಡಿ ಕೇಂದ್ರಕ್ಕಾಗಿ ಸಾಲ ಬೇಕು" : (isBn ? "আমার টিফিন সেন্টার / খাবার ব্যবসার জন্য ঋণ প্রয়োজন" : "I want a food business / tiffin loan")))
+      },
+      {
+        label: isTe ? "🌾 వ్యవసాయ రుణం (KCC)" : (isHi ? "🌾 कृषि लोन (KCC)" : (isKn ? "🌾 ಕೃಷಿ ಸಾಲ (KCC)" : (isBn ? "🌾 কৃষি ঋণ (KCC)" : "🌾 Kisan Credit Card"))),
+        prompt: isTe ? "నాకు కిసాన్ క్రెడిట్ కార్డ్ వ్యవసాయ లోన్ కావాలి" : (isHi ? "मुझे किसान क्रेडिट कार्ड कृषि लोन चाहिए" : (isKn ? "ನನಗೆ ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಕೃಷಿ ಸಾಲ ಬೇಕು" : (isBn ? "আমার কিসান ক্রেডিট কার্ড কৃষি ঋণ প্রয়োজন" : "I want Kisan Credit Card agri loan")))
+      },
+      {
+        label: isTe ? "🧵 చేతివృత్తుల లోన్ (విశ్వకర్మ)" : (isHi ? "🧵 विश्वकर्मा योजना" : (isKn ? "🧵 ವಿಶ್ವಕರ್ಮ ಯೋಜನೆ" : (isBn ? "🧵 বিশ্বকর্মা যোজনা" : "🧵 Artisan Vishwakarma"))),
+        prompt: isTe ? "చేతివృత్తుల కోసం పీఎం విశ్వకర్మ లోన్ కావాలి" : (isHi ? "दस्तकारों के लिए पीएम विश्वकर्मा लोन चाहिए" : (isKn ? "ಕುಶಲಕರ್ಮಿಗಳಿಗಾಗಿ ಪಿಎಂ ವಿಶ್ವಕರ್ಮ ಸಾಲ ಬೇಕು" : (isBn ? "কারিগরদের জন্য প্রধানমন্ত্রী বিশ্বকর্মা ঋণ চাই" : "PM Vishwakarma artisan loan")))
+      },
+      {
+        label: isTe ? "♿ దివ్యాంగుల రుణం (NHFDC)" : (isHi ? "♿ दिव्यांगजन ऋण" : (isKn ? "♿ ವಿಕಲಚೇತನರ ಸಾಲ" : (isBn ? "♿ প্রতিবন্ধী ঋণ (NHFDC)" : "♿ Divyangjan Loan"))),
+        prompt: isTe ? "దివ్యాంగుల స్వయం ఉపాధి రుణ పథకం" : (isHi ? "दिव्यांगजन स्वरोजगार ऋण योजना" : (isKn ? "ವಿಕಲಚೇತನರ ಸ್ವಯಂ ಉದ್ಯೋಗ ಸಾಲ ಯೋಜನೆ" : (isBn ? "প্রতিবন্ধী ব্যক্তিদের স্বনির্ভর কর্মসংস্থান ঋণ প্রকল্প" : "Divyangjan PwD loan")))
+      }
+    ];
+
+    const chipsDiv = document.createElement('div');
+    chipsDiv.className = 'greeting-chips';
+    greetingPrompts.forEach(item => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'suggestion-chip';
+      btn.innerText = item.label;
+      btn.addEventListener('click', () => {
+        sendSuggestedPrompt(item.prompt);
+      });
+      chipsDiv.appendChild(btn);
+    });
+    interactiveContainer.appendChild(chipsDiv);
+
+  } else if (data.schemes && data.schemes.length > 0) {
     window.__aiChatSchemes = window.__aiChatSchemes || {};
     const schemesDiv = document.createElement('div');
     schemesDiv.className = 'ai-schemes-container';
@@ -1347,17 +1449,16 @@ async function sendChatMessage(autoSpeak = false) {
   const sectorName = data.target_sector || data.detectedSector;
   let sectorBadge = '';
   const ADVISORY_LABEL = {te:'💡 AI ఆర్థిక సలహా • EMI & తిరిగి చెల్లింపు',hi:'💡 AI वित्तीय सलाह • EMI और पुनर्भुगतान',kn:'💡 AI ಹಣಕಾಸು ಸಲಹೆ • EMI ಮತ್ತು ಮರುಪಾವತಿ',ta:'💡 AI நிதி ஆலோசனை • EMI & திரும்பச் செலுத்தல்',mr:'💡 AI आर्थिक सल्ला • EMI व परतफेड',bn:'💡 AI আর্থিক পরামর্শ • EMI ও পরিশোধ',en:'💡 AI Financial Advisory • EMI & Repayment Terms'};
-  const SECTOR_PREFIX = {te:'🎯 లక్ష్య రంగం',hi:'🎯 लक्षित क्षेत्र',kn:'🎯 ಗುರಿ ಕ್ಷೇತ್ರ',ta:'🎯 இலக்கு துறை',mr:'🎯 लक्ष्य क्षेत्र',bn:'🎯 লক্ষ্য ক্ষেত্র',en:'🎯 Target Sector'};
+  const SECTOR_PREFIX = {te:'🎯 లక్ష్య రంగం',hi:'🎯 लक्षित क्षेत्र',kn:'🎯 ಗುರಿ ಕ್ಷೇತ್ರ',ta:'🎯 இலக்கு துறை',mr:'🎯 लक्ष्य क्षेत्र',bn:'🎯 लक्ष्य क्षेत्र',en:'🎯 Target Sector'};
   if (data.type === 'financial_advisory') {
     sectorBadge = `<div class="sector-indicator" style="background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;">${ADVISORY_LABEL[langCode]||ADVISORY_LABEL.en}</div>`;
-  } else if (sectorName && sectorName !== 'General Advisory') {
+  } else if (sectorName && sectorName !== 'General Advisory' && sectorName !== 'Discovery') {
     sectorBadge = `<div class="sector-indicator">${SECTOR_PREFIX[langCode]||SECTOR_PREFIX.en}: ${sectorName}</div>`;
   }
 
   const displayText = data.message || data.reply || '';
 
-  const LISTEN_LABEL = {te:'🔊 వినండి',hi:'🔊 सुनिए',kn:'🔊 ಕೇಳಿ',ta:'🔊 கேளுங்கள்',mr:'🔊 ऐका',bn:'🔊 শুনুন',en:'🔊 Listen'};
-  const listenBtnLabel = LISTEN_LABEL[langCode] || LISTEN_LABEL.en;
+  const listenBtnLabel = {te:'🔊 వినండి',hi:'🔊 सुनिए',kn:'🔊 ಕೇಳಿ',ta:'🔊 கேளுங்கள்',mr:'🔊 ऐका',bn:'🔊 শুনুন',en:'🔊 Listen'}[langCode] || '🔊 Listen';
 
   const aiBubble = document.createElement('div');
   aiBubble.className = 'chat-bubble ai';
@@ -1396,96 +1497,6 @@ async function sendChatMessage(autoSpeak = false) {
     speakBhashiniVoice(displayText, lang, listenBtn);
   }
 }
-
-function generateSmartVernacularAIResponse(message, lang, langCode) {
-  const msg = (message || '').toLowerCase();
-
-  // 1. Food / Tiffin / Hotel / Catering / Restaurant
-  if (msg.includes('food') || msg.includes('tiffin') || msg.includes('hotel') || msg.includes('restaurant') || msg.includes('cater') || msg.includes('bakery') || msg.includes('snack') || msg.includes('ఫుడ్') || msg.includes('టిఫిన్') || msg.includes('భోజన') || msg.includes('भोजन') || msg.includes('खाद्य') || msg.includes('होटल')) {
-    const text = {
-      te: 'ఆహార మరియు టిఫిన్ వ్యాపారం కోసం భారత ప్రభుత్వం ద్వారా 3 ప్రధాన పథకాలు అందుబాటులో ఉన్నాయి:\n\n1. 🍲 **PM-FME (ఫుడ్ ప్రాసెసింగ్)**: 35% క్రెడిట్ సబ్సిడీ (గరిష్టంగా ₹10 లక్షలు).\n2. 🌾 **PMEGP (ఫుడ్ బిజినెస్)**: ప్రాజెక్ట్ ఖర్చుపై 35% వరకు సబ్సిడీ మరియు ₹50 లక్షల వరకు పూచీకత్తు లేని రుణం.\n3. 💳 **ముద్రా యోజన (MUDRA Kishor)**: ₹50,000 నుండి ₹10 లక్షల వరకు జీరో కొలేటరల్ వర్కింగ్ క్యాపిటల్.',
-      hi: 'खाद्य एवं टिफिन व्यवसाय शुरू करने के लिए 3 प्रमुख सरकारी योजनाएं उपलब्ध हैं:\n\n1. 🍲 **PM-FME योजना**: 35% सब्सिडी (अधिकतम ₹10 लाख तक)।\n2. 🌾 **PMEGP योजना**: 35% तक सरकारी सब्सिडी और बिना गारंटी ₹50 लाख तक का ऋण।\n3. 💳 **मुद्रा योजना (MUDRA)**: ₹50,000 से ₹10 लाख तक बिना किसी गारंटी के आसान ऋण।',
-      en: 'For starting a Food / Tiffin / Catering enterprise, you qualify for 3 premier Government Schemes:\n\n1. 🍲 **PM-FME Scheme**: 35% Credit-Linked Capital Subsidy up to ₹10 Lakhs.\n2. 🌾 **PMEGP (Food & Agro)**: Up to 35% Government Subsidy and Collateral-free loan up to ₹50 Lakhs.\n3. 💳 **MUDRA Yojana (Kishor / Tarun)**: Collateral-free credit from ₹50,000 to ₹10 Lakhs with subsidized interest rates.'
-    }[langCode] || 'For starting a Food / Tiffin / Catering enterprise, you qualify for PM-FME (35% Subsidy), PMEGP, and MUDRA Loans up to ₹50 Lakhs collateral-free.';
-
-    return {
-      success: true,
-      message: text,
-      type: 'scheme_recommendation',
-      detectedSector: 'Food & Agro Processing',
-      source: 'Udyam Setu Vernacular AI Engine',
-      schemes: [
-        { title: 'PM-FME (Micro Food Enterprises)', schemeName: 'PM-FME (Micro Food Enterprises)', id: 'pmfme' },
-        { title: 'PMEGP (Food & Agro Enterprise)', schemeName: 'PMEGP (Food & Agro Enterprise)', id: 'pmegp' },
-        { title: 'Pradhan Mantri MUDRA Yojana (Kishor)', schemeName: 'Pradhan Mantri MUDRA Yojana (Kishor)', id: 'mudra' }
-      ]
-    };
-  }
-
-  // 2. Tailoring / Garments / Boutique / Textile
-  if (msg.includes('tailor') || msg.includes('garment') || msg.includes('cloth') || msg.includes('boutique') || msg.includes('textile') || msg.includes('కుట్టు') || msg.includes('कपड़ा') || msg.includes('सिलाई')) {
-    const text = {
-      te: 'టెక్స్‌టైల్ మరియు గార్మెంట్స్ వ్యాపారం కోసం:\n\n1. 🧵 **PMEGP (గార్మెంట్ యూనిట్)**: 35% వరకు ప్రభుత్వ సబ్సిడీ మరియు ₹50 లక్షల వరకు రుణం.\n2. 💳 **MUDRA Shishu/Kishor**: కుట్టు యంత్రాలు మరియు వస్త్రాల కోసం ₹50,000 నుండి ₹5 లక్షల వరకు లోన్.\n3. 👩 **స్టాండ్-అప్ ఇండియా**: మహిళా వ్యాపారవేత్తలకు ₹10 లక్షల నుండి ₹1 కోటి వరకు రుణం.',
-      hi: 'सिलाई एवं गारमेंट व्यवसाय के लिए प्रमुख योजनाएं:\n\n1. 🧵 **PMEGP (गारमेंट यूनिट)**: 35% तक सरकारी सब्सिडी एवं ₹50 लाख तक ऋण।\n2. 💳 **मुद्रा योजना**: सिलाई मशीन और कपड़े के लिए ₹50,000 से ₹5 लाख तक का आसान ऋण।\n3. 👩 **स्टैंड-अप इंडिया**: महिला उद्यमियों के लिए ₹10 लाख से ₹1 करोड़ तक का ऋण।',
-      en: 'For Garments, Tailoring, and Boutique enterprises:\n\n1. 🧵 **PMEGP (Garment Unit)**: Up to 35% capital subsidy and collateral-free loan up to ₹50 Lakhs.\n2. 💳 **MUDRA (Shishu / Kishor)**: ₹50,000 to ₹5 Lakhs for sewing machines and inventory.\n3. 👩 **Stand-Up India**: ₹10 Lakhs to ₹1 Crore for women entrepreneurs.'
-    }[langCode] || 'For Garments & Tailoring, you are eligible for PMEGP (35% subsidy) and MUDRA Shishu/Kishor loans.';
-
-    return {
-      success: true,
-      message: text,
-      type: 'scheme_recommendation',
-      detectedSector: 'Textiles & Garments',
-      source: 'Udyam Setu Vernacular AI Engine',
-      schemes: [
-        { title: 'PMEGP (Garment & Textile Unit)', schemeName: 'PMEGP (Garment & Textile Unit)', id: 'pmegp' },
-        { title: 'Pradhan Mantri MUDRA (Shishu/Kishor)', schemeName: 'Pradhan Mantri MUDRA (Shishu/Kishor)', id: 'mudra' },
-        { title: 'Stand-Up India (Women Entrepreneurs)', schemeName: 'Stand-Up India (Women Entrepreneurs)', id: 'standup' }
-      ]
-    };
-  }
-
-  // 3. Transport / Auto / Vehicle
-  if (msg.includes('auto') || msg.includes('transport') || msg.includes('taxi') || msg.includes('vehicle') || msg.includes('ఆటో') || msg.includes('ऑटो') || msg.includes('वाहन')) {
-    const text = {
-      te: 'కమర్షియల్ ఆటో / ట్రాన్స్‌పోర్ట్ వాహనం కోసం:\n\n1. 🛺 **MUDRA Tarun (కమర్షియల్ వెహికల్)**: ఆటో మరియు గూడ్స్ వెహికల్ కోసం ₹10 లక్షల వరకు ఎలాంటి షూరిటీ లేకుండా లోన్.\n2. 💼 **CGTMSE కవరేజ్**: బ్యాంక్ గ్యారెంటీ కవరేజ్ తో తక్కువ వడ్డీ రుణం.',
-      hi: 'कमर्शियल ऑटो या ट्रांसपोर्ट वाहन खरीदने के लिए:\n\n1. 🛺 **मुद्रा तरुण योजना**: कमर्शियल ऑटो और ई-रिक्शा के लिए ₹10 लाख तक बिना गारंटी ऋण।\n2. 💼 **CGTMSE क्रेडिट गारंटी**: 85% सरकारी सुरक्षा कवर के साथ आसान लोन।',
-      en: 'For Commercial Auto & Transport Vehicles:\n\n1. 🛺 **MUDRA Tarun (Commercial Transport)**: Zero collateral loan up to ₹10 Lakhs for autos and commercial vehicles.\n2. 💼 **CGTMSE Scheme**: Credit guarantee backed facility from nationalized banks.'
-    }[langCode] || 'For commercial auto & transport, MUDRA Tarun provides up to ₹10 Lakhs collateral-free.';
-
-    return {
-      success: true,
-      message: text,
-      type: 'scheme_recommendation',
-      detectedSector: 'Commercial Transport',
-      source: 'Udyam Setu Vernacular AI Engine',
-      schemes: [
-        { title: 'Pradhan Mantri MUDRA Yojana (Tarun)', schemeName: 'Pradhan Mantri MUDRA Yojana (Tarun)', id: 'mudra' },
-        { title: 'CGTMSE Transport Support', schemeName: 'CGTMSE Transport Support', id: 'cgtmse' }
-      ]
-    };
-  }
-
-  // 4. Default Smart Advisory
-  const defaultText = {
-    te: 'మీ వ్యాపార అవసరాలకు సంబంధించిన వివరాలు విశ్లేషించబడ్డాయి. మీరు PMEGP (35% సబ్సిడీ) మరియు ముద్రా యోజన (పూచీకత్తు లేని రుణం) కింద ₹50 లక్షల వరకు ఆర్థిక సహాయం పొందవచ్చు. వివరాలు కింద చూడండి:',
-    hi: 'आपके व्यवसाय संबंधी प्रश्न का विश्लेषण किया गया है। आप PMEGP (35% सब्सिडी) और मुद्रा योजना के तहत बिना गारंटी ₹50 लाख तक के ऋण के लिए पात्र हैं।',
-    en: 'Based on your query, you qualify for premier Central Government MSME credit & subsidy programs including PMEGP (up to 35% Capital Subsidy) and Pradhan Mantri MUDRA Yojana (up to ₹20 Lakhs Collateral-Free). Explore matched schemes below:'
-  }[langCode] || 'Based on your requirement, you qualify for PMEGP (35% Subsidy) and MUDRA collateral-free loans.';
-
-  return {
-    success: true,
-    message: defaultText,
-    type: 'scheme_recommendation',
-    detectedSector: 'MSME Enterprise & Self-Employment',
-    source: 'Udyam Setu Vernacular AI Engine',
-    schemes: [
-      { title: 'Prime Minister Employment Generation Programme (PMEGP)', schemeName: 'Prime Minister Employment Generation Programme (PMEGP)', id: 'pmegp' },
-      { title: 'Pradhan Mantri MUDRA Yojana (Tarun)', schemeName: 'Pradhan Mantri MUDRA Yojana (Tarun)', id: 'mudra' },
-      { title: 'Credit Guarantee Trust (CGTMSE)', schemeName: 'Credit Guarantee Trust (CGTMSE)', id: 'cgtmse' }
-    ]
-  };
-}
-
 
 let previousScreenBeforeDetails = 4;
 
