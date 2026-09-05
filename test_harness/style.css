@@ -1143,6 +1143,124 @@ body {
   text-transform: uppercase;
 }
 
+/* Modern Glassmorphic Floating Chat Input Dock */
+.chat-dock-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 6px 0;
+}
+
+.chat-dock-pill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFFFFF;
+  border: 1.2px solid #CBD5E1;
+  border-radius: 28px;
+  padding: 6px 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.chat-dock-pill:focus-within {
+  border-color: #10B981;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);
+}
+
+.dock-lang-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  border-radius: 18px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #1E293B;
+  white-space: nowrap;
+}
+
+.dock-lang-select {
+  background: transparent;
+  border: none;
+  font-size: 11px;
+  font-weight: 800;
+  color: #1E293B;
+  cursor: pointer;
+  outline: none;
+  padding-right: 2px;
+}
+
+.dock-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1E293B;
+  padding: 6px 4px;
+}
+
+.dock-input::placeholder {
+  color: #94A3B8;
+  font-weight: 400;
+}
+
+.dock-mic-btn {
+  background: #F1F5F9;
+  border: none;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #64748B;
+}
+
+.dock-mic-btn:hover {
+  background: #E2E8F0;
+  color: #1E293B;
+}
+
+.dock-mic-btn.listening {
+  background: #FEF2F2;
+  color: #EF4444;
+  animation: micPulse 1.2s infinite;
+}
+
+.dock-send-btn {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.dock-send-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.55);
+}
+
+.dock-send-btn:active {
+  transform: scale(0.95);
+}
+
 /* AI Chat Scheme Recommendation Cards (Screen 4) */
 .ai-scheme-card {
   position: relative;

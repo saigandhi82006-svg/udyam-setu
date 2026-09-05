@@ -125,7 +125,7 @@
       "vending_opt": "🛍️ Street Vending / Pushcart (SVANidhi)",
       "listen_btn": "🔊 Listen",
       "voice_prompt": "🎙️ Tap to Speak in your Language",
-      "input_placeholder": "Ask or speak in your language...",
+      "input_placeholder": "Type here...",
       "send_btn": "➤",
       "view_details": "View Full Scheme Details"
     },

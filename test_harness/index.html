@@ -435,25 +435,33 @@
               </div>
             </div>
 
-            <!-- Voice mic bar -->
-            <div class="voice-bar">
-              <span id="voicePromptText" data-i18n="screen4.voice_prompt">🎙️ Tap to Speak in your Language</span>
-              <button class="voice-btn" id="voiceBtn" onclick="triggerBhashiniSpeechInput()" title="Speak in your mother tongue">🎙️</button>
-            </div>
+            <!-- Modern Floating Glassmorphic Chat Input Dock -->
+            <div class="chat-dock-container">
+              <div class="chat-dock-pill">
+                <div class="dock-lang-badge">
+                  <span class="globe-icon">🌐</span>
+                  <select id="chatLangSelect" class="dock-lang-select" onchange="onLanguageChanged(); setLanguage(this.value)">
+                    <option value="English">EN</option>
+                    <option value="Hindi">HI (हिन्दी)</option>
+                    <option value="Telugu">TE (తెలుగు)</option>
+                    <option value="Tamil">TA (தமிழ்)</option>
+                    <option value="Marathi">MR (मराठी)</option>
+                    <option value="Kannada">KN (ಕನ್ನಡ)</option>
+                    <option value="Bengali">BN (বাংলা)</option>
+                  </select>
+                </div>
 
-            <!-- Language & text input row -->
-            <div class="chat-input-row">
-              <select id="chatLangSelect" class="lang-select" onchange="onLanguageChanged(); setLanguage(this.value)">
-                <option value="English">English (Indian)</option>
-                <option value="Hindi">हिन्दी (Hindi)</option>
-                <option value="Telugu">తెలుగు (Telugu)</option>
-                <option value="Tamil">தமிழ் (Tamil)</option>
-                <option value="Marathi">मराठी (Marathi)</option>
-                <option value="Kannada">ಕನ್ನಡ (Kannada)</option>
-                <option value="Bengali">বাংলা (Bengali)</option>
-              </select>
-              <input type="text" id="chatInput" placeholder="Ask or speak in your language..." data-i18n-placeholder="screen4.input_placeholder" onkeypress="if(event.key==='Enter') sendChatMessage()">
-              <button class="send-btn" onclick="sendChatMessage()">➤</button>
+                <input type="text" id="chatInput" class="dock-input" placeholder="Type here..." data-i18n-placeholder="screen4.input_placeholder" onkeypress="if(event.key==='Enter') sendChatMessage()">
+
+                <button class="dock-mic-btn" id="voiceBtn" onclick="triggerBhashiniSpeechInput()" title="Speak in your language">🎙️</button>
+              </div>
+
+              <button class="dock-send-btn" onclick="sendChatMessage()" title="Send Message (Enter)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
             </div>
           </div>
 

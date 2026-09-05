@@ -323,19 +323,22 @@
                         </div>
 
                         <!-- Language & text input row -->
-                        <div class="chat-input-row">
-                            <select id="chatLangSelect" class="lang-select" onchange="onLanguageChanged()">
-                                <option value="English">English (Indian)</option>
-                                <option value="Hindi">हिन्दी (Hindi)</option>
-                                <option value="Telugu">తెలుగు (Telugu)</option>
-                                <option value="Tamil">தமிழ் (Tamil)</option>
-                                <option value="Marathi">मराठी (Marathi)</option>
-                                <option value="Kannada">ಕನ್ನಡ (Kannada)</option>
-                                <option value="Bengali">বাংলা (Bengali)</option>
-                            </select>
-                            <input type="text" id="chatInput" placeholder="Ask or speak in your language..."
-                                onkeypress="if(event.key==='Enter') sendChatMessage()">
-                            <button class="send-btn" onclick="sendChatMessage()">➤</button>
+                        <div class="chat-dock-container">
+                            <div class="chat-dock-pill">
+                                <select id="chatLangSelect" class="lang-select" onchange="onLanguageChanged()">
+                                    <option value="English">EN</option>
+                                    <option value="Hindi">HI (हिन्दी)</option>
+                                    <option value="Telugu">TE (తెలుగు)</option>
+                                    <option value="Tamil">TA (தமிழ்)</option>
+                                    <option value="Marathi">MR (मराठी)</option>
+                                    <option value="Kannada">KN (ಕನ್ನಡ)</option>
+                                    <option value="Bengali">BN (বাংলা)</option>
+                                </select>
+                                <input type="text" id="chatInput" placeholder="Type here..."
+                                    onkeypress="if(event.key==='Enter') sendChatMessage()">
+                                <button class="dock-mic-btn" id="voiceBtn" onclick="triggerBhashiniSpeechInput()" title="Speak with AI">🎙️</button>
+                            </div>
+                            <button class="dock-send-btn" onclick="sendChatMessage()" title="Send message">➤</button>
                         </div>
                     </div>
 
