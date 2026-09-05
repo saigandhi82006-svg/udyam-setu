@@ -740,6 +740,7 @@ const WELCOME_DISCOVERY_DATA = {
     title: '👇 మీ వ్యాపార రంగాన్ని ఎంచుకోండి (తక్షణ పథక వివరాల కోసం):',
     listen: '🔊 వినండి (Listen)',
     options: [
+      { label: '🎙️ మాట్లాడి ప్రొఫైల్ నింపండి (Voice AI)', prompt: 'నాకు రాయడం చదవడం రాదు, నాతో మాట్లాడి వివరాలు తీసుకొని పథకాలు చూపించండి' },
       { label: '🍲 ఫుడ్ బిజినెస్ / టిఫిన్', prompt: 'నాకు టిఫిన్ సెంటర్ లేదా ఫుడ్ బిజినెస్ కోసం రుణం కావాలి' },
       { label: '🛒 కిరాణా / చిల్లర దుకాణం', prompt: 'నాకు కిరాణా దుకాణం కోసం ముద్ర లోన్ కావాలి' },
       { label: '🌾 వ్యవసాయం & పాడి (KCC)', prompt: 'నాకు వ్యవసాయం లేదా పాడి పరిశ్రమ కోసం కిసాన్ క్రెడిట్ కార్డ్ రుణం కావాలి' },
@@ -757,6 +758,7 @@ const WELCOME_DISCOVERY_DATA = {
     title: '👇 अपने व्यवसाय का चयन करें:',
     listen: '🔊 सुनिए (Listen)',
     options: [
+      { label: '🎙️ बोलकर प्रोफाइल भरें (Voice AI)', prompt: 'मुझे लिखना-पढ़ना नहीं आता, कृपया बोलकर मेरी जानकारी लें और योजनाएं बताएं' },
       { label: '🍲 फूड बिजनेस / टिफिन सेंटर', prompt: 'मुझे टिफिन सेंटर या खाद्य व्यवसाय शुरू करने के लिए लोन चाहिए' },
       { label: '🛒 किराना / जनरल स्टोर', prompt: 'मुझे किराना दुकान या खुदरा व्यापार के लिए लोन चाहिए' },
       { label: '🌾 कृषि एवं डेयरी (KCC)', prompt: 'मुझे कृषि या डेयरी फार्मिंग के लिए किसान क्रेडिट कार्ड लोन चाहिए' },
@@ -774,6 +776,7 @@ const WELCOME_DISCOVERY_DATA = {
     title: '👇 ನಿಮ್ಮ ವ್ಯವಹಾರವನ್ನು ಆಯ್ಕೆಮಾಡಿ:',
     listen: '🔊 ಕೇಳಿ (Listen)',
     options: [
+      { label: '🎙️ ಧ್ವನಿ ಮೂಲಕ ಪ್ರೊಫೈಲ್ ಭರ್ತಿ (Voice AI)', prompt: 'ನನಗೆ ಓದಲು ಬರೆಯಲು ಬರುವುದಿಲ್ಲ, ನನ್ನೊಂದಿಗೆ ಮಾತನಾಡಿ ವಿವರಗಳನ್ನು ಪಡೆದು ಯೋಜನೆ ತೋರಿಸಿ' },
       { label: '🍲 ಆಹಾರ / ಹೋಟೆಲ್ / ತಿಂಡಿ', prompt: 'ನನಗೆ ಹೋಟೆಲ್ ಅಥವಾ ತಿಂಡಿ ಕೇಂದ್ರ ಪ್ರಾರಂಭಿಸಲು ಸಾಲ ಬೇಕು' },
       { label: '🛒 ಕಿರಾಣಿ / ಚಿಲ್ಲರೆ ಅಂಗಡಿ', prompt: 'ನನಗೆ ಕಿರಾಣಿ ಅಂಗಡಿ ಅಥವಾ ಚಿಲ್ಲರೆ ವ್ಯಾಪಾರಕ್ಕಾಗಿ ಸಾಲ ಬೇಕು' },
       { label: '🌾 ಕೃಷಿ ಮತ್ತು ಹೈನುಗಾರಿಕೆ (KCC)', prompt: 'ನನಗೆ ಕೃಷಿ ಅಥವಾ ಹೈನುಗಾರಿಕೆಗಾಗಿ ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಸಾಲ ಬೇಕು' },
@@ -791,6 +794,7 @@ const WELCOME_DISCOVERY_DATA = {
     title: '👇 আপনার ব্যবসার ধরন নির্বাচন করুন:',
     listen: '🔊 শুনুন (Listen)',
     options: [
+      { label: '🎙️ কথা বলে প্রোফাইল পূরণ (Voice AI)', prompt: 'আমি লিখতে বা পড়তে পারি না, দয়া করে আমার সাথে কথা বলে তথ্য নিয়ে প্রকল্প দেখান' },
       { label: '🍲 খাদ্য ব্যবসা / টিফিন সেন্টার', prompt: 'আমার খাদ্য ব্যবসা বা টিফিন সেন্টার খোলার জন্য ঋণ প্রয়োজন' },
       { label: '🛒 মুদি ও খুচরা দোকান', prompt: 'আমার মুদি দোকান বা খুচরা ব্যবসার জন্য ঋণ প্রয়োজন' },
       { label: '🌾 কৃষি ও দুগ্ধ খামার (KCC)', prompt: 'আমার কৃষি বা দুগ্ধ খামারের জন্য কিসান ক্রেডিট কার্ড ঋণ প্রয়োজন' },
@@ -808,6 +812,7 @@ const WELCOME_DISCOVERY_DATA = {
     title: '👇 Select your business sector to explore matching schemes:',
     listen: '🔊 Listen',
     options: [
+      { label: '🎙️ Fill Profile by Voice Assistant', prompt: 'I cannot type or read text, please ask me questions via voice to fill my profile and show eligible schemes' },
       { label: '🍲 Food Business / Tiffin / Hotel', prompt: 'I want a loan for starting a food business, hotel, or tiffin center' },
       { label: '🛒 Retail / Kirana Grocery Shop', prompt: 'I want a loan for a kirana shop or retail grocery store' },
       { label: '🌾 Agriculture & Dairy (KCC)', prompt: 'I want an agriculture, farming, or dairy loan (KCC / AIF)' },
@@ -825,6 +830,7 @@ const WELCOME_DISCOVERY_DATA = {
     title: '👇 உங்கள் வணிகத் துறையைத் தேர்ந்தெடுக்கவும்:',
     listen: '🔊 கேளுங்கள் (Listen)',
     options: [
+      { label: '🎙️ பேசி சுயவிவரம் நிரப்பவும் (Voice AI)', prompt: 'எனக்கு எழுத படிக்க தெரியாது, என்னிடம் பேசி விவரங்களை பெற்று திட்டங்களை காட்டுங்கள்' },
       { label: '🍲 உணவு வணிகம் / உணவகம் / சிற்றுண்டி', prompt: 'எனக்கு உணவகம் அல்லது சிற்றுண்டி மையம் தொடங்க அரசு கடன் வேண்டும்' },
       { label: '🛒 மளிகை / சில்லறை வணிகம்', prompt: 'எனக்கு மளிகை கடை அல்லது சில்லறை வணிகத்திற்கான முத்ரா கடன் வேண்டும்' },
       { label: '🌾 விவசாயம் & பால் பண்ணை (KCC)', prompt: 'எனக்கு விவசாயம் அல்லது பால் பண்ணைக்கு கிசான் கிரெடிಟ್ கார்டு கடன் வேண்டும்' },
@@ -842,6 +848,7 @@ const WELCOME_DISCOVERY_DATA = {
     title: '👇 आपल्या व्यवसायाचे क्षेत्र निवडा:',
     listen: '🔊 ऐका (Listen)',
     options: [
+      { label: '🎙️ बोलून प्रोफाइल भरा (Voice AI)', prompt: 'मला वाचता-लिहिता येत नाही, कृपया माझ्याशी बोलून माहिती घ्या आणि योजना दाखवा' },
       { label: '🍲 अन्न व्यवसाय / हॉटेल व नाश्ता केंद्र', prompt: 'मला हॉटेल किंवा नाश्ता केंद्र सुरू करण्यासाठी सरकारी कर्ज हवे आहे' },
       { label: '🛒 किराणा / किरकोळ दुकान', prompt: 'मला किराणा दुकान किंवा किरकोळ व्यवसायासाठी मुद्रा कर्ज हवे आहे' },
       { label: '🌾 शेती आणि दुग्ध व्यवसाय (KCC)', prompt: 'मला शेती किंवा दुग्ध व्यवसायासाठी किसान क्रेडिट कार्ड कर्ज हवे आहे' },
@@ -876,6 +883,24 @@ function getActiveLanguageKey() {
   if (rawLang.includes('English')) return 'English';
   return 'Telugu';
 }
+
+function sendSuggestedPrompt(promptText) {
+  const input = document.getElementById('chatInput');
+  if (input) {
+    input.value = promptText;
+    if (typeof autoExpandTextarea === 'function') autoExpandTextarea(input);
+  }
+  if (/నాతో మాట్లాడి|बोलकर मेरी जानकारी|voice profile|ಧ್ವನಿ ಮೂಲಕ|பேசி சுயவிவரம்|बोलून प्रोफाइल|কথা বলে প্রোফাইল|fill profile by voice/i.test(promptText)) {
+    if (typeof startVoiceProfilingModal === 'function') {
+      startVoiceProfilingModal();
+      return;
+    }
+  }
+  if (typeof sendChatMessage === 'function') {
+    sendChatMessage(true);
+  }
+}
+window.sendSuggestedPrompt = sendSuggestedPrompt;
 
 function renderInitialChatWelcome() {
   const chatContainer = document.getElementById('chatMessages');
@@ -3187,3 +3212,610 @@ function submitSupportFeedback(event) {
   showCustomToast('✅ Inquiry submitted! Our support desk will reach out shortly.');
 }
 window.submitSupportFeedback = submitSupportFeedback;
+
+
+// ==========================================================================
+// AI Voice-Guided Profiling Engine (For Illiterate & Non-Tech-Savvy Users)
+// ==========================================================================
+
+const VOICE_PROFILING_DATA = {
+  Telugu: {
+    title: '🎙️ AI వాయిస్ ప్రొఫైలింగ్',
+    questions: [
+      {
+        step: 1,
+        text: 'నమస్కారం! మీ పూర్తి పేరు ఏమిటి? మరియు మీరు పురుషులా లేక మహిళా?',
+        sub: 'పేరు మరియు లింగం చెప్పండి (ఉదా: నా పేరు భాస్కర్, పురుషుడు)',
+        sample: 'నా పేరు భాస్కర్, నేను పురుషుడిని'
+      },
+      {
+        step: 2,
+        text: 'మీ వయస్సు ఎంత? మరియు మీ సామాజిక వర్గం ఏది? (BC, SC, ST, జనరల్ లేదా మైనారిటీ)?',
+        sub: 'వయస్సు మరియు కుల వర్గం చెప్పండి (ఉదా: వయస్సు 30, BC వర్గం)',
+        sample: 'నా వయస్సు 30 సంవత్సరాలు, బీసీ వర్గం'
+      },
+      {
+        step: 3,
+        text: 'మీరు ఏ వ్యాపారం చేస్తున్నారు లేదా కొత్తగా ప్రారంభించాలనుకుంటున్నారు? గ్రామీణమా లేక పట్టణమా?',
+        sub: 'వ్యాపార రంగం చెప్పండి (ఉదా: కిరాణా దుకాణం, గ్రామీణ ప్రాంతం)',
+        sample: 'నాకు కిరాణా దుకాణం ఉంది, గ్రామీణ ప్రాంతం'
+      },
+      {
+        step: 4,
+        text: 'మీ వ్యాపారానికి ఎంత పెట్టుబడి లేదా ప్రభుత్వ రుణం కావాలి? (ఉదా: 50,000, 2 లక్షలు, లేదా 5 లక్షలు)?',
+        sub: 'కావలసిన రుణ మొత్తం చెప్పండి (ఉదా: 5 లక్షల లోన్ కావాలి)',
+        sample: 'నాకు 5 లక్షల ముద్ర లోన్ కావాలి'
+      }
+    ],
+    successGreeting: 'మీ వివరాలు విజయవంతంగా నమోదయ్యాయి! మీ వ్యాపారానికి సరిపోయే ప్రభుత్వ పథకాలను ఇప్పుడు చూపిస్తున్నాం.',
+    tapToSpeak: 'మాట్లాడటానికి నొక్కండి',
+    listening: 'వింటున్నాం... మాట్లాడండి',
+    heardPrefix: 'వినబడినది: '
+  },
+  Hindi: {
+    title: '🎙️ AI वॉयस प्रोफाइलिंग',
+    questions: [
+      {
+        step: 1,
+        text: 'नमस्ते! आपका पूरा नाम क्या है? और आप पुरुष हैं या महिला?',
+        sub: 'नाम और लिंग बताएं (उदा: मेरा नाम रमेश, पुरुष)',
+        sample: 'मेरा नाम रमेश है, मैं पुरुष हूँ'
+      },
+      {
+        step: 2,
+        text: 'आपकी उम्र कितनी है? और आपका सामाजिक वर्ग क्या है (OBC, SC, ST, सामान्य)?',
+        sub: 'उम्र और वर्ग बताएं (उदा: उम्र 30 वर्ष, OBC वर्ग)',
+        sample: 'मेरी उम्र 30 साल है, ओबीसी वर्ग'
+      },
+      {
+        step: 3,
+        text: 'आप कौन सा व्यापार कर रहे हैं या शुरू करना चाहते हैं? ग्रामीण क्षेत्र है या शहरी?',
+        sub: 'व्यापार और क्षेत्र बताएं (उदा: किराना दुकान, ग्रामीण)',
+        sample: 'किराना दुकान का व्यापार, ग्रामीण क्षेत्र'
+      },
+      {
+        step: 4,
+        text: 'आपके व्यवसाय के लिए कितनी पूंजी या सरकारी ऋण चाहिए? (उदा: 50 हजार, 2 लाख या 5 लाख)?',
+        sub: 'ऋण राशि बताएं (उदा: 5 लाख का ऋण चाहिए)',
+        sample: 'मुझे 5 लाख रुपये का मुद्रा ऋण चाहिए'
+      }
+    ],
+    successGreeting: 'आपकी जानकारी सफलतापूर्वक दर्ज कर ली गई है! आपके लिए उपयुक्त सरकारी योजनाएं दिखाई जा रही हैं।',
+    tapToSpeak: 'बोलने के लिए टैप करें',
+    listening: 'सुन रहे हैं... बोलिए',
+    heardPrefix: 'सुना गया: '
+  },
+  Tamil: {
+    title: '🎙️ AI குரல் சுயவிவரம்',
+    questions: [
+      {
+        step: 1,
+        text: 'வணக்கம்! உங்கள் முழு பெயர் என்ன? நீங்கள் ஆணா அல்லது பெண்ணா?',
+        sub: 'பெயர் மற்றும் பாலினம் சொல்லவும்',
+        sample: 'என் பெயர் பாஸ்கர், ஆண்'
+      },
+      {
+        step: 2,
+        text: 'உங்கள் வயது என்ன? மற்றும் சமூகப் பிரிவு எது (OBC, SC, ST, பொது)?',
+        sub: 'வயது மற்றும் சமூகப் பிரிவு',
+        sample: 'வயது 30, பிசி பிரிவு'
+      },
+      {
+        step: 3,
+        text: 'நீங்கள் என்ன தொழில் செய்கிறீர்கள் அல்லது தொடங்க விரும்புகிறீர்கள்? கிராமமா அல்லது நகரமா?',
+        sub: 'தொழில் மற்றும் பகுதி',
+        sample: 'மளிகை கடை, கிராமப்புறம்'
+      },
+      {
+        step: 4,
+        text: 'உங்கள் தொழிலுக்கு எவ்வளவு கடன் அல்லது முதலீடு தேவை? (எ.கா: 2 லட்சம் அல்லது 5 லட்சம்)?',
+        sub: 'தேவைப்படும் கடன் தொகை',
+        sample: 'எனக்கு 5 லட்சம் ரூபாய் கடன் தேவை'
+      }
+    ],
+    successGreeting: 'உங்கள் விவரங்கள் வெற்றிகரமாக பதிவு செய்யப்பட்டன! உங்களுக்கு ஏற்ற அரசு திட்டங்கள் காட்டப்படுகின்றன.',
+    tapToSpeak: 'பேச தட்டவும்',
+    listening: 'கேட்கிறது... பேசுங்கள்',
+    heardPrefix: 'கேட்டது: '
+  },
+  Kannada: {
+    title: '🎙️ AI ಧ್ವನಿ ಪ್ರೊಫೈಲಿಂಗ್',
+    questions: [
+      {
+        step: 1,
+        text: 'ನಮಸ್ಕಾರ! ನಿಮ್ಮ ಪೂರ್ಣ ಹೆಸರು ಏನು? ಮತ್ತು ನೀವು ಪುರುಷರೇ ಅಥವಾ ಮಹಿಳೆಯೇ?',
+        sub: 'ಹೆಸರು ಮತ್ತು ಲಿಂಗ ತಿಳಿಸಿ',
+        sample: 'ನನ್ನ ಹೆಸರು ಭಾಸ್ಕರ್, ಪುರುಷ'
+      },
+      {
+        step: 2,
+        text: 'ನಿಮ್ಮ ವಯಸ್ಸು ಎಷ್ಟು? ಮತ್ತು ನಿಮ್ಮ ಸಾಮಾಜಿಕ ವರ್ಗ ಯಾವುದು (OBC, SC, ST, ಸಾಮಾನ್ಯ)?',
+        sub: 'ವಯಸ್ಸು ಮತ್ತು ವರ್ಗ',
+        sample: 'ವಯಸ್ಸು 30, ಒಬಿಸಿ ವರ್ಗ'
+      },
+      {
+        step: 3,
+        text: 'ನೀವು ಯಾವ ವ್ಯವಹಾರ ಮಾಡುತ್ತಿದ್ದೀರಿ ಅಥವಾ ಪ್ರಾರಂಭಿಸಲು ಬಯಸುತ್ತೀರಿ? ಗ್ರಾಮೀಣವೇ ಅಥವಾ ನಗರವೇ?',
+        sub: 'ವ್ಯವಹಾರ ಮತ್ತು ಸ್ಥಳ',
+        sample: 'ಕಿರಾಣಿ ಅಂಗಡಿ, ಗ್ರಾಮೀಣ ಪ್ರದೇಶ'
+      },
+      {
+        step: 4,
+        text: 'ನಿಮ್ಮ ವ್ಯವಹಾರಕ್ಕೆ ಎಷ್ಟು ಸಾಲ ಅಥವಾ ಬಂಡವಾಳ ಬೇಕು? (ಉದಾ: 2 ಲಕ್ಷ ಅಥವಾ 5 ಲಕ್ಷ)?',
+        sub: 'ಅಗತ್ಯ ಸಾಲದ ಮೊತ್ತ',
+        sample: 'ನನಗೆ 5 ಲಕ್ಷ ಮುದ್ರಾ ಸಾಲ ಬೇಕು'
+      }
+    ],
+    successGreeting: 'ನಿಮ್ಮ ವಿವರಗಳನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಉಳಿಸಲಾಗಿದೆ! ನಿಮಗಾಗಿ ಸೂಕ್ತವಾದ ಸರ್ಕಾರಿ ಯೋಜನೆಗಳನ್ನು ತೋರಿಸಲಾಗುತ್ತಿದೆ.',
+    tapToSpeak: 'ಮಾತನಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ',
+    listening: 'ಕೇಳುತ್ತಿದ್ದೇವೆ... ಮಾತನಾಡಿ',
+    heardPrefix: 'ಕೇಳಿದ್ದು: '
+  },
+  Marathi: {
+    title: '🎙️ AI व्हॉईस प्रोफाइलिंग',
+    questions: [
+      {
+        step: 1,
+        text: 'नमस्कार! आपले पूर्ण नाव काय आहे? आणि आपण पुरुष आहात की महिला?',
+        sub: 'नाव आणि लिंग सांगा',
+        sample: 'माझे नाव भास्कर आहे, पुरुष'
+      },
+      {
+        step: 2,
+        text: 'आपले वय किती आहे? आणि आपला सामाजिक प्रवर्ग कोणता आहे (OBC, SC, ST, खुला)?',
+        sub: 'वय आणि प्रवर्ग',
+        sample: 'वय 30 वर्षे, ओबीसी प्रवर्ग'
+      },
+      {
+        step: 3,
+        text: 'आपण कोणता व्यवसाय करत आहात किंवा सुरू करू इच्छिता? ग्रामीण की शहरी?',
+        sub: 'व्यवसाय आणि भाग',
+        sample: 'किराणा दुकान, ग्रामीण भाग'
+      },
+      {
+        step: 4,
+        text: 'आपल्या व्यवसायासाठी किती कर्ज किंवा भांडवल हवे आहे? (उदा: 2 लाख किंवा 5 लाख)?',
+        sub: 'आवश्यक कर्ज रक्कम',
+        sample: 'मला 5 लाख रुपयांचे कर्ज हवे आहे'
+      }
+    ],
+    successGreeting: 'आपली माहिती यशस्वीरित्या नोंदवली गेली आहे! आपल्यासाठी योग्य सरकारी योजना दाखवत आहोत.',
+    tapToSpeak: 'बोलण्यासाठी टॅप करा',
+    listening: 'ऐकत आहोत... बोला',
+    heardPrefix: 'ऐकले: '
+  },
+  Bengali: {
+    title: '🎙️ AI ভয়েস প্রোফাইলিং',
+    questions: [
+      {
+        step: 1,
+        text: 'নমস্কার! আপনার সম্পূর্ণ নাম কি? এবং আপনি পুরুষ না মহিলা?',
+        sub: 'নাম ও লিঙ্গ বলুন',
+        sample: 'আমার নাম ভাস্কর, পুরুষ'
+      },
+      {
+        step: 2,
+        text: 'আপনার বয়স কত? এবং সামাজিক শ্রেণি কোনটি (OBC, SC, ST, সাধারণ)?',
+        sub: 'বয়স ও সামাজিক শ্রেণি',
+        sample: 'বয়স ৩০ বছর, ওবিসি শ্রেণি'
+      },
+      {
+        step: 3,
+        text: 'আপনি কোন ব্যবসা করছেন বা শুরু করতে চান? গ্রামীণ না শহুরে?',
+        sub: 'ব্যবসা ও এলাকা',
+        sample: 'মুদি দোকান, গ্রামীণ এলাকা'
+      },
+      {
+        step: 4,
+        text: 'আপনার ব্যবসার জন্য কত ঋণ বা মূলধন প্রয়োজন? (যেমন: ২ লাখ বা ৫ লাখ)?',
+        sub: 'প্রয়োজনীয় ঋণের পরিমাণ',
+        sample: 'আমার ৫ লাখ টাকার মুদ্রা ঋণ প্রয়োজন'
+      }
+    ],
+    successGreeting: 'আপনার তথ্য সফলভাবে সংরক্ষিত হয়েছে! আপনার জন্য উপযুক্ত সরকারি প্রকল্প দেখানো হচ্ছে।',
+    tapToSpeak: 'কথা বলতে ট্যাপ করুন',
+    listening: 'শুনছি... বলুন',
+    heardPrefix: 'শোনা গেছে: '
+  },
+  English: {
+    title: '🎙️ AI Voice-Guided Profiling',
+    questions: [
+      {
+        step: 1,
+        text: 'Hello! What is your full name? And are you male or female?',
+        sub: 'Speak Name and Gender (e.g., My name is Bhaskar, Male)',
+        sample: 'My name is Bhaskar, Male'
+      },
+      {
+        step: 2,
+        text: 'What is your age? And what is your social category (OBC, SC, ST, General, Women)?',
+        sub: 'Speak Age and Category (e.g., Age 30, OBC Category)',
+        sample: 'I am 30 years old, OBC category'
+      },
+      {
+        step: 3,
+        text: 'What business do you run or want to start? And is your location rural or urban?',
+        sub: 'Speak Business & Location (e.g., Kirana Grocery Shop, Rural area)',
+        sample: 'Kirana grocery shop in a rural area'
+      },
+      {
+        step: 4,
+        text: 'How much loan or capital investment do you need? (e.g., ₹50,000, ₹2 Lakhs, or ₹5 Lakhs)?',
+        sub: 'Speak Needed Loan Amount (e.g., Need 5 Lakhs Mudra loan)',
+        sample: 'I need a 5 Lakh Mudra loan'
+      }
+    ],
+    successGreeting: 'Your profile details have been saved successfully! Showing your matching government schemes now.',
+    tapToSpeak: 'Tap to Speak',
+    listening: 'Listening... Speak now',
+    heardPrefix: 'Heard: '
+  }
+};
+
+let currentVoiceStep = 1;
+let voiceRecognitionInstance = null;
+let isVoiceListening = false;
+
+function startVoiceProfilingModal() {
+  const modal = document.getElementById('voiceProfilingModal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+
+  currentVoiceStep = 1;
+  updateVoiceStepUI();
+  updateVoiceChipsUI();
+
+  // Auto speak Question 1 after a short delay
+  setTimeout(() => {
+    playVoiceQuestion(currentVoiceStep);
+  }, 400);
+}
+window.startVoiceProfilingModal = startVoiceProfilingModal;
+
+function closeVoiceProfilingModal() {
+  const modal = document.getElementById('voiceProfilingModal');
+  if (modal) modal.style.display = 'none';
+
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  if (voiceRecognitionInstance) {
+    try { voiceRecognitionInstance.abort(); } catch (e) {}
+    voiceRecognitionInstance = null;
+  }
+  isVoiceListening = false;
+  setVoiceMicListeningUI(false);
+}
+window.closeVoiceProfilingModal = closeVoiceProfilingModal;
+
+function getVoiceDataForCurrentLang() {
+  const langKey = (typeof getActiveLanguageKey === 'function') ? getActiveLanguageKey() : 'Telugu';
+  return VOICE_PROFILING_DATA[langKey] || VOICE_PROFILING_DATA.Telugu;
+}
+
+function updateVoiceStepUI() {
+  const data = getVoiceDataForCurrentLang();
+  const qData = data.questions[currentVoiceStep - 1] || data.questions[0];
+
+  const stepText = document.getElementById('voiceStepText');
+  const fill = document.getElementById('voiceProgressFill');
+  const promptText = document.getElementById('voiceAiPromptText');
+  const transcriptText = document.getElementById('voiceHeardText');
+  const nextBtn = document.getElementById('voiceNextStepBtn');
+  const finishBtn = document.getElementById('voiceFinishMatchBtn');
+
+  if (stepText) stepText.innerText = `${(typeof t === 'function') ? t('screen5.step_indicator', 'Step') : 'Step'} ${currentVoiceStep} / 4`;
+  if (fill) fill.style.width = `${(currentVoiceStep / 4) * 100}%`;
+  if (promptText) promptText.innerText = qData.text;
+  if (transcriptText) transcriptText.innerText = qData.sub;
+
+  if (currentVoiceStep === 4) {
+    if (nextBtn) nextBtn.style.display = 'none';
+    if (finishBtn) finishBtn.style.display = 'flex';
+  } else {
+    if (nextBtn) nextBtn.style.display = 'block';
+    if (finishBtn) finishBtn.style.display = 'none';
+  }
+}
+
+function playVoiceQuestion(step) {
+  const data = getVoiceDataForCurrentLang();
+  const qData = data.questions[step - 1] || data.questions[0];
+  const langKey = (typeof getActiveLanguageKey === 'function') ? getActiveLanguageKey() : 'Telugu';
+
+  const replayBtn = document.getElementById('voiceReplayBtn');
+  speakBhashiniVoice(qData.text, langKey, replayBtn);
+}
+
+function replayVoiceQuestion() {
+  playVoiceQuestion(currentVoiceStep);
+}
+window.replayVoiceQuestion = replayVoiceQuestion;
+
+function setVoiceMicListeningUI(listening) {
+  const micBtn = document.getElementById('voiceBigMicBtn');
+  const waveAnim = document.getElementById('voiceWaveAnim');
+  const statusLabel = document.getElementById('voiceMicStatus');
+  const data = getVoiceDataForCurrentLang();
+
+  if (micBtn) {
+    if (listening) micBtn.classList.add('listening');
+    else micBtn.classList.remove('listening');
+  }
+  if (waveAnim) {
+    if (listening) waveAnim.classList.add('active');
+    else waveAnim.classList.remove('active');
+  }
+  if (statusLabel) {
+    statusLabel.innerText = listening ? data.listening : data.tapToSpeak;
+  }
+}
+
+function toggleVoiceRecording() {
+  if (isVoiceListening) {
+    if (voiceRecognitionInstance) {
+      try { voiceRecognitionInstance.stop(); } catch (e) {}
+    }
+    isVoiceListening = false;
+    setVoiceMicListeningUI(false);
+    return;
+  }
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const langCode = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'te';
+  const data = getVoiceDataForCurrentLang();
+  const transcriptText = document.getElementById('voiceHeardText');
+
+  if (SpeechRecognition) {
+    try {
+      voiceRecognitionInstance = new SpeechRecognition();
+      const codeMap = { te: 'te-IN', hi: 'hi-IN', ta: 'ta-IN', kn: 'kn-IN', mr: 'mr-IN', bn: 'bn-IN', en: 'en-IN' };
+      voiceRecognitionInstance.lang = codeMap[langCode] || 'te-IN';
+      voiceRecognitionInstance.interimResults = false;
+
+      voiceRecognitionInstance.onstart = () => {
+        isVoiceListening = true;
+        setVoiceMicListeningUI(true);
+        if (transcriptText) transcriptText.innerText = data.listening;
+      };
+
+      voiceRecognitionInstance.onresult = (e) => {
+        const transcript = e.results[0][0].transcript;
+        if (transcript && transcript.trim()) {
+          if (transcriptText) transcriptText.innerText = `${data.heardPrefix}"${transcript}"`;
+          parseVoiceProfilingAnswer(currentVoiceStep, transcript);
+          
+          // Auto advance after 1.2 seconds
+          setTimeout(() => {
+            if (currentVoiceStep < 4) {
+              nextVoiceQuestion();
+            } else {
+              completeVoiceProfilingAndMatch();
+            }
+          }, 1200);
+        }
+      };
+
+      voiceRecognitionInstance.onerror = () => {
+        isVoiceListening = false;
+        setVoiceMicListeningUI(false);
+        triggerFallbackVoiceSample();
+      };
+
+      voiceRecognitionInstance.onend = () => {
+        isVoiceListening = false;
+        setVoiceMicListeningUI(false);
+      };
+
+      voiceRecognitionInstance.start();
+    } catch (err) {
+      triggerFallbackVoiceSample();
+    }
+  } else {
+    triggerFallbackVoiceSample();
+  }
+}
+window.toggleVoiceRecording = toggleVoiceRecording;
+
+function triggerFallbackVoiceSample() {
+  const data = getVoiceDataForCurrentLang();
+  const qData = data.questions[currentVoiceStep - 1];
+  const transcriptText = document.getElementById('voiceHeardText');
+
+  setVoiceMicListeningUI(true);
+  if (transcriptText) transcriptText.innerText = data.listening;
+
+  setTimeout(() => {
+    setVoiceMicListeningUI(false);
+    const sample = qData.sample || 'భావన, 30 సంవత్సరాలు';
+    if (transcriptText) transcriptText.innerText = `${data.heardPrefix}"${sample}"`;
+    parseVoiceProfilingAnswer(currentVoiceStep, sample);
+
+    setTimeout(() => {
+      if (currentVoiceStep < 4) {
+        nextVoiceQuestion();
+      } else {
+        completeVoiceProfilingAndMatch();
+      }
+    }, 1200);
+  }, 1400);
+}
+
+function parseVoiceProfilingAnswer(step, text) {
+  if (!text || !text.trim()) return;
+  const lower = text.toLowerCase();
+
+  // Cross-step business detection if spoken
+  if (/textile|garment|tailor|tailoring|boutique|dress|cloth|stitching|saree|టైలరింగ్|టైలర్|బట్టల|వస్త్ర|కుట్టు|బోటిక్|చీరలు|सिलाई|कपड़ा|தையல்|துணி|ಟೈಲರಿಂಗ್|ದರ್ಜಿ/i.test(text)) {
+    currentProfile.businessType = 'Textile & Garments';
+  } else if (/food|hotel|tiffin|canteen|mess|restaurant|catering|tea|chai|bakery|snacks|హోటల్|టిఫిన్|మెస్|క్యాటరింగ్|టీ|చాయ్|బేకరీ|స్నాక్స్|భోజనశాల|ఆహార|खाना|होटल|नाश्ता|உணவகம்|ತಿಂಡಿ|খাবার/i.test(text)) {
+    currentProfile.businessType = 'Food Business';
+  } else if (/artisan|handicraft|handloom|weaver|vishwakarma|carpenter|potter|చేనేత|చేతివృత్తులు|విశ్వకర్మ|వడ్రంగి|కుమ్మరి|కంసాలి|నేత|మగ్గం|हस्तशिल्प|बुनकर|கைவினை|நெசவு|ನೇಕಾರ|তাঁত/i.test(text)) {
+    currentProfile.businessType = 'Handicrafts & Handlooms';
+  } else if (/agri|farmer|farming|dairy|milk|cow|buffalo|poultry|chicken|goat|fish|వ్యవసాయం|రైతు|పాడి|గేదెలు|ఆవులు|పాలు|డైరీ|కోళ్ల|చేపలు|తోట|खेती|किसान|डेयरी|விவசாயம்|ಕೃಷಿ|কৃষি/i.test(text)) {
+    currentProfile.businessType = 'Agriculture & Allied';
+  } else if (/auto|rickshaw|mechanic|repair|garage|vehicle|service|ఆటో|రిక్షా|మెకానిక్|రిపేర్|గ్యారేజ్|సర్వీస్|వాహనం|ऑटो|मैकेनिक|ஆட்டோ|ಪಾವತಿ|ಗಾಡಿ/i.test(text)) {
+    currentProfile.businessType = 'Services / Repair Shop';
+  } else if (/vending|street|vendor|thela|pushcart|hawker|svanidhi|తోపుడు బండి|వీధి వ్యాపారం|బండి|హాకర్|స్వనిధి|ठेला|रेहड़ी|தெருவோர|ತಳ್ಳುಗಾಡಿ|হকার/i.test(text)) {
+    currentProfile.businessType = 'Street Vending';
+  } else if (/mfg|factory|industry|workshop|fabrication|paper plates|mill|పరిశ్రమ|తయారీ|ఫ్యాబ్రికేషన్|వర్క్‌షాప్|ఫ్యాక్టరీ|మిల్లు|పిండి గిర్నీ|कारखाना|उद्योग|தொழிற்சாலை|ಕೈಗಾರಿಕೆ|কারখানা/i.test(text)) {
+    currentProfile.businessType = 'Manufacturing & Fabrication';
+  } else if (/kirana|కిరాణా|చిల్లర|దుకాణం|షాపు|grocery|store|supermarket|दुकान|किराना|மளிகை|கடை|ಕಿರಾಣಿ|ಮುদি/i.test(text)) {
+    currentProfile.businessType = 'Retail / Kirana Shop';
+  }
+
+  if (step === 1) {
+    // 1. Extract Gender
+    if (/female|మహిళ|స్త్రీ|महिला|औरत|பெண்|ಮಹಿಳೆ|মহিলা|లేడీ/i.test(text)) {
+      currentProfile.gender = 'Female';
+    } else if (/male|పురుషుడు|పురుషుడిని|మగ|మగాడిని|पुरुष|ஆண்|ಪುರುಷ|পুরুষ/i.test(text)) {
+      currentProfile.gender = 'Male';
+    } else if (/transgender|other|ట్రాన్స్‌జెండర్/i.test(text)) {
+      currentProfile.gender = 'Transgender / Other';
+    }
+
+    // 2. Extract Clean Name
+    let clean = text
+      .replace(/\b(?:hello|hi|namaste|is|am|this|my|name|i)\b/gi, '')
+      .replace(/నమస్కారం|హలో|नमस्ते|வணக்கம்|ನಮಸ್ಕಾರ|নমস্কার/gi, '')
+      .replace(/నా\s*పేరు|నాది|నేను|అండి|గారు|అయిన|ఉంటుంది/gi, '')
+      .replace(/मेरा\s*नाम|என்\s*பெயர்|ನನ್ನ\s*ಹೆಸರು|আমার\s*নাম|माझे\s*नाव/gi, '')
+      .replace(/పురుషుడు|పురుషుడిని|మగ|మహిళ|మహిళను|స్త్రీ|స్త్రీని|male|female|पुरुष|महिला|ஆண்|பெண்|ಪುರುಷ|ಮಹಿಳೆ|পুরুষ|মহিলা/gi, '')
+      .replace(/[,.!?\-]/g, ' ')
+      .trim();
+
+    const words = clean.split(/\s+/).filter(w => w.length >= 2);
+    if (words.length > 0) {
+      currentProfile.name = words.slice(0, 3).join(' ');
+    } else if (!currentProfile.name || currentProfile.name === 'Ravi Kumar') {
+      currentProfile.name = 'భాస్కర్';
+    }
+  } else if (step === 2) {
+    // Extract Age
+    const ageMatch = text.match(/(\d{2})/);
+    if (ageMatch) {
+      const val = parseInt(ageMatch[1]);
+      if (val >= 18 && val <= 90) currentProfile.age = val;
+    }
+
+    // Extract Category
+    if (/sc|ఎస్సీ|अनुसूचित जाति|எஸ்சி|ಎಸ್ಸಿ/i.test(text)) currentProfile.category = 'SC';
+    else if (/st|ఎస్టీ|अनुसूचित जनजाति|எஸ்டி|ಎಸ್ಟಿ/i.test(text)) currentProfile.category = 'ST';
+    else if (/obc|bc|ఓబీసీ|బీసీ|ओबीसी|பிசி|ಒಬಿಸಿ/i.test(text)) currentProfile.category = 'OBC';
+    else if (/women|మహిళ|महिला|பெண்|ಮಹಿಳೆ/i.test(text)) currentProfile.category = 'Women Entrepreneur';
+    else if (/minority|మైనారిటీ|अल्पसंख्यक|சிறுபான்மை|ಅಲ್ಪಸಂಖ್ಯಾತ/i.test(text)) currentProfile.category = 'Minority';
+    else if (/general|oc|జనరల్|सामान्य|பொது|ಸಾಮಾನ್ಯ/i.test(text)) currentProfile.category = 'General';
+  } else if (step === 3) {
+    // Location Type
+    if (/rural|గ్రామీణ|గావ్|गाँव|கிராம|ಗ್ರಾಮೀಣ|গ্রাম/i.test(text)) currentProfile.locationType = 'Rural';
+    else if (/urban|city|పట్టణ|शहर|நகர|ನಗರ|শহর/i.test(text)) currentProfile.locationType = 'Urban';
+  } else if (step === 4) {
+    // Extract Loan amount
+    if (/50[ ,]?000|యాభై వేలు|पचास हजार|ஐம்பதாயிரம்/i.test(text)) currentProfile.neededInvestment = 50000;
+    else if (/1[ ,]?lakh|ఒక లక్ష|1 लाख|ஒரு லட்சம்|ಒಂದು ಲಕ್ಷ|১ লাখ/i.test(text)) currentProfile.neededInvestment = 100000;
+    else if (/2[ ,]?lakh|రెండు లక్షలు|2 लाख|இரண்டு லட்சம்|ಎರಡು ಲಕ್ಷ|২ লাখ/i.test(text)) currentProfile.neededInvestment = 200000;
+    else if (/3[ ,]?lakh|మూడు లక్షలు|3 लाख|மூன்று லட்சம்|ಮೂರು ಲಕ್ಷ|৩ লাখ/i.test(text)) currentProfile.neededInvestment = 300000;
+    else if (/5[ ,]?lakh|ఐదు లక్షలు|5 लाख|ஐந்து லட்சம்|ಐದು ಲಕ್ಷ|৫ লাখ/i.test(text)) currentProfile.neededInvestment = 500000;
+    else if (/10[ ,]?lakh|పది లక్షలు|10 लाख|பத்து லட்சம்|ಹತ್ತು ಲಕ್ಷ|১০ লাখ/i.test(text)) currentProfile.neededInvestment = 1000000;
+    else if (/20[ ,]?lakh|ఇరవై లక్షలు|20 लाख/i.test(text)) currentProfile.neededInvestment = 2000000;
+    else {
+      const numMatch = text.match(/(\d+)/);
+      if (numMatch) {
+        let num = parseInt(numMatch[1]);
+        if (num <= 50) num *= 100000;
+        currentProfile.neededInvestment = num;
+      }
+    }
+  }
+
+  // Sync to Screen 5 DOM Form Inputs in background
+  syncProfileToFormDOM();
+  updateVoiceChipsUI();
+}
+
+function syncProfileToFormDOM() {
+  const nameEl = document.getElementById('profName');
+  const ageEl = document.getElementById('profAge');
+  const genEl = document.getElementById('profGender');
+  const catEl = document.getElementById('profCategory');
+  const locEl = document.getElementById('profLocationType');
+  const bizEl = document.getElementById('profBusiness');
+  const invEl = document.getElementById('profInvestment');
+
+  if (nameEl && currentProfile.name) nameEl.value = currentProfile.name;
+  if (ageEl && currentProfile.age) {
+    ageEl.value = currentProfile.age;
+    if (typeof updateAgeCategoryBadge === 'function') updateAgeCategoryBadge();
+  }
+  if (genEl && currentProfile.gender) genEl.value = currentProfile.gender;
+  if (catEl && currentProfile.category) catEl.value = currentProfile.category;
+  if (locEl && currentProfile.locationType) locEl.value = currentProfile.locationType;
+  if (bizEl && currentProfile.businessType) bizEl.value = currentProfile.businessType;
+  if (invEl && currentProfile.neededInvestment) invEl.value = currentProfile.neededInvestment;
+}
+
+function updateVoiceChipsUI() {
+  const cName = document.querySelector('#vChipName span');
+  const cAge = document.querySelector('#vChipAge span');
+  const cGen = document.querySelector('#vChipGender span');
+  const cCat = document.querySelector('#vChipCategory span');
+  const cBiz = document.querySelector('#vChipBusiness span');
+  const cInv = document.querySelector('#vChipInvestment span');
+
+  if (cName) {
+    cName.innerText = currentProfile.name || '-';
+    if (currentProfile.name) document.getElementById('vChipName')?.classList.add('filled');
+  }
+  if (cAge) {
+    cAge.innerText = currentProfile.age ? `${currentProfile.age} yrs` : '-';
+    if (currentProfile.age) document.getElementById('vChipAge')?.classList.add('filled');
+  }
+  if (cGen) {
+    cGen.innerText = currentProfile.gender || '-';
+    if (currentProfile.gender) document.getElementById('vChipGender')?.classList.add('filled');
+  }
+  if (cCat) {
+    cCat.innerText = currentProfile.category || '-';
+    if (currentProfile.category) document.getElementById('vChipCategory')?.classList.add('filled');
+  }
+  if (cBiz) {
+    cBiz.innerText = currentProfile.businessType ? currentProfile.businessType.split('/')[0].trim() : '-';
+    if (currentProfile.businessType) document.getElementById('vChipBusiness')?.classList.add('filled');
+  }
+  if (cInv) {
+    cInv.innerText = currentProfile.neededInvestment ? `₹${currentProfile.neededInvestment.toLocaleString('en-IN')}` : '-';
+    if (currentProfile.neededInvestment) document.getElementById('vChipInvestment')?.classList.add('filled');
+  }
+}
+
+function nextVoiceQuestion() {
+  if (currentVoiceStep < 4) {
+    currentVoiceStep++;
+    updateVoiceStepUI();
+    setTimeout(() => {
+      playVoiceQuestion(currentVoiceStep);
+    }, 300);
+  } else {
+    completeVoiceProfilingAndMatch();
+  }
+}
+window.nextVoiceQuestion = nextVoiceQuestion;
+
+async function completeVoiceProfilingAndMatch() {
+  const data = getVoiceDataForCurrentLang();
+  const langKey = (typeof getActiveLanguageKey === 'function') ? getActiveLanguageKey() : 'Telugu';
+
+  // Speak success audio
+  speakBhashiniVoice(data.successGreeting, langKey);
+
+  // Save profile to database & storage
+  await saveUserProfileDetails(false);
+
+  // Close modal
+  closeVoiceProfilingModal();
+
+  // Run matching & jump directly to Screen 6
+  showScreen(6);
+  runSchemeMatching(true);
+
+  showCustomToast('🎉 ' + data.successGreeting);
+}
+window.completeVoiceProfilingAndMatch = completeVoiceProfilingAndMatch;

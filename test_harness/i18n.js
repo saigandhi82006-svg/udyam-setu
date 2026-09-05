@@ -212,7 +212,13 @@
       "exp_0": "🌱 0 Years (New Venture)",
       "exp_1_2": "📈 1-2 Years",
       "exp_3_5": "⭐ 3-5 Years",
-      "exp_5_plus": "🏆 5+ Years"
+      "exp_5_plus": "🏆 5+ Years",
+      "voice_badge": "⚡ Voice AI Assistant for Non-Literate Entrepreneurs",
+      "voice_title": "🎙️ Fill Profile by Speaking (Voice AI)",
+      "voice_desc": "No typing required! Just speak answers to 4 simple questions and AI will match government schemes for you.",
+      "voice_btn": "Speak Now ➔",
+      "voice_modal_title": "🎙️ AI Voice-Guided Profiling",
+      "voice_detected_heading": "Captured Profile Details:"
     },
     "screen6": {
       "header": "Matching Schemes",
@@ -566,7 +572,13 @@
       "exp_0": "🌱 0 वर्ष (नया उद्यम)",
       "exp_1_2": "📈 1-2 वर्ष",
       "exp_3_5": "⭐ 3-5 वर्ष",
-      "exp_5_plus": "🏆 5+ वर्ष"
+      "exp_5_plus": "🏆 5+ वर्ष",
+      "voice_badge": "⚡ बिना लिखे बोलकर प्रोफाइल भरने के लिए AI सहायक",
+      "voice_title": "🎙️ बोलकर अपनी जानकारी दर्ज करें (Voice AI)",
+      "voice_desc": "टाइप करने की जरूरत नहीं! बस 4 आसान सवालों के जवाब बोलकर दें, AI आपके लिए योजनाएं खोजेगा।",
+      "voice_btn": "बोलें ➔",
+      "voice_modal_title": "🎙️ AI वॉयस प्रोफाइलिंग",
+      "voice_detected_heading": "दर्ज किए गए विवरण:"
     },
     "screen6": {
       "header": "अनुकूल योजनाएं",
@@ -920,7 +932,13 @@
       "exp_0": "🌱 0 సంవత్సరాలు (కొత్త వ్యాపారం)",
       "exp_1_2": "📈 1-2 సంవత్సరాలు",
       "exp_3_5": "⭐ 3-5 సంవత్సరాలు",
-      "exp_5_plus": "🏆 5+ సంవత్సరాలు"
+      "exp_5_plus": "🏆 5+ సంవత్సరాలు",
+      "voice_badge": "⚡ నిరక్షరాస్యుల కోసం AI వాయిస్ సహాయకుడు",
+      "voice_title": "🎙️ నోటితో మాట్లాడి వివరాలు నమోదు చేయండి (Voice AI)",
+      "voice_desc": "టైప్ చేయనక్కర్లేదు! AI అడిగే 4 సులభమైన ప్రశ్నలకు మాట్లాడి సమాధానం చెప్పండి చాలు.",
+      "voice_btn": "మాట్లాడండి ➔",
+      "voice_modal_title": "🎙️ AI వాయిస్ ప్రొఫైలింగ్",
+      "voice_detected_heading": "నమోదైన వివరాలు:"
     },
     "screen6": {
       "header": "సరిపోలిన పథకాలు",
@@ -1274,7 +1292,13 @@
       "exp_0": "🌱 0 ವರ್ಷಗಳು (ಹೊಸ ಉದ್ಯಮ)",
       "exp_1_2": "📈 1-2 ವರ್ಷಗಳು",
       "exp_3_5": "⭐ 3-5 ವರ್ಷಗಳು",
-      "exp_5_plus": "🏆 5+ ವರ್ಷಗಳು"
+      "exp_5_plus": "🏆 5+ ವರ್ಷಗಳು",
+      "voice_badge": "⚡ ಅನಕ್ಷರಸ್ಥರಿಗಾಗಿ AI ಧ್ವನಿ ಸಹಾಯಕ",
+      "voice_title": "🎙️ ಧ್ವನಿ ಮೂಲಕ ವಿವರಗಳನ್ನು ನಮೂದಿಸಿ (Voice AI)",
+      "voice_desc": "ಟೈಪ್ ಮಾಡುವ ಅಗತ್ಯವಿಲ್ಲ! ಕೇವಲ 4 ಸುಲಭ ಪ್ರಶ್ನೆಗಳಿಗೆ ಮಾತನಾಡಿ ಉತ್ತರಿಸಿ, AI ನಿಮಗೆ ಯೋಜನೆಗಳನ್ನು ತೋರಿಸುತ್ತದೆ.",
+      "voice_btn": "ಮಾತನಾಡಿ ➔",
+      "voice_modal_title": "🎙️ AI ಧ್ವನಿ ಪ್ರೊಫೈಲಿಂಗ್",
+      "voice_detected_heading": "ದಾಖಲಾದ ವಿವರಗಳು:"
     },
     "screen6": {
       "header": "ಹೊಂದಿಕೆಯಾಗುವ ಯೋಜನೆಗಳು",
@@ -1628,7 +1652,13 @@
       "exp_0": "🌱 0 ஆண்டுகள் (புதிய தொழில்)",
       "exp_1_2": "📈 1-2 ஆண்டுகள்",
       "exp_3_5": "⭐ 3-5 ஆண்டுகள்",
-      "exp_5_plus": "🏆 5+ ஆண்டுகள்"
+      "exp_5_plus": "🏆 5+ ஆண்டுகள்",
+      "voice_badge": "⚡ எழுத படிக்க தெரியாதவர்களுக்கான AI குரல் வழிகாட்டி",
+      "voice_title": "🎙️ பேசி உங்கள் விவரங்களை உள்ளிடவும் (Voice AI)",
+      "voice_desc": "டைப் செய்ய தேவையில்லை! 4 எளிய கேள்விகளுக்கு பேசி பதிலளிக்கவும், AI திட்டங்களை கண்டறியும்.",
+      "voice_btn": "பேசுங்கள் ➔",
+      "voice_modal_title": "🎙️ AI குரல் சுயவிவரம்",
+      "voice_detected_heading": "பதிவுசெய்யப்பட்ட விவரங்கள்:"
     },
     "screen6": {
       "header": "பொருத்தமான திட்டங்கள்",
@@ -1982,7 +2012,13 @@
       "exp_0": "🌱 0 वर्षे (नवीन व्यवसाय)",
       "exp_1_2": "📈 1-2 वर्षे",
       "exp_3_5": "⭐ 3-5 वर्षे",
-      "exp_5_plus": "🏆 5+ वर्षे"
+      "exp_5_plus": "🏆 5+ वर्षे",
+      "voice_badge": "⚡ निरक्षरांसाठी AI व्हॉईस सहाय्यक",
+      "voice_title": "🎙️ बोलून आपले तपशील भरा (Voice AI)",
+      "voice_desc": "टाईप करण्याची गरज नाही! फक्त 4 सोप्या प्रश्नांची उत्तरे बोला, AI तुमच्यासाठी योजना शोधेल.",
+      "voice_btn": "बोला ➔",
+      "voice_modal_title": "🎙️ AI व्हॉईस प्रोफाइलिंग",
+      "voice_detected_heading": "नोंदवलेले तपशील:"
     },
     "screen6": {
       "header": "जुळणाऱ्या योजना",
@@ -2336,7 +2372,13 @@
       "exp_0": "🌱 0 বছর (নতুন উদ্যোগ)",
       "exp_1_2": "📈 1-2 বছর",
       "exp_3_5": "⭐ 3-5 বছর",
-      "exp_5_plus": "🏆 5+ বছর"
+      "exp_5_plus": "🏆 5+ বছর",
+      "voice_badge": "⚡ নিরক্ষরদের জন্য AI ভয়েস সহায়ক",
+      "voice_title": "🎙️ কথা বলে আপনার বিবরণ লিখুন (Voice AI)",
+      "voice_desc": "টাইপ করার দরকার নেই! শুধুমাত্র ৪টি সহজ প্রশ্নের উত্তর কথা বলে দিন, AI প্রকল্প খুঁজে দেবে।",
+      "voice_btn": "বলুন ➔",
+      "voice_modal_title": "🎙️ AI ভয়েস প্রোফাইলিং",
+      "voice_detected_heading": "নথিভুক্ত বিবরণ:"
     },
     "screen6": {
       "header": "উপযুক্ত প্রকল্পসমূহ",

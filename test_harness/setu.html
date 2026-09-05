@@ -340,12 +340,85 @@
                         </div>
                     </div>
 
-                    <!-- SCREEN 5: USER DETAILS PROFILING -->
+                    
+          <!-- Voice Profiling Overlay (Accessible Conversational Modal) -->
+          <div id="voiceProfilingModal" class="voice-modal-overlay" style="display: none;">
+            <div class="voice-modal-card">
+              <div class="voice-modal-header">
+                <div class="voice-modal-title">
+                  <span class="voice-live-dot"></span>
+                  <span data-i18n="screen5.voice_modal_title">🎙️ AI వాయిస్ ప్రొఫైలింగ్ (Voice Profiling)</span>
+                </div>
+                <button type="button" class="voice-modal-close-btn" onclick="closeVoiceProfilingModal()">✕</button>
+              </div>
+
+              <!-- Step progress -->
+              <div class="voice-step-tracker">
+                <span id="voiceStepText">ప్రశ్న 1 / 4 (Question 1 of 4)</span>
+                <div class="voice-progress-track">
+                  <div id="voiceProgressFill" class="voice-progress-fill" style="width: 25%;"></div>
+                </div>
+              </div>
+
+              <!-- Big AI Question Bubble -->
+              <div class="voice-ai-prompt-box">
+                <div class="voice-ai-avatar">🤖</div>
+                <div class="voice-ai-prompt-text" id="voiceAiPromptText">నమస్కారం! మీ పూర్తి పేరు మరియు లింగం చెప్పండి.</div>
+                <button type="button" class="voice-replay-audio-btn" id="voiceReplayBtn" onclick="replayVoiceQuestion()">🔊 మళ్లీ వినండి (Listen Again)</button>
+              </div>
+
+              <!-- Voice Visualizer & Big Mic Button -->
+              <div class="voice-mic-zone">
+                <div class="voice-wave-container" id="voiceWaveAnim">
+                  <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
+                </div>
+                <button type="button" class="voice-big-mic-btn" id="voiceBigMicBtn" onclick="toggleVoiceRecording()">
+                  <span class="mic-icon">🎙️</span>
+                  <span class="mic-status-label" id="voiceMicStatus">మాట్లాడటానికి నొక్కండి</span>
+                </button>
+                <div class="voice-heard-transcript" id="voiceHeardText">మీ మాటల కోసం వేచి చూస్తున్నాం... (Tap Mic & Speak)</div>
+              </div>
+
+              <!-- Live Extracted Profile Chips -->
+              <div class="voice-extracted-summary">
+                <div class="voice-summary-heading" data-i18n="screen5.voice_detected_heading">నమోదైన వివరాలు (Captured Details):</div>
+                <div class="voice-extracted-grid">
+                  <div class="voice-chip" id="vChipName">👤 పేరు: <span>-</span></div>
+                  <div class="voice-chip" id="vChipAge">🎂 వయస్సు: <span>-</span></div>
+                  <div class="voice-chip" id="vChipGender">⚧️ లింగం: <span>-</span></div>
+                  <div class="voice-chip" id="vChipCategory">🏷️ సామాజిక వర్గం: <span>-</span></div>
+                  <div class="voice-chip" id="vChipBusiness">🏬 వ్యాపారం: <span>-</span></div>
+                  <div class="voice-chip" id="vChipInvestment">💰 కావలసిన రుణం: <span>-</span></div>
+                </div>
+              </div>
+
+              <!-- Footer Action: Auto-enabled when details ready or direct skip to schemes -->
+              <div class="voice-modal-footer">
+                <button type="button" class="voice-skip-btn" onclick="nextVoiceQuestion()" id="voiceNextStepBtn">తదుపరి ప్రశ్న ➔ (Next)</button>
+                <button type="button" class="voice-finish-btn" id="voiceFinishMatchBtn" onclick="completeVoiceProfilingAndMatch()" style="display: none;">
+                  <span>🎯 నా పథకాలను చూడండి (Find Matching Schemes)</span> ➔
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- SCREEN 5: USER DETAILS PROFILING -->
                               <div class="screen" id="screen-5">
             <div class="sub-header">
               <button class="back-btn" onclick="showScreen(3)">‹</button>
               <h4 data-i18n="screen5.header">User Details</h4>
             </div>
+            <!-- Voice Assistant Hero Banner for Illiterate / Non-Tech-Savvy Users -->
+            <div class="voice-assist-banner" onclick="startVoiceProfilingModal()">
+              <div class="voice-assist-icon-badge">🎙️</div>
+              <div class="voice-assist-info">
+                <div class="voice-assist-badge" data-i18n="screen5.voice_badge">⚡ నిరక్షరాస్యుల కోసం AI సహాయం (Voice AI Assistant)</div>
+                <strong class="voice-assist-title" data-i18n="screen5.voice_title">నోటితో మాట్లాడి వివరాలు నమోదు చేయండి</strong>
+                <p class="voice-assist-desc" data-i18n="screen5.voice_desc">టైప్ చేయనక్కర్లేదు! AI అడిగే 4 సులభమైన ప్రశ్నలకు మాట్లాడి సమాధానం చెప్పండి చాలు.</p>
+              </div>
+              <button type="button" class="voice-assist-btn" data-i18n="screen5.voice_btn">మాట్లాడండి ➔</button>
+            </div>
+
 
             <!-- Top Progressive Step Header -->
             <div class="step-indicator">
