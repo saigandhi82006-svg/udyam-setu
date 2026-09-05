@@ -47,10 +47,30 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Reactively handle language changes across the entire app
+// Reactively handle language changes across the entire app
 window.addEventListener('udyam:languageChanged', (event) => {
   const langCode = event.detail.language;
+  const langName = event.detail.languageName || 'Telugu';
   if (currentProfile) currentProfile.language = langCode;
   
+  // Sync chat input language dropdown
+  const chatLangSel = document.getElementById('chatLangSelect');
+  if (chatLangSel) {
+    for (let i = 0; i < chatLangSel.options.length; i++) {
+      if (chatLangSel.options[i].value.toLowerCase().includes(langName.toLowerCase()) ||
+          chatLangSel.options[i].text.toLowerCase().includes(langName.toLowerCase()) ||
+          chatLangSel.options[i].value.toLowerCase() === langCode) {
+        chatLangSel.selectedIndex = i;
+        break;
+      }
+    }
+  }
+
+  // If no user messages have been sent in chat, re-render initial welcome in new language
+  if (!chatHistory || chatHistory.length === 0) {
+    renderInitialChatWelcome();
+  }
+
   // Re-render Scheme Details if currently on screen 7
   if (currentSelectedScheme && typeof window.refreshCurrentSchemeDetails === 'function') {
     window.refreshCurrentSchemeDetails();
@@ -799,21 +819,70 @@ const WELCOME_DISCOVERY_DATA = {
       { label: '♿ Divyangjan PwD Loan (NHFDC)', prompt: 'I need details on self-employment loan schemes for persons with disabilities' },
       { label: '💡 Mudra Loan EMI & Interest Rates', prompt: 'What are the interest rates, EMI terms, and subsidy under PM Mudra Yojana?' }
     ]
+  },
+  Tamil: {
+    greeting: 'வணக்கம்! உத்யம் சேது AI அரசு திட்ட ஆலோசனை மையத்திற்கு உங்களை வரவேற்கிறோம். உங்கள் வணிகத்திற்கான பிணையமில்லா அரசு கடன்கள் (₹50,000 முதல் ₹2 கோடி வரை) மற்றும் 35% வரை மானியங்களைப் பெற, கீழே உங்கள் வணிகத் துறையைத் தேர்ந்தெடுக்கவும் அல்லது நேரடியாகக் கேட்கவும்:',
+    title: '👇 உங்கள் வணிகத் துறையைத் தேர்ந்தெடுக்கவும்:',
+    listen: '🔊 கேளுங்கள் (Listen)',
+    options: [
+      { label: '🍲 உணவு வணிகம் / உணவகம் / சிற்றுண்டி', prompt: 'எனக்கு உணவகம் அல்லது சிற்றுண்டி மையம் தொடங்க அரசு கடன் வேண்டும்' },
+      { label: '🛒 மளிகை / சில்லறை வணிகம்', prompt: 'எனக்கு மளிகை கடை அல்லது சில்லறை வணிகத்திற்கான முத்ரா கடன் வேண்டும்' },
+      { label: '🌾 விவசாயம் & பால் பண்ணை (KCC)', prompt: 'எனக்கு விவசாயம் அல்லது பால் பண்ணைக்கு கிசான் கிரெடிಟ್ கார்டு கடன் வேண்டும்' },
+      { label: '🧵 கைவினை & நெசவு (விஸ்வகர்மா)', prompt: 'நான் ஒரு கைவினைஞர் அல்லது நெசவாளர், எனக்கு விஸ்வகர்மா திட்ட கடன் வேண்டும்' },
+      { label: '👗 தையல் & ஆடை வணிகம்', prompt: 'எனக்கு தையல் அல்லது ஜவுளித் தொழிலுக்கு அரசு கடன் உதவி வேண்டும்' },
+      { label: '🏭 சிறு உற்பத்தித் தொழிற்சாலை (MSME)', prompt: 'எனக்கு சிறு உற்பத்தி அல்லது தயாரிப்பு அலகு அமைக்க கடன் வேண்டும்' },
+      { label: '🛺 வணிக ஆட்டோ / வாகனக் கடன்', prompt: 'எனக்கு வணிக ஆட்டோ ரிக்ஷா அல்லது சரக்கு வாகனம் வாங்க கடன் வேண்டும்' },
+      { label: '🛍️ தெருவோர வியாபாரம் (PM SVANidhi)', prompt: 'நான் ஒரு தெருவோர வியாபாரி, எனக்கு பிஎம் சுவநிதி கடன் வேண்டும்' },
+      { label: '♿ மாற்றுத்திறனாளிகள் கடன் (NHFDC)', prompt: 'மாற்றுத்திறனாளிகளுக்கான சுயதொழில் கடன் திட்ட விவரங்கள் தேவை' },
+      { label: '💡 முத்ரா கடன் EMI & வட்டி விவரங்கள்', prompt: 'முத்ரா கடன் வட்டி விகிதங்கள் மற்றும் EMI விவரங்கள் என்ன?' }
+    ]
+  },
+  Marathi: {
+    greeting: 'नमस्कार! उद्यम सेतू एआय शासकीय योजना सल्लागार केंद्रात आपले स्वागत आहे. आपल्या व्यवसायासाठी विनातारण सरकारी कर्ज (₹50,000 ते ₹2 कोटी) आणि 35% पर्यंत अनुदान मिळवण्यासाठी खालील पर्यायांमधून आपला व्यवसाय निवडा किंवा थेट विचारा:',
+    title: '👇 आपल्या व्यवसायाचे क्षेत्र निवडा:',
+    listen: '🔊 ऐका (Listen)',
+    options: [
+      { label: '🍲 अन्न व्यवसाय / हॉटेल व नाश्ता केंद्र', prompt: 'मला हॉटेल किंवा नाश्ता केंद्र सुरू करण्यासाठी सरकारी कर्ज हवे आहे' },
+      { label: '🛒 किराणा / किरकोळ दुकान', prompt: 'मला किराणा दुकान किंवा किरकोळ व्यवसायासाठी मुद्रा कर्ज हवे आहे' },
+      { label: '🌾 शेती आणि दुग्ध व्यवसाय (KCC)', prompt: 'मला शेती किंवा दुग्ध व्यवसायासाठी किसान क्रेडिट कार्ड कर्ज हवे आहे' },
+      { label: '🧵 पीएम विश्वकर्मा (कारागीर व विणकर)', prompt: 'मी एक कारागीर किंवा विणकर आहे, मला विश्वकर्मा योजनेचे कर्ज हवे आहे' },
+      { label: '👗 टेलरिंग व वस्त्रोद्योग', prompt: 'मला टेलरिंग किंवा कापड व्यवसायासाठी सरकारी कर्ज हवे आहे' },
+      { label: '🏭 लघु उद्योग व उत्पादन (MSME)', prompt: 'मला लहान उत्पादन युनिट सुरू करण्यासाठी कर्ज हवे आहे' },
+      { label: '🛺 व्यावसायिक ऑटो / वाहन कर्ज', prompt: 'मला व्यावसायिक ऑटो रिक्षा किंवा वाहन खरेदीसाठी कर्ज हवे आहे' },
+      { label: '🛍️ फेरीवाले / पथविक्रेते (पीएम स्वनिधी)', prompt: 'मी एक पथविक्रेता आहे, मला पीएम स्वनिधी योजना कर्ज हवे आहे' },
+      { label: '♿ दिव्यांगजन कर्ज योजना (NHFDC)', prompt: 'दिव्यांग व्यक्तींसाठी स्वयंरोजगार कर्ज योजनेची माहिती हवी आहे' },
+      { label: '💡 मुद्रा कर्ज EMI आणि व्याजदर', prompt: 'मुद्रा कर्जाचे व्याजदर, EMI आणि अनुदानाचे तपशील काय आहेत?' }
+    ]
   }
 };
+
+function getActiveLanguageKey() {
+  const code = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || '';
+  if (code === 'hi') return 'Hindi';
+  if (code === 'te') return 'Telugu';
+  if (code === 'ta') return 'Tamil';
+  if (code === 'kn') return 'Kannada';
+  if (code === 'mr') return 'Marathi';
+  if (code === 'bn') return 'Bengali';
+  if (code === 'en') return 'English';
+
+  const rawLang = document.getElementById('chatLangSelect')?.value || window.__currentLanguageName || '';
+  if (rawLang.includes('Hindi')) return 'Hindi';
+  if (rawLang.includes('Telugu')) return 'Telugu';
+  if (rawLang.includes('Tamil')) return 'Tamil';
+  if (rawLang.includes('Kannada')) return 'Kannada';
+  if (rawLang.includes('Marathi')) return 'Marathi';
+  if (rawLang.includes('Bengali')) return 'Bengali';
+  if (rawLang.includes('English')) return 'English';
+  return 'Telugu';
+}
 
 function renderInitialChatWelcome() {
   const chatContainer = document.getElementById('chatMessages');
   if (!chatContainer) return;
   if (chatHistory && chatHistory.length > 0) return; // preserve active conversation
 
-  const rawLang = document.getElementById('chatLangSelect')?.value || window.__currentLanguageName || 'Telugu';
-  const lang = rawLang.includes('Hindi') ? 'Hindi'
-    : (rawLang.includes('Kannada') ? 'Kannada'
-    : (rawLang.includes('Bengali') ? 'Bengali'
-    : (rawLang.includes('English') ? 'English'
-    : 'Telugu')));
-
+  const lang = getActiveLanguageKey();
   const data = WELCOME_DISCOVERY_DATA[lang] || WELCOME_DISCOVERY_DATA.Telugu;
 
   chatContainer.innerHTML = '';
@@ -863,19 +932,6 @@ function renderInitialChatWelcome() {
 
   chatContainer.appendChild(aiBubble);
   scrollToBottomChat();
-}
-
-function autoExpandTextarea(el) {
-  if (!el) return;
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
-}
-
-function handleChatInputKeyDown(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendChatMessage();
-  }
 }
 
 function onLanguageChanged() {
