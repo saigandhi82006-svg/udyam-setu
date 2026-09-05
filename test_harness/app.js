@@ -2867,9 +2867,93 @@ async function loadMyApplications() {
 
     // Resolve localized scheme name
     let schemeDisplayName = app.schemeName || 'PM Mudra Yojana';
+    const sId = app.schemeId || (schemeDisplayName.toLowerCase().includes('mudra') ? 'PMMY' : (schemeDisplayName.toLowerCase().includes('pmegp') ? 'PMEGP' : 'PMMY'));
     if (window.UdyamI18n && typeof window.UdyamI18n.getLocalizedSchemeDetails === 'function') {
-      const locDetails = window.UdyamI18n.getLocalizedSchemeDetails(app.schemeId || 'PMMY', curLang);
+      const locDetails = window.UdyamI18n.getLocalizedSchemeDetails(sId, curLang);
       if (locDetails && locDetails.name) schemeDisplayName = locDetails.name;
+    }
+
+    // Localize Proposed Business
+    let proposedBiz = app.proposedBusiness || 'Micro Food Processing Enterprise';
+    const BIZ_MAP = {
+      'South Indian Organic Canteen & Tiffin Center': {
+        te: 'దక్షిణ భారత సేంద్రీయ టిఫిన్ & క్యాంటీన్ సెంటర్',
+        hi: 'दक्षिण भारतीय जैविक कैंटीन एवं टिफिन सेंटर',
+        kn: 'ದಕ್ಷಿಣ ಭಾರತೀಯ ಸಾವಯವ ಕ್ಯಾಂಟೀನ್ ಮತ್ತು ಉಪಾಹಾರ ಕೇಂದ್ರ',
+        ta: 'தென்னிந்திய இயற்கை உணவு மற்றும் சிற்றுண்டி மையம்',
+        mr: 'दक्षिण भारतीय सेंद्रिय कॅन्टीन आणि टिफिन सेंटर',
+        bn: 'দক্ষিণ ভারতীয় অর্গানিক ক্যান্টিন ও টিফিন সেন্টার',
+        en: 'South Indian Organic Canteen & Tiffin Center'
+      },
+      'Food Business': {
+        te: 'ఆహార వ్యాపారం (హోటల్, క్యాటరింగ్, టిఫిన్ సెంటర్)',
+        hi: 'खाद्य व्यवसाय (होटल, खानपान, टिफिन सेंटर)',
+        kn: 'ಆಹಾರ ವ್ಯವಹಾರ (ಹೋಟೆಲ್, ಕ್ಯಾಟರಿಂಗ್, ಉಪಾಹಾರ)',
+        ta: 'உணவு வணிகம் (உணவகம், சிற்றுண்டி மையம்)',
+        mr: 'खाद्य व्यवसाय (हॉटेल, केटरिंग, नाश्ता केंद्र)',
+        bn: 'খাদ্য ব্যবসা (হোটেল, ক্যাটারিং, টিফিন সেন্টার)',
+        en: 'Food Business (Hotel, Catering, Tiffin Center)'
+      }
+    };
+    if (BIZ_MAP[proposedBiz] && BIZ_MAP[proposedBiz][curLang]) {
+      proposedBiz = BIZ_MAP[proposedBiz][curLang];
+    }
+
+    // Localize Partner Name
+    let partnerDisplayName = app.partnerName || 'Andhra Grameena Bank (Lead RRB)';
+    const PARTNER_MAP = {
+      'Andhra Grameena Bank (Lead RRB)': {
+        te: 'ఆంధ్రా గ్రామీణ బ్యాంక్ (లీడ్ ఆర్ఆర్‌బీ)',
+        hi: 'आंध्रा ग्रामीण बैंक (लीड क्षेत्रीय बैंक)',
+        kn: 'ಆಂಧ್ರ ಗ್ರಾಮೀಣ ಬ್ಯಾಂಕ್ (ಲೀಡ್ ಗ್ರಾಮೀಣ ಬ್ಯಾಂಕ್)',
+        ta: 'ஆந்திர கிராமிய வங்கி (முன்னணி கிராம வங்கி)',
+        mr: 'आंध्रा ग्रामीण बँक (लीड प्रादेशिक बँक)',
+        bn: 'অন্ধ্র গ্রামীণ ব্যাংক (লিড আরআরবি)',
+        en: 'Andhra Grameena Bank (Lead RRB)'
+      },
+      'Andhra Pradesh Grameena Vikas Bank (APGVB) - Branch #401': {
+        te: 'ఆంధ్రప్రదేశ్ గ్రామీణ వికాస్ బ్యాంక్ (APGVB) - శాఖ #401',
+        hi: 'आंध्र प्रदेश ग्रामीण विकास बैंक (APGVB) - शाखा #401',
+        kn: 'ಆಂಧ್ರ ಪ್ರದೇಶ ಗ್ರಾಮೀಣ ವಿಕಾಸ ಬ್ಯಾಂಕ್ (APGVB) - ಶಾಖೆ #401',
+        ta: 'ஆந்திர பிரதேச கிராமிய விகாஸ் வங்கி (APGVB) - கிளை #401',
+        mr: 'आंध्र प्रदेश ग्रामीण विकास बँक (APGVB) - शाखा #401',
+        bn: 'অন্ধ্রপ্রদেশ গ্রামীণ বিকাশ ব্যাংক (APGVB) - শাখা #৪০১',
+        en: 'Andhra Pradesh Grameena Vikas Bank (APGVB) - Branch #401'
+      }
+    };
+    if (PARTNER_MAP[partnerDisplayName] && PARTNER_MAP[partnerDisplayName][curLang]) {
+      partnerDisplayName = PARTNER_MAP[partnerDisplayName][curLang];
+    } else if (window.UdyamI18n && typeof window.UdyamI18n.localizePartnerName === 'function') {
+      partnerDisplayName = window.UdyamI18n.localizePartnerName(partnerDisplayName, curLang);
+    }
+
+    // Localize Remarks / Verification Note
+    let remarksText = app.remarks || '';
+    const REMARKS_MAP = {
+      default_review: {
+        te: 'ఉద్యమ్ సేతు రూల్ ఇంజిన్ ద్వారా దరఖాస్తు ముందస్తు పరిశీలన పూర్తయింది (90% సరిపోలింది). పత్రాల పరిశీలన మరియు రుణ మంజూరు కొరకు ఆంధ్రా గ్రామీణ బ్యాంకుకు పంపబడింది.',
+        hi: 'उद्यम सेतु नियम इंजन द्वारा आवेदन की पूर्व-समीक्षा पूरी हुई (90% मिलान)। भौतिक निरीक्षण और ऋण स्वीकृति के लिए आंध्रा ग्रामीण बैंक को भेजा गया।',
+        kn: 'ಉದ್ಯಮ್ ಸೇತು ನಿಯಮ ಇಂಜಿನ್ ಮೂಲಕ ಅರ್ಜಿ ಪೂರ್ವ ಪರಿಶೀಲನೆ ಪೂರ್ಣಗೊಂಡಿದೆ (90% ಹೊಂದಾಣಿಕೆ). ಸ್ಥಳ ಪರಿಶೀಲನೆ ಮತ್ತು ಸಾಲ ಮಂಜೂರಾತಿಗಾಗಿ ಆಂಧ್ರ ಗ್ರಾಮೀಣ ಬ್ಯಾಂಕ್‌ಗೆ ಕಳುಹಿಸಲಾಗಿದೆ.',
+        ta: 'உத்யம் சேது விதி இயந்திரம் மூலம் விண்ணப்ப முன்சரிபார்ப்பு நிறைவடைந்தது (90% பொருத்தம்). கள ஆய்வு மற்றும் கடன் ஒப்புதலுக்காக ஆந்திர கிராமிய வங்கிக்கு அனுப்பப்பட்டுள்ளது.',
+        mr: 'उद्यम सेतू नियम इंजिनद्वारे अर्जाची पूर्व-तपासणी पूर्ण झाली (90% जुळणी). प्रत्यक्ष पाहणी आणि कर्ज मंजुरीसाठी आंध्रा ग्रामीण बँकेकडे पाठवले.',
+        bn: 'উদ্যম সেতু নিয়ম ইঞ্জিন দ্বারা আবেদন প্রাক-যাচাইকরণ সম্পন্ন হয়েছে (৯০% মিল)। মাঠ পরিদর্শন ও ঋণ অনুমোদনের জন্য অন্ধ্র গ্রামীণ ব্যাংকে পাঠানো হয়েছে।',
+        en: 'Application pre-screened by Udyam Setu Rule Engine (90% Match). Sent to Andhra Grameena Bank for physical inspection & loan sanction.'
+      },
+      default_submitted: {
+        te: 'డిజిటల్ పోర్టల్ ద్వారా దరఖాస్తు సమర్పించబడింది. బ్యాంక్ అధికారుల పరిశీలనలో ఉంది.',
+        hi: 'डिजिटल पोर्टल के माध्यम से आवेदन जमा किया गया। बैंक अधिकारियों द्वारा समीक्षाधीन है।',
+        kn: 'ಡಿಜಿಟಲ್ ಪೋರ್ಟಲ್ ಮೂಲಕ ಅರ್ಜಿ ಸಲ್ಲಿಸಲಾಗಿದೆ. ಬ್ಯಾಂಕ್ ಅಧಿಕಾರಿಗಳು ಪರಿಶೀಲಿಸುತ್ತಿದ್ದಾರೆ.',
+        ta: 'டிஜிட்டல் தளம் மூலம் விண்ணப்பம் சமர்ப்பிக்கப்பட்டது. வங்கி அதிகாரிகளின் ஆய்வில் உள்ளது.',
+        mr: 'डिजिटल पोर्टलद्वारे अर्ज सादर केला. बँक अधिकाऱ्यांच्या पुनरावलोकनात आहे.',
+        bn: 'ডিজিটাল পোর্টালের মাধ্যমে আবেদন জমা দেওয়া হয়েছে। ব্যাংক কর্মকর্তাদের পর্যালোচনাধীন।',
+        en: 'Application submitted via digital portal. Under review by bank officials.'
+      }
+    };
+
+    if (!remarksText || remarksText.includes('pre-screened') || remarksText.includes('Rule Engine') || remarksText.includes('CSC VLE')) {
+      remarksText = REMARKS_MAP.default_review[curLang] || REMARKS_MAP.default_review.en;
+    } else if (remarksText.includes('submitted via') || remarksText.includes('Digital Portal')) {
+      remarksText = REMARKS_MAP.default_submitted[curLang] || REMARKS_MAP.default_submitted.en;
     }
 
     // Format Amount
@@ -2885,7 +2969,7 @@ async function loadMyApplications() {
         </div>
 
         <h4 class="app-scheme-title">🏷️ ${schemeDisplayName}</h4>
-        <div class="app-proposed-biz">💼 ${app.proposedBusiness || 'Micro Food Processing Enterprise'}</div>
+        <div class="app-proposed-biz">💼 ${proposedBiz}</div>
         <div class="app-amount-row">💰 ${L.requested}: ${formattedAmount}</div>
 
         <!-- Visual Lifecycle Pipeline -->
@@ -2916,8 +3000,8 @@ async function loadMyApplications() {
 
         <!-- Remarks / Partner Info -->
         <div class="app-remarks-box">
-          <strong>🏛️ ${app.partnerName || 'Andhra Grameena Bank (Lead RRB)'}:</strong><br>
-          ${app.remarks || 'Application successfully verified by CSC VLE Officer and forwarded to Lead Bank for physical verification & loan disbursement.'}
+          <strong>🏛️ ${partnerDisplayName}:</strong><br>
+          ${remarksText}
         </div>
 
         <!-- Action Buttons -->
