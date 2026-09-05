@@ -2115,11 +2115,6 @@ function openGoogleMapsGeneral() {
   window.open(directionsUrl, '_blank');
 }
 
-  // Driving route / nearby search centered on user's exact coordinates
-  const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${encodeURIComponent(query)}&travelmode=driving`;
-  window.open(directionsUrl, '_blank');
-}
-
 // 7. Document Checklist (Screen 10)
 function renderDocumentChecklist() {
   const container = document.getElementById('docListContainer');
