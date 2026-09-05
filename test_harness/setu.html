@@ -310,69 +310,42 @@
                         </div>
 
                         <div class="chat-messages" id="chatMessages">
+                            <div class="chat-bubble user">
+                                I want a loan for starting a small food business.
+                            </div>
                             <div class="chat-bubble ai">
-                                <div>Welcome to <strong>Udyam Setu AI</strong>, your intelligent government scheme advisor. To find the best collateral-free loans, subsidies, and schemes, please tell us: <strong>Who are you and which business or enterprise do you run or plan to start?</strong></div>
-                                <div class="business-selection-container">
-                                    <div class="selection-title">👇 Select your business or goal:</div>
-                                    <div class="business-chips-grid">
-                                        <button type="button" class="business-option-chip" onclick="selectBusinessOption('I want a loan for starting a food business, hotel, or tiffin center')">
-                                            <span class="chip-label">🍲 Food Business / Tiffin / Hotel</span>
-                                            <span class="chip-arrow">➔</span>
-                                        </button>
-                                        <button type="button" class="business-option-chip" onclick="selectBusinessOption('I want a loan for a kirana shop or retail grocery store')">
-                                            <span class="chip-label">🛒 Retail / Kirana Shop / General Store</span>
-                                            <span class="chip-arrow">➔</span>
-                                        </button>
-                                        <button type="button" class="business-option-chip" onclick="selectBusinessOption('I am an artisan or handloom weaver looking for PM Vishwakarma and Weaver Mudra schemes')">
-                                            <span class="chip-label">🧵 Handicrafts & Handlooms / Weaver</span>
-                                            <span class="chip-arrow">➔</span>
-                                        </button>
-                                        <button type="button" class="business-option-chip" onclick="selectBusinessOption('I want an agriculture, farming, or dairy loan (KCC / AIF)')">
-                                            <span class="chip-label">🌾 Agriculture & Allied / Dairy (KCC)</span>
-                                            <span class="chip-arrow">➔</span>
-                                        </button>
-                                        <button type="button" class="business-option-chip" onclick="selectBusinessOption('I want a loan for a tailoring boutique or textile garment business')">
-                                            <span class="chip-label">👗 Textile & Garments / Tailoring</span>
-                                            <span class="chip-arrow">➔</span>
-                                        </button>
-                                        <button type="button" class="business-option-chip" onclick="selectBusinessOption('I want a loan to set up a small manufacturing or fabrication unit')">
-                                            <span class="chip-label">🏭 Manufacturing & Fabrication / MSME</span>
-                                            <span class="chip-arrow">➔</span>
-                                        </button>
-                                        <button type="button" class="business-option-chip" onclick="selectBusinessOption('I want a loan for a repair shop, service center, or commercial vehicle')">
-                                            <span class="chip-label">🔧 Services / Repair Shop / Auto Garage</span>
-                                            <span class="chip-arrow">➔</span>
-                                        </button>
-                                        <button type="button" class="business-option-chip" onclick="selectBusinessOption('I am a street vendor looking for PM SVANidhi working capital loan')">
-                                            <span class="chip-label">🛍️ Street Vending / Pushcart (SVANidhi)</span>
-                                            <span class="chip-arrow">➔</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <button class="listen-btn" onclick="speakBhashiniVoice('Welcome to Udyam Setu AI. Which business or enterprise do you run or plan to start? Please select an option or tell us your details.', 'English', this)">🔊 Listen</button>
-                                <small class="ai-credit">✨ Powered by Google Gemini AI & Digital India Bhashini</small>
+                                Great! For a small food business or tiffin center, the Government provides up to ₹50,000 Shishu Mudra loan completely collateral-free.
+                                <button class="listen-btn"
+                                    onclick="speakBhashiniVoice('For a small food business, the Government provides up to 50,000 rupees Shishu Mudra loan completely collateral-free without pledging any land or gold.', 'English', this)">🔊
+                                    Suniye / వినండి (Listen)</button>
+                                <small class="ai-credit">✨ Powered by Gemini AI & Digital India Bhashini</small>
                             </div>
                         </div>
 
-                        <!-- Gemini Dark Expanding Card Chat Dock -->
+                        <!-- Voice mic bar -->
+                        <div class="voice-bar">
+                            <span id="voicePromptText">🎙️ Tap to Speak in your Language</span>
+                            <button class="voice-btn" id="voiceBtn" onclick="triggerBhashiniSpeechInput()"
+                                title="Speak in your mother tongue">🎙️</button>
+                        </div>
+
+                        <!-- Language & text input row -->
                         <div class="chat-dock-container">
-                            <div class="chat-dock-card">
-                                <textarea id="chatInput" class="dock-textarea" rows="1" placeholder="Ask Gemini..."
-                                    oninput="autoExpandTextarea(this)" onkeydown="handleChatInputKeyDown(event)"></textarea>
-                                <div class="dock-controls-row">
-                                    <select id="chatLangSelect" class="dock-lang-select" onchange="onLanguageChanged(); if (window.setLanguage) setLanguage(this.value)">
-                                        <option value="English">English ▾</option>
-                                        <option value="Hindi">हिन्दी ▾</option>
-                                        <option value="Telugu">తెలుగు ▾</option>
-                                        <option value="Tamil">தமிழ் ▾</option>
-                                        <option value="Marathi">मराठी ▾</option>
-                                        <option value="Kannada">ಕನ್ನಡ ▾</option>
-                                        <option value="Bengali">বাংলা ▾</option>
-                                    </select>
-                                    <button class="dock-mic-btn-attractive" id="voiceBtn" onclick="triggerBhashiniSpeechInput()" title="Speak in your language">🎙️</button>
-                                    <button class="dock-send-btn" onclick="sendChatMessage()" title="Send message">➔</button>
-                                </div>
+                            <div class="chat-dock-pill">
+                                <select id="chatLangSelect" class="lang-select" onchange="onLanguageChanged()">
+                                    <option value="English">EN</option>
+                                    <option value="Hindi">HI (हिन्दी)</option>
+                                    <option value="Telugu">TE (తెలుగు)</option>
+                                    <option value="Tamil">TA (தமிழ்)</option>
+                                    <option value="Marathi">MR (मराठी)</option>
+                                    <option value="Kannada">KN (ಕನ್ನಡ)</option>
+                                    <option value="Bengali">BN (বাংলা)</option>
+                                </select>
+                                <input type="text" id="chatInput" placeholder="Type here..."
+                                    onkeypress="if(event.key==='Enter') sendChatMessage()">
+                                <button class="dock-mic-btn" id="voiceBtn" onclick="triggerBhashiniSpeechInput()" title="Speak with AI">🎙️</button>
                             </div>
+                            <button class="dock-send-btn" onclick="sendChatMessage()" title="Send message">➤</button>
                         </div>
                     </div>
 
