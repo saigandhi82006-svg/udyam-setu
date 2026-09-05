@@ -3366,3 +3366,219 @@ body {
   font-weight: 700;
   cursor: pointer;
 }
+
+/* Screen 12: Help & Support */
+.support-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 20px;
+}
+
+.support-banner {
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border: 1px solid #BFDBFE;
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.support-banner-icon {
+  font-size: 28px;
+}
+
+.support-banner-text h4 {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1E3A8A;
+  margin-bottom: 2px;
+}
+
+.support-banner-text p {
+  font-size: 11.5px;
+  color: #3B82F6;
+  line-height: 1.35;
+}
+
+.support-section-title {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748B;
+  margin: 4px 0 2px 2px;
+}
+
+.support-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  transition: all 0.2s ease;
+}
+
+.support-card:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.support-card-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.support-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.support-card-icon.blue { background: #EFF6FF; }
+.support-card-icon.green { background: #F0FDF4; }
+.support-card-icon.amber { background: #FEF3C7; }
+.support-card-icon.purple { background: #FAF5FF; }
+
+.support-card-info h5 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1E293B;
+  margin-bottom: 2px;
+}
+
+.support-card-info p {
+  font-size: 11px;
+  color: #64748B;
+}
+
+.support-call-btn {
+  padding: 6px 12px;
+  border-radius: 18px;
+  background: #F0FDF4;
+  color: #16A34A;
+  border: 1px solid #BBF7D0;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.support-call-btn:hover {
+  background: #DCFCE7;
+}
+
+.faq-card {
+  background: white;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.faq-card summary {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1E293B;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.faq-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-card summary::after {
+  content: '▾';
+  font-size: 14px;
+  color: #94A3B8;
+  transition: transform 0.2s;
+}
+
+.faq-card[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.faq-card p {
+  font-size: 11.5px;
+  color: #475569;
+  line-height: 1.45;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #F1F5F9;
+}
+
+.team-info-box {
+  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.team-info-box h5 {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0F172A;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.team-info-box p {
+  font-size: 11.5px;
+  color: #475569;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.team-contact-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: #334155;
+  margin-top: 4px;
+}
+
+.feedback-form-box {
+  background: white;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.feedback-form-box textarea {
+  width: 100%;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 12px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 60px;
+  outline: none;
+  margin-top: 8px;
+}
+
+.feedback-form-box textarea:focus {
+  border-color: var(--primary-green, #16A34A);
+}

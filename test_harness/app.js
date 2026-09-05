@@ -69,7 +69,7 @@ window.addEventListener('udyam:languageChanged', (event) => {
 
 // Screen Switcher
 function showScreen(screenNumber) {
-  for (let i = 1; i <= 11; i++) {
+  for (let i = 1; i <= 12; i++) {
     const s = document.getElementById(`screen-${i}`);
     if (s) s.classList.remove('active');
   }
@@ -2671,3 +2671,20 @@ async function testProfileApi() {
   const data = await res.json();
   logTerminal(JSON.stringify(data, null, 2));
 }
+
+function submitSupportFeedback(event) {
+  if (event) event.preventDefault();
+  const inputEl = document.getElementById('supportFeedbackInput');
+  const msg = inputEl ? inputEl.value.trim() : '';
+
+  if (!msg) {
+    alert('Please enter your question or message before submitting.');
+    return;
+  }
+
+  logTerminal(`[Help & Support Desk] Received entrepreneur inquiry: "${msg}" from ${currentProfile.name || 'User'} (${currentProfile.phone || 'No phone'}). Ticket created: #SETU-${Math.floor(100000 + Math.random() * 900000)}`);
+  
+  if (inputEl) inputEl.value = '';
+  showCustomToast('✅ Inquiry submitted! Our support desk will reach out shortly.');
+}
+window.submitSupportFeedback = submitSupportFeedback;
