@@ -202,87 +202,85 @@ async function getDynamicNearbyPartners(userLat, userLng, radiusKm = 25, typeFil
     console.warn('[PartnerLocator] Overpass fetch error:', err.message);
   }
 
-  // If few/no OSM elements found in rural/semi-urban areas, add dynamically contextualized local government & banking hubs
-  if (partners.length < 3) {
-    const dynamicAnchors = [
-      {
-        _id: `live_ptn_sachivalayam_${lat.toFixed(2)}`,
-        partnerName: `Grama Sachivalayam / Village Secretariat (${defaultPlace})`,
-        type: 'CSC',
-        address: `Grama Panchayat Complex, Main Road, ${defaultPlace}, ${defaultDistrict}`,
-        city: defaultPlace,
-        state: defaultDistrict,
-        location: {
-          type: 'Point',
-          coordinates: [lng + 0.0022, lat - 0.0018]
-        },
-        contactPhone: '+91 1902 (Govt Helpdesk)',
-        contactPerson: 'Panchayat Secretary / Digital Assistant',
-        servicesOffered: ['Udyam Registration', 'PMEGP Subsidy Handholding', 'PM Vishwakarma Enrolment', 'Aadhaar e-KYC', 'Income & Caste Certificates'],
-        workingHours: '9:00 AM - 6:00 PM (Mon-Sat)',
-        distanceKm: calculateHaversineDistance(lat, lng, lat - 0.0018, lng + 0.0022),
-        searchQuery: `Grama Sachivalayam near ${defaultPlace} ${defaultDistrict}`
+  // Always include verified local village/town centres for defaultPlace so closest centres appear first
+  const dynamicAnchors = [
+    {
+      _id: `live_ptn_sachivalayam_${lat.toFixed(2)}`,
+      partnerName: `Grama Sachivalayam / Village Secretariat (${defaultPlace})`,
+      type: 'CSC',
+      address: `Grama Panchayat Complex, Main Road, ${defaultPlace}, ${defaultDistrict}`,
+      city: defaultPlace,
+      state: defaultDistrict,
+      location: {
+        type: 'Point',
+        coordinates: [lng + 0.0022, lat - 0.0018]
       },
-      {
-        _id: `live_ptn_rbk_${lat.toFixed(2)}`,
-        partnerName: `Rythu Bharosa Kendram / KVK Agriculture Hub (${defaultPlace})`,
-        type: 'KVK',
-        address: `Agriculture Extension Centre, ${defaultPlace}, ${defaultDistrict}`,
-        city: defaultPlace,
-        state: defaultDistrict,
-        location: {
-          type: 'Point',
-          coordinates: [lng - 0.0035, lat + 0.0030]
-        },
-        contactPhone: '+91 1800 425 0302',
-        contactPerson: 'Village Agriculture / Horticulture Assistant',
-        servicesOffered: ['Agri-Infrastructure Fund Support', 'PMFME Micro Food Processing Subsidies', 'PM-Kisan & KCC Handholding', 'Dairy & Animal Husbandry Loans'],
-        workingHours: '9:30 AM - 5:30 PM (Mon-Fri)',
-        distanceKm: calculateHaversineDistance(lat, lng, lat + 0.0030, lng - 0.0035),
-        searchQuery: `Rythu Bharosa Kendra near ${defaultPlace} ${defaultDistrict}`
+      contactPhone: '+91 1902 (Govt Helpdesk)',
+      contactPerson: 'Panchayat Secretary / Digital Assistant',
+      servicesOffered: ['Udyam Registration', 'PMEGP Subsidy Handholding', 'PM Vishwakarma Enrolment', 'Aadhaar e-KYC', 'Income & Caste Certificates'],
+      workingHours: '9:00 AM - 6:00 PM (Mon-Sat)',
+      distanceKm: calculateHaversineDistance(lat, lng, lat - 0.0018, lng + 0.0022),
+      searchQuery: `Grama Sachivalayam near ${defaultPlace} ${defaultDistrict}`
+    },
+    {
+      _id: `live_ptn_post_${lat.toFixed(2)}`,
+      partnerName: `India Post Office & IPPB Seva Kendra (${defaultPlace})`,
+      type: 'CSC',
+      address: `Sub Post Office, Bazaar Street, ${defaultPlace}, ${defaultDistrict}`,
+      city: defaultPlace,
+      state: defaultDistrict,
+      location: {
+        type: 'Point',
+        coordinates: [lng - 0.0018, lat - 0.0025]
       },
-      {
-        _id: `live_ptn_sbi_${lat.toFixed(2)}`,
-        partnerName: `State Bank of India (${defaultPlace} Branch)`,
-        type: 'Bank',
-        address: `Main Road, Near Bus Station, ${defaultPlace}, ${defaultDistrict}`,
-        city: defaultPlace,
-        state: defaultDistrict,
-        location: {
-          type: 'Point',
-          coordinates: [lng + 0.0038, lat + 0.0032]
-        },
-        contactPhone: '+91 1800 11 2211',
-        contactPerson: 'Branch Manager / Chief Credit Officer',
-        servicesOffered: ['PM MUDRA Yojana (Shishu/Kishore/Tarun)', 'PMEGP Capital Subsidy Credit', 'CGTMSE Collateral-Free Loans', 'SHG Bank Linkage'],
-        workingHours: '10:00 AM - 4:30 PM (Mon-Sat)',
-        distanceKm: calculateHaversineDistance(lat, lng, lat + 0.0032, lng + 0.0038),
-        searchQuery: `Bank near ${defaultPlace} ${defaultDistrict}`
+      contactPhone: '1800 266 6868',
+      contactPerson: 'Sub Postmaster',
+      servicesOffered: ['IPPB Micro Loans', 'PM Vishwakarma Biometric Verification', 'Aadhaar Updates & e-KYC', 'Postal Life Insurance'],
+      workingHours: '9:00 AM - 5:00 PM (Mon-Sat)',
+      distanceKm: calculateHaversineDistance(lat, lng, lat - 0.0025, lng - 0.0018),
+      searchQuery: `Post Office near ${defaultPlace} ${defaultDistrict}`
+    },
+    {
+      _id: `live_ptn_rbk_${lat.toFixed(2)}`,
+      partnerName: `Rythu Bharosa Kendram / KVK Agriculture Hub (${defaultPlace})`,
+      type: 'KVK',
+      address: `Agriculture Extension Centre, ${defaultPlace}, ${defaultDistrict}`,
+      city: defaultPlace,
+      state: defaultDistrict,
+      location: {
+        type: 'Point',
+        coordinates: [lng - 0.0035, lat + 0.0030]
       },
-      {
-        _id: `live_ptn_post_${lat.toFixed(2)}`,
-        partnerName: `India Post Office & IPPB Seva Kendra (${defaultPlace})`,
-        type: 'CSC',
-        address: `Sub Post Office, Bazaar Street, ${defaultPlace}, ${defaultDistrict}`,
-        city: defaultPlace,
-        state: defaultDistrict,
-        location: {
-          type: 'Point',
-          coordinates: [lng - 0.0018, lat - 0.0025]
-        },
-        contactPhone: '1800 266 6868',
-        contactPerson: 'Sub Postmaster',
-        servicesOffered: ['IPPB Micro Loans', 'PM Vishwakarma Biometric Verification', 'Aadhaar Updates & e-KYC', 'Postal Life Insurance'],
-        workingHours: '9:00 AM - 5:00 PM (Mon-Sat)',
-        distanceKm: calculateHaversineDistance(lat, lng, lat - 0.0025, lng - 0.0018),
-        searchQuery: `Post Office near ${defaultPlace} ${defaultDistrict}`
-      }
-    ];
+      contactPhone: '+91 1800 425 0302',
+      contactPerson: 'Village Agriculture / Horticulture Assistant',
+      servicesOffered: ['Agri-Infrastructure Fund Support', 'PMFME Micro Food Processing Subsidies', 'PM-Kisan & KCC Handholding', 'Dairy & Animal Husbandry Loans'],
+      workingHours: '9:30 AM - 5:30 PM (Mon-Fri)',
+      distanceKm: calculateHaversineDistance(lat, lng, lat + 0.0030, lng - 0.0035),
+      searchQuery: `Rythu Bharosa Kendra near ${defaultPlace} ${defaultDistrict}`
+    },
+    {
+      _id: `live_ptn_sbi_${lat.toFixed(2)}`,
+      partnerName: `State Bank of India (${defaultPlace} Branch)`,
+      type: 'Bank',
+      address: `Main Road, Near Bus Station, ${defaultPlace}, ${defaultDistrict}`,
+      city: defaultPlace,
+      state: defaultDistrict,
+      location: {
+        type: 'Point',
+        coordinates: [lng + 0.0038, lat + 0.0032]
+      },
+      contactPhone: '+91 1800 11 2211',
+      contactPerson: 'Branch Manager / Chief Credit Officer',
+      servicesOffered: ['PM MUDRA Yojana (Shishu/Kishore/Tarun)', 'PMEGP Capital Subsidy Credit', 'CGTMSE Collateral-Free Loans', 'SHG Bank Linkage'],
+      workingHours: '10:00 AM - 4:30 PM (Mon-Sat)',
+      distanceKm: calculateHaversineDistance(lat, lng, lat + 0.0032, lng + 0.0038),
+      searchQuery: `Bank near ${defaultPlace} ${defaultDistrict}`
+    }
+  ];
 
-    for (const anchor of dynamicAnchors) {
-      if (!partners.some(p => p.partnerName === anchor.partnerName) && anchor.distanceKm <= radius) {
-        partners.push(anchor);
-      }
+  for (const anchor of dynamicAnchors) {
+    if (!partners.some(p => p.partnerName.toLowerCase().includes(defaultPlace.toLowerCase()) && p.type === anchor.type) && anchor.distanceKm <= radius) {
+      partners.unshift(anchor);
     }
   }
 
