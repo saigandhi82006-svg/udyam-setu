@@ -341,76 +341,201 @@
                     </div>
 
                     <!-- SCREEN 5: USER DETAILS PROFILING -->
-                    <div class="screen" id="screen-5">
-                        <div class="sub-header">
-                            <button class="back-btn" onclick="showScreen(3)">‹</button>
-                            <h4>Tell us about yourself</h4>
-                        </div>
-                        <div class="step-indicator">
-                            <span>Step 2 of 5</span>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 40%;"></div>
-                            </div>
-                        </div>
+                              <div class="screen" id="screen-5">
+            <div class="sub-header">
+              <button class="back-btn" onclick="showScreen(3)">‹</button>
+              <h4 data-i18n="screen5.header">User Details</h4>
+            </div>
 
-                        <div class="form-body">
-                            <div class="form-group">
-                                <label>Full Name</label>
-                                <input type="text" id="profName" value="Ravi Kumar">
-                            </div>
-                            <div class="form-row-2">
-                                <div class="form-group">
-                                    <label>Mobile Number</label>
-                                    <input type="tel" id="profPhone" value="9876543210" maxlength="10">
-                                </div>
-                                <div class="form-group">
-                                    <label>Email Address</label>
-                                    <input type="email" id="profEmail" value="ravi.kumar@example.com">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Age</label>
-                                <input type="number" id="profAge" value="28">
-                            </div>
-                            <div class="form-group">
-                                <label>Category</label>
-                                <select id="profCategory">
-                                    <option value="OBC" selected>OBC</option>
-                                    <option value="SC">SC</option>
-                                    <option value="ST">ST</option>
-                                    <option value="General">General</option>
-                                    <option value="Women Entrepreneur">Women Entrepreneur</option>
-                                    <option value="Minority">Minority</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Annual Income</label>
-                                <div class="input-with-prefix">
-                                    <span class="prefix">₹</span>
-                                    <input type="number" id="profIncome" value="240000">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Business Type / Activity</label>
-                                <select id="profBusiness">
-                                    <option value="Food Business" selected>Food Business</option>
-                                    <option value="Retail / Kirana Shop">Retail / Kirana Shop</option>
-                                    <option value="Handicrafts & Handlooms">Handicrafts & Handlooms</option>
-                                    <option value="Agriculture & Allied">Agriculture & Allied</option>
-                                    <option value="Textile & Garments">Textile & Garments</option>
-                                    <option value="Manufacturing & Fabrication">Manufacturing & Fabrication</option>
-                                    <option value="Services / Repair Shop">Services / Repair Shop</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Experience</label>
-                                <input type="text" id="profExperience" value="2 Years">
-                            </div>
+            <!-- Top Progressive Step Header -->
+            <div class="step-indicator">
+              <span id="profStepIndicatorText" data-i18n="screen5.step_indicator">Step 1 of 4</span>
+              <div class="progress-bar"><div class="progress-fill" id="profStepProgressFill" style="width: 25%;"></div></div>
+            </div>
 
-                            <button class="pill-btn primary mt-4" onclick="runSchemeMatching()">Next →</button>
-                            <button class="pill-btn save-profile-action-btn" onclick="saveUserProfileDetails(true)">💾 Save Profile Details</button>
-                        </div>
+            <div class="prof-pills-row">
+              <span class="prof-pill active" id="prof-pill-1" onclick="setProfStep(1)" data-i18n="screen5.pill_about">👤 About</span>
+              <span class="prof-pill" id="prof-pill-2" onclick="setProfStep(2)" data-i18n="screen5.pill_social">🤝 Social</span>
+              <span class="prof-pill" id="prof-pill-3" onclick="setProfStep(3)" data-i18n="screen5.pill_business">🏢 Business</span>
+              <span class="prof-pill" id="prof-pill-4" onclick="setProfStep(4)" data-i18n="screen5.pill_capital">💰 Capital</span>
+            </div>
+
+            <div class="form-body">
+              <!-- STEP 1: ABOUT YOU -->
+              <div id="prof-step-1" class="prof-step-card">
+                <div class="form-group">
+                  <label>👤 <span data-i18n="screen5.name_label">Full Name</span> <span class="required">*</span></label>
+                  <input type="text" id="profName" value="Ravi Kumar" placeholder="Ravi Kumar">
+                </div>
+
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label>📱 <span data-i18n="screen5.phone_label">Mobile Number</span> <span class="required">*</span></label>
+                    <input type="tel" id="profPhone" value="9876543210" placeholder="9876543210" maxlength="10">
+                  </div>
+                  <div class="form-group">
+                    <label>✉️ <span data-i18n="screen5.email_label">Email Address</span></label>
+                    <input type="email" id="profEmail" value="ravi.kumar@example.com" placeholder="ravi.kumar@example.com">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>🎂 <span data-i18n="screen5.age_label">Age</span> <span class="required">*</span></label>
+                  <input type="number" id="profAge" min="18" max="95" value="28" placeholder="28" oninput="updateAgeCategoryBadge()">
+                  <small class="form-badge-pill youth" id="profAgeBadge">⚡ Youth (18-35) • High Subsidy</small>
+                </div>
+
+                <div class="form-group">
+                  <label>👤 <span data-i18n="screen5.gender_label">Gender</span> <span class="required">*</span></label>
+                  <select id="profGender">
+                    <option value="Male" selected data-i18n="screen5.gender_male">♂️ Male</option>
+                    <option value="Female" data-i18n="screen5.gender_female">♀️ Female</option>
+                    <option value="Transgender / Other" data-i18n="screen5.gender_other">⚧️ Other</option>
+                  </select>
+                </div>
+
+                <div class="step-actions">
+                  <button class="pill-btn primary" onclick="setProfStep(2)" data-i18n="screen5.continue_btn">Continue →</button>
+                </div>
+              </div>
+
+              <!-- STEP 2: SOCIAL DETAILS & CONDITIONAL DISABILITY -->
+              <div id="prof-step-2" class="prof-step-card" style="display: none;">
+                <div class="form-group">
+                  <label>🤝 <span data-i18n="screen5.social_cat_label">Social Category</span> <span class="required">*</span></label>
+                  <select id="profCategory">
+                    <option value="OBC" selected data-i18n="screen5.cat_obc">🏷️ OBC</option>
+                    <option value="SC" data-i18n="screen5.cat_sc">🔰 SC</option>
+                    <option value="ST" data-i18n="screen5.cat_st">🌿 ST</option>
+                    <option value="General" data-i18n="screen5.cat_general">✨ General</option>
+                    <option value="Women Entrepreneur" data-i18n="screen5.cat_women">👩 Women Entrepreneur</option>
+                    <option value="Minority" data-i18n="screen5.cat_minority">☪️ Minority</option>
+                    <option value="Ex-Servicemen" data-i18n="screen5.cat_ex_servicemen">🎖️ Ex-Servicemen</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>♿ <span data-i18n="screen5.pwd_label">Person with Disability (Divyangjan)</span> <span class="required">*</span></label>
+                  <select id="profDisability" onchange="toggleDisabilityFields()">
+                    <option value="No" selected data-i18n="screen5.pwd_no">❌ No</option>
+                    <option value="Yes" data-i18n="screen5.pwd_yes">♿ Yes (Differently Abled - PwD)</option>
+                  </select>
+                </div>
+
+                <!-- Conditional Disability Fields -->
+                <div id="disabilityFieldsContainer" class="conditional-card" style="display: none;">
+                  <div class="form-group">
+                    <label>🩺 <span data-i18n="screen5.disability_type_label">Type of Disability</span></label>
+                    <select id="profDisabilityType">
+                      <option value="Locomotor / Physical" selected data-i18n="screen5.disability_locomotor">🧑‍🦽 Locomotor / Orthopedic</option>
+                      <option value="Visual Impairment" data-i18n="screen5.disability_visual">👁️ Visual Impairment / Blindness</option>
+                      <option value="Hearing / Speech Impairment" data-i18n="screen5.disability_hearing">👂 Hearing or Speech</option>
+                      <option value="Intellectual / Mental" data-i18n="screen5.disability_intellectual">🧠 Intellectual Disability</option>
+                      <option value="Multiple Disabilities" data-i18n="screen5.disability_multiple">🏥 Multiple Disabilities</option>
+                    </select>
+                  </div>
+
+                  <div class="form-row-2">
+                    <div class="form-group">
+                      <label>📊 <span data-i18n="screen5.disability_percent_label">Disability %</span></label>
+                      <select id="profDisabilityPercent">
+                        <option value="40% - 70%" selected data-i18n="screen5.disability_percent_40_70">📊 40% - 70% (Benchmark PwD)</option>
+                        <option value="Above 70%" data-i18n="screen5.disability_percent_above70">📈 Above 70% (Severe)</option>
+                        <option value="Below 40%" data-i18n="screen5.disability_percent_below40">📉 Below 40% (Mild)</option>
+                      </select>
                     </div>
+                    <div class="form-group">
+                      <label>💳 <span data-i18n="screen5.udid_card_label">UDID Card?</span></label>
+                      <select id="profHasUdid">
+                        <option value="Yes" selected data-i18n="screen5.udid_yes">Yes, have UDID Card</option>
+                        <option value="In-Process" data-i18n="screen5.udid_in_process">Applied / In Process</option>
+                        <option value="No" data-i18n="screen5.udid_no">No / Not yet applied</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="step-actions row-actions">
+                  <button class="pill-btn outline" onclick="setProfStep(1)" data-i18n="screen5.back_btn">← Back</button>
+                  <button class="pill-btn primary" onclick="setProfStep(3)" data-i18n="screen5.continue_btn">Continue →</button>
+                </div>
+              </div>
+
+              <!-- STEP 3: BUSINESS DETAILS -->
+              <div id="prof-step-3" class="prof-step-card" style="display: none;">
+                <div class="form-group">
+                  <label>📍 <span data-i18n="screen5.location_label">Enterprise Location</span> <span class="required">*</span></label>
+                  <select id="profLocationType">
+                    <option value="Rural" selected data-i18n="screen5.loc_rural">🏡 Rural Area</option>
+                    <option value="Urban" data-i18n="screen5.loc_urban">🏙️ Urban Area</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>🏬 <span data-i18n="screen5.biz_type_label">Business Type / Activity</span> <span class="required">*</span></label>
+                  <select id="profBusiness">
+                    <option value="Food Business" selected data-i18n="screen5.biz_food">🍲 Food Business</option>
+                    <option value="Retail / Kirana Shop" data-i18n="screen5.biz_retail">🛒 Retail / Kirana Shop</option>
+                    <option value="Handicrafts & Handlooms" data-i18n="screen5.biz_handicrafts">🧵 Handicrafts & Handlooms</option>
+                    <option value="Agriculture & Allied" data-i18n="screen5.biz_agri">🌾 Agriculture & Allied</option>
+                    <option value="Textile & Garments" data-i18n="screen5.biz_textile">👗 Textile & Garments</option>
+                    <option value="Manufacturing & Fabrication" data-i18n="screen5.biz_mfg">🏭 Manufacturing & Fabrication</option>
+                    <option value="Services / Repair Shop" data-i18n="screen5.biz_services">🔧 Services / Repair Shop</option>
+                    <option value="Street Vending" data-i18n="screen5.biz_vending">🛍️ Street Vending</option>
+                  </select>
+                </div>
+
+                <div class="step-actions row-actions">
+                  <button class="pill-btn outline" onclick="setProfStep(2)" data-i18n="screen5.back_btn">← Back</button>
+                  <button class="pill-btn primary" onclick="setProfStep(4)" data-i18n="screen5.continue_btn">Continue →</button>
+                </div>
+              </div>
+
+              <!-- STEP 4: CAPITAL & FINANCIALS -->
+              <div id="prof-step-4" class="prof-step-card" style="display: none;">
+                <div class="form-group">
+                  <label>💰 <span data-i18n="screen5.investment_label">Needed Investment / Capital</span> <span class="required">*</span></label>
+                  <div class="input-with-prefix">
+                    <span class="prefix">₹</span>
+                    <input type="number" id="profInvestment" value="500000" placeholder="500000">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>💵 <span data-i18n="screen5.income_label">Annual Family Income</span> <span class="required">*</span></label>
+                  <div class="input-with-prefix">
+                    <span class="prefix">₹</span>
+                    <input type="number" id="profIncome" value="240000" placeholder="240000">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>⏱️ <span data-i18n="screen5.experience_label">Experience</span> <span class="required">*</span></label>
+                  <select id="profExperience">
+                    <option value="0 Years (New Business)" data-i18n="screen5.exp_0">🌱 0 Years (New Venture)</option>
+                    <option value="2 Years" selected data-i18n="screen5.exp_1_2">📈 1-2 Years</option>
+                    <option value="3-5 Years" data-i18n="screen5.exp_3_5">⭐ 3-5 Years</option>
+                    <option value="5+ Years" data-i18n="screen5.exp_5_plus">🏆 5+ Years</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>🎓 <span data-i18n="screen5.education_label">Education</span> <span class="required">*</span></label>
+                  <select id="profEducation">
+                    <option value="8th Pass or Above" selected data-i18n="screen5.edu_8th_above">🎓 8th Pass or Above</option>
+                    <option value="Below 8th Pass" data-i18n="screen5.edu_below_8th">📚 Below 8th Pass</option>
+                    <option value="Graduate / ITI / Diploma" data-i18n="screen5.edu_graduate">🏛️ Graduate / ITI / Diploma</option>
+                  </select>
+                </div>
+
+                <div class="step-actions row-actions">
+                  <button class="pill-btn outline" onclick="setProfStep(3)" data-i18n="screen5.back_btn">← Back</button>
+                  <button class="pill-btn primary" onclick="runSchemeMatching()" data-i18n="screen5.find_schemes_btn">Find Matching Schemes ➔</button>
+                </div>
+                <button class="pill-btn save-profile-action-btn" onclick="saveUserProfileDetails(true)" data-i18n="screen5.save_profile_btn">💾 Save Profile Details</button>
+              </div>
+            </div>
+          </div>
 
                     <!-- SCREEN 6: SCHEME MATCH RESULTS -->
                     <div class="screen" id="screen-6">

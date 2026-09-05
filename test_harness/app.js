@@ -1584,7 +1584,12 @@ function setProfStep(step) {
 
   const indicatorText = document.getElementById('profStepIndicatorText');
   const fillEl = document.getElementById('profStepProgressFill');
-  if (indicatorText) indicatorText.innerText = `Step ${step} of 4`;
+  if (indicatorText) {
+    const fmt = (typeof t === 'function') ? t('screen5.step_progress_format') : 'Step {step} of {total}';
+    indicatorText.innerText = (fmt && fmt.includes('{step}'))
+      ? fmt.replace('{step}', step).replace('{total}', '4')
+      : `Step ${step} of 4`;
+  }
   if (fillEl) fillEl.style.width = `${(step / 4) * 100}%`;
 }
 window.setProfStep = setProfStep;
