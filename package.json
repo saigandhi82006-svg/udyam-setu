@@ -1,0 +1,17 @@
+{
+  "name": "udyam-setu",
+  "version": "1.0.0",
+  "description": "Udyam Setu - AI-Powered Vernacular Government Schemes Discovery and Credit Enablement Platform",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "cap:sync": "cap sync",
+    "cap:open": "cap open android",
+    "cap:build": "cap build android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.1",
+    "@capacitor/cli": "^7.0.1",
+    "@capacitor/core": "^7.0.1"
+  }
+}

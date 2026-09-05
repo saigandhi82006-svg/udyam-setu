@@ -1,0 +1,44 @@
+name: udyam_setu_app
+description: "Udyam Setu - AI-Powered Vernacular Government Schemes Discovery and Credit Enablement Platform for Indian MSMEs & Entrepreneurs"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.0.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Networking & Serialization
+  http: ^1.2.0
+  provider: ^6.1.1
+  shared_preferences: ^2.2.2
+
+  # Device Location & URL Launcher
+  geolocator: ^11.0.0
+  url_launcher: ^6.2.4
+
+  # Voice Assistant & Speech
+  speech_to_text: ^6.6.1
+  flutter_tts: ^3.8.5
+
+  # Document Picking & PDF Export
+  file_picker: ^8.0.0
+  pdf: ^3.10.7
+  printing: ^5.12.0
+
+  # UI Styling & Typography
+  google_fonts: ^6.1.0
+  flutter_spinkit: ^5.2.0
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
