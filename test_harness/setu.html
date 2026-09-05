@@ -358,6 +358,20 @@
 
                         <div class="form-body">
                             <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" id="profName" value="Ravi Kumar">
+                            </div>
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>Mobile Number</label>
+                                    <input type="tel" id="profPhone" value="9876543210" maxlength="10">
+                                </div>
+                                <div class="form-group">
+                                    <label>Email Address</label>
+                                    <input type="email" id="profEmail" value="ravi.kumar@example.com">
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <label>Age</label>
                                 <input type="number" id="profAge" value="28">
                             </div>
@@ -397,6 +411,7 @@
                             </div>
 
                             <button class="pill-btn primary mt-4" onclick="runSchemeMatching()">Next →</button>
+                            <button class="pill-btn save-profile-action-btn" onclick="saveUserProfileDetails(true)">💾 Save Profile Details</button>
                         </div>
                     </div>
 

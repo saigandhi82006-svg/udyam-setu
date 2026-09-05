@@ -156,18 +156,36 @@ const dataStore = {
 
   // Users
   async getUser(id) {
+    if (!id) return null;
+    const idStr = id.toString().trim();
     if (!isInMemoryFallback()) {
       try {
-        const user = await User.findById(id);
-        if (user) return user;
+        let user = null;
+        if (idStr.match(/^[0-9a-fA-F]{24}$/)) {
+          user = await User.findById(idStr);
+        }
+        if (!user) {
+          user = await User.findOne({
+            $or: [{ phone: idStr }, { email: idStr }, { _id: idStr }]
+          });
+        }
+        if (user) return user.toObject ? user.toObject() : user;
       } catch (e) {}
     }
-    return memoryDB.users.find(u => u._id.toString() === id.toString() || u.phone === id);
+    return memoryDB.users.find(u => 
+      (u._id && u._id.toString() === idStr) || 
+      (u.phone && u.phone === idStr) ||
+      (u.email && u.email.toLowerCase() === idStr.toLowerCase())
+    ) || null;
   },
 
   async saveUser(userData) {
     const id = userData._id || 'usr_' + Math.random().toString(36).substring(2, 9);
-    const existingIndex = memoryDB.users.findIndex(u => u._id.toString() === id.toString() || (userData.phone && u.phone === userData.phone));
+    const existingIndex = memoryDB.users.findIndex(u => 
+      (userData._id && u._id && u._id.toString() === userData._id.toString()) || 
+      (userData.phone && u.phone && u.phone === userData.phone) ||
+      (userData.email && u.email && u.email.toLowerCase() === userData.email.toLowerCase())
+    );
     
     let user;
     if (existingIndex >= 0) {
@@ -180,12 +198,35 @@ const dataStore = {
 
     if (!isInMemoryFallback()) {
       try {
-        if (userData._id) {
-          await User.findByIdAndUpdate(userData._id, userData, { upsert: true });
-        } else {
-          await User.create(userData);
+        const mongoPayload = { ...userData };
+        const hasValidObjectId = mongoPayload._id && mongoPayload._id.toString().match(/^[0-9a-fA-F]{24}$/);
+        if (!hasValidObjectId) {
+          delete mongoPayload._id;
         }
-      } catch (e) {}
+
+        let filter = null;
+        if (hasValidObjectId) {
+          filter = { _id: userData._id };
+        } else if (mongoPayload.phone) {
+          filter = { phone: mongoPayload.phone };
+        } else if (mongoPayload.email) {
+          filter = { email: mongoPayload.email };
+        }
+
+        if (filter) {
+          const dbUser = await User.findOneAndUpdate(
+            filter,
+            { $set: mongoPayload },
+            { new: true, upsert: true, setDefaultsOnInsert: true }
+          );
+          if (dbUser) return dbUser.toObject ? dbUser.toObject() : dbUser;
+        } else {
+          const dbUser = await User.create(mongoPayload);
+          if (dbUser) return dbUser.toObject ? dbUser.toObject() : dbUser;
+        }
+      } catch (e) {
+        console.warn('MongoDB saveUser error, continuing with memoryDB:', e.message);
+      }
     }
     return user;
   },

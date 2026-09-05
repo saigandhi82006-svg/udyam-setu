@@ -485,6 +485,17 @@
                   <input type="text" id="profName" value="Ravi Kumar" placeholder="Ravi Kumar">
                 </div>
 
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label>📱 <span data-i18n="screen5.phone_label">Mobile Number</span> <span class="required">*</span></label>
+                    <input type="tel" id="profPhone" value="9876543210" placeholder="9876543210" maxlength="10">
+                  </div>
+                  <div class="form-group">
+                    <label>✉️ <span data-i18n="screen5.email_label">Email Address</span></label>
+                    <input type="email" id="profEmail" value="ravi.kumar@example.com" placeholder="ravi.kumar@example.com">
+                  </div>
+                </div>
+
                 <div class="form-group">
                   <label>🎂 <span data-i18n="screen5.age_label">Age</span> <span class="required">*</span></label>
                   <input type="number" id="profAge" min="18" max="95" value="28" placeholder="28" oninput="updateAgeCategoryBadge()">
@@ -638,6 +649,7 @@
                   <button class="pill-btn outline" onclick="setProfStep(3)">← Back</button>
                   <button class="pill-btn primary" onclick="runSchemeMatching()" data-i18n="screen5.find_schemes_btn">Find Matching Schemes ➔</button>
                 </div>
+                <button class="pill-btn save-profile-action-btn" onclick="saveUserProfileDetails(true)" data-i18n="screen5.save_profile_btn">💾 Save Profile Details</button>
               </div>
             </div>
           </div>
@@ -908,6 +920,15 @@
         </div>
         <p class="endpoint-desc">Haversine / MongoDB 2dsphere spatial channel locator</p>
         <button class="run-api-btn" onclick="testPartnersApi()">Test Spatial Search</button>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method post">POST</span>
+          <code>/api/users/profile</code>
+        </div>
+        <p class="endpoint-desc">MongoDB database storage & multi-step profiling upsert</p>
+        <button class="run-api-btn" onclick="testProfileApi()">Test Profile MongoDB</button>
       </div>
 
       <div class="endpoint-card">

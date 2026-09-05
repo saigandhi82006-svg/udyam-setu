@@ -3,6 +3,9 @@ const API_BASE = '/api';
 
 let currentSelectedScheme = null;
 let currentProfile = {
+  name: 'Ravi Kumar',
+  phone: '9876543210',
+  email: 'ravi.kumar@example.com',
   age: 28,
   gender: 'Male',
   hasDisability: false,
@@ -11,6 +14,7 @@ let currentProfile = {
   hasUdidCard: false,
   category: 'OBC',
   annualIncome: 240000,
+  neededInvestment: 500000,
   businessType: 'Food Business',
   locationType: 'Rural',
   experienceYears: 2,
@@ -30,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.UdyamI18n && typeof window.UdyamI18n.initI18n === 'function') {
     window.UdyamI18n.initI18n();
   }
+  loadSavedUserProfile();
   checkBackendHealth();
   updateEMICalculator();
   loadNearbyPartners();
@@ -328,6 +333,8 @@ async function selectGoogleAccount(email, name, avatarInitials = 'G') {
 
     currentProfile.name = name;
     currentProfile.email = email;
+    if (document.getElementById('profName')) document.getElementById('profName').value = name;
+    if (document.getElementById('profEmail')) document.getElementById('profEmail').value = email;
 
     const avatarEl = document.querySelector('.user-avatar');
     if (avatarEl) avatarEl.innerText = avatarInitials;
@@ -340,6 +347,8 @@ async function selectGoogleAccount(email, name, avatarInitials = 'G') {
   } catch (err) {
     currentProfile.name = name;
     currentProfile.email = email;
+    if (document.getElementById('profName')) document.getElementById('profName').value = name;
+    if (document.getElementById('profEmail')) document.getElementById('profEmail').value = email;
     const avatarEl = document.querySelector('.user-avatar');
     if (avatarEl) avatarEl.innerText = avatarInitials;
     showScreen(3);
@@ -499,6 +508,8 @@ async function handleVerifyOTP() {
     const data = await res.json();
 
     if (data.success) {
+      currentProfile.phone = phone;
+      if (document.getElementById('profPhone')) document.getElementById('profPhone').value = phone;
       logTerminal(`[Auth] User +91 ${phone} verified successfully.`);
       showScreen(3);
     } else {
@@ -508,6 +519,8 @@ async function handleVerifyOTP() {
   } catch (err) {
     // If entered OTP matches generated OTP or test OTP 123456
     if (enteredOtp === generatedOtp || enteredOtp === '123456') {
+      currentProfile.phone = phone;
+      if (document.getElementById('profPhone')) document.getElementById('profPhone').value = phone;
       logTerminal(`[Auth] User +91 ${phone} verified successfully (Offline mode).`);
       showScreen(3);
     } else {
@@ -1244,11 +1257,13 @@ function setProfStep(step) {
 }
 window.setProfStep = setProfStep;
 
-// 3. Profiling & Rule-Based Matching (Screen 5 & 6)
-async function runSchemeMatching(shouldNavigate = true) {
-  currentProfile.name = document.getElementById('profName')?.value || 'Ravi Kumar';
+async function saveUserProfileDetails(showAlert = true) {
+  currentProfile.name = document.getElementById('profName')?.value || currentProfile.name || 'Ravi Kumar';
+  currentProfile.phone = document.getElementById('profPhone')?.value || currentProfile.phone || '9876543210';
+  currentProfile.email = document.getElementById('profEmail')?.value || currentProfile.email || '';
   currentProfile.age = parseInt(document.getElementById('profAge')?.value) || 28;
   currentProfile.gender = document.getElementById('profGender')?.value || 'Male';
+  
   const disabilityVal = document.getElementById('profDisability')?.value || 'No';
   currentProfile.hasDisability = disabilityVal === 'Yes';
   currentProfile.disabilityType = currentProfile.hasDisability ? (document.getElementById('profDisabilityType')?.value || 'Locomotor / Physical') : 'None';
@@ -1261,6 +1276,112 @@ async function runSchemeMatching(shouldNavigate = true) {
   currentProfile.businessType = document.getElementById('profBusiness')?.value || 'Food Business';
   currentProfile.experienceYears = parseInt(document.getElementById('profExperience')?.value) || 2;
   currentProfile.education = document.getElementById('profEducation')?.value || '8th Pass or Above';
+
+  try {
+    localStorage.setItem('udyam_user_profile', JSON.stringify(currentProfile));
+  } catch (e) {}
+
+  // Update user avatar initials on Screen 3
+  const initials = currentProfile.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'RK';
+  document.querySelectorAll('.user-avatar').forEach(el => el.innerText = initials);
+
+  // Persist / Sync profile to MongoDB database backend
+  try {
+    const res = await fetch(`${API_BASE}/users/profile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(currentProfile)
+    });
+    const data = await res.json();
+    if (data.success) {
+      logTerminal(`[POST /api/users/profile] Profile details saved to MongoDB for ${currentProfile.name} (Phone: ${currentProfile.phone}, Email: ${currentProfile.email || 'N/A'})`);
+    }
+  } catch (err) {
+    console.warn('Backend MongoDB sync error, data retained in local storage:', err);
+  }
+
+  if (showAlert) {
+    const contactInfo = currentProfile.phone ? `📱 ${currentProfile.phone}` : (currentProfile.email ? `✉️ ${currentProfile.email}` : '');
+    showCustomToast(`✅ Profile Details Saved to MongoDB! (${currentProfile.name} • ${contactInfo})`);
+  }
+}
+window.saveUserProfileDetails = saveUserProfileDetails;
+
+async function loadSavedUserProfile() {
+  try {
+    const saved = localStorage.getItem('udyam_user_profile');
+    if (saved) {
+      const data = JSON.parse(saved);
+      Object.assign(currentProfile, data);
+
+      if (document.getElementById('profName') && data.name) document.getElementById('profName').value = data.name;
+      if (document.getElementById('profPhone') && data.phone) document.getElementById('profPhone').value = data.phone;
+      if (document.getElementById('profEmail') && data.email) document.getElementById('profEmail').value = data.email;
+      if (document.getElementById('profAge') && data.age) document.getElementById('profAge').value = data.age;
+      if (document.getElementById('profGender') && data.gender) document.getElementById('profGender').value = data.gender;
+      if (document.getElementById('profCategory') && data.category) document.getElementById('profCategory').value = data.category;
+      if (document.getElementById('profLocationType') && data.locationType) document.getElementById('profLocationType').value = data.locationType;
+      if (document.getElementById('profIncome') && data.annualIncome) document.getElementById('profIncome').value = data.annualIncome;
+      if (document.getElementById('profInvestment') && data.neededInvestment) document.getElementById('profInvestment').value = data.neededInvestment;
+      if (document.getElementById('profBusiness') && data.businessType) document.getElementById('profBusiness').value = data.businessType;
+      if (document.getElementById('profEducation') && data.education) document.getElementById('profEducation').value = data.education;
+
+      if (data.hasDisability && document.getElementById('profDisability')) {
+        document.getElementById('profDisability').value = 'Yes';
+        if (typeof toggleDisabilityFields === 'function') toggleDisabilityFields();
+        if (document.getElementById('profDisabilityType') && data.disabilityType) document.getElementById('profDisabilityType').value = data.disabilityType;
+        if (document.getElementById('profDisabilityPercent') && data.disabilityPercentage) document.getElementById('profDisabilityPercent').value = data.disabilityPercentage;
+        if (document.getElementById('profHasUdid')) document.getElementById('profHasUdid').value = data.hasUdidCard ? 'Yes' : 'No';
+      }
+
+      if (typeof updateAgeCategoryBadge === 'function') updateAgeCategoryBadge();
+    }
+  } catch (e) {}
+
+  // Fetch from MongoDB backend on initialization
+  try {
+    const queryParam = currentProfile.phone || currentProfile.email || 'usr_demo';
+    const res = await fetch(`${API_BASE}/users/profile?userId=${encodeURIComponent(queryParam)}`);
+    const data = await res.json();
+    if (data.success && data.user) {
+      if (!localStorage.getItem('udyam_user_profile')) {
+        Object.assign(currentProfile, data.user);
+        if (document.getElementById('profName') && data.user.name) document.getElementById('profName').value = data.user.name;
+        if (document.getElementById('profPhone') && data.user.phone) document.getElementById('profPhone').value = data.user.phone;
+        if (document.getElementById('profEmail') && data.user.email) document.getElementById('profEmail').value = data.user.email;
+        if (document.getElementById('profAge') && data.user.age) document.getElementById('profAge').value = data.user.age;
+      }
+    }
+  } catch (e) {}
+}
+window.loadSavedUserProfile = loadSavedUserProfile;
+
+function showCustomToast(message, duration = 3000) {
+  const existing = document.querySelector('.udyam-toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.className = 'udyam-toast';
+  toast.innerHTML = `
+    <span style="font-size: 16px;">💾</span>
+    <span style="flex: 1;">${message}</span>
+  `;
+
+  const targetContainer = document.getElementById('phoneScreen') || document.body;
+  targetContainer.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(-10px)';
+    setTimeout(() => toast.remove(), 400);
+  }, duration);
+}
+window.showCustomToast = showCustomToast;
+
+// 3. Profiling & Rule-Based Matching (Screen 5 & 6)
+async function runSchemeMatching(shouldNavigate = true) {
+  saveUserProfileDetails(false); // auto-save on matching
 
   try {
     const res = await fetch(`${API_BASE}/schemes/match`, {
@@ -2363,6 +2484,17 @@ async function testEmiApi() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ loanAmount: 500000, interestRate: 10, tenureYears: 3 })
+  });
+  const data = await res.json();
+  logTerminal(JSON.stringify(data, null, 2));
+}
+
+async function testProfileApi() {
+  saveUserProfileDetails(false);
+  const res = await fetch(`${API_BASE}/users/profile`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(currentProfile)
   });
   const data = await res.json();
   logTerminal(JSON.stringify(data, null, 2));

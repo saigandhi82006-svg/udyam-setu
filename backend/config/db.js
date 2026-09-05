@@ -1,5 +1,11 @@
 const net = require('net');
+const dns = require('dns');
 const mongoose = require('mongoose');
+
+// Configure reliable DNS servers for MongoDB Atlas SRV lookups across all networks
+try {
+  dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+} catch (e) {}
 
 let isConnected = false;
 let isInMemoryFallback = false;
@@ -35,10 +41,15 @@ const connectDB = async () => {
         throw new Error('Local MongoDB port 27017 is not accessible');
       }
     }
-    const conn = await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 2500, // Quick timeout for fast fallback
-      directConnection: true
-    });
+    const isLocal = uri.includes('127.0.0.1') || uri.includes('localhost');
+    const connectOptions = {
+      serverSelectionTimeoutMS: isLocal ? 2500 : 8000
+    };
+    if (isLocal && !uri.startsWith('mongodb+srv://')) {
+      connectOptions.directConnection = true;
+    }
+
+    const conn = await mongoose.connect(uri, connectOptions);
     isConnected = true;
     isInMemoryFallback = false;
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);

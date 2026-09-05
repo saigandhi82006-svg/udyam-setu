@@ -185,6 +185,52 @@ class _UserProfilingScreenState extends State<UserProfilingScreen> {
     }
   }
 
+  void _saveProfileDetails() async {
+    final cleanExp = int.tryParse(_experienceController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 2;
+    final cleanIncome = double.tryParse(_incomeController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 240000;
+    final cleanInvestment = double.tryParse(_investmentController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 500000;
+
+    final userProfile = UserProfile(
+      name: _nameController.text.trim().isEmpty ? 'Ravi Kumar' : _nameController.text.trim(),
+      age: int.tryParse(_ageController.text) ?? 28,
+      gender: _selectedGender,
+      category: _selectedCategory,
+      state: _selectedState,
+      district: _selectedDistrict,
+      pincode: _pincodeController.text.trim(),
+      hasDisability: _hasDisability,
+      disabilityType: _disabilityType,
+      disabilityPercentage: _disabilityPercentage,
+      hasUdidCard: _hasUdidCard,
+      annualIncome: cleanIncome,
+      locationType: _selectedLocationType,
+      neededInvestment: cleanInvestment,
+      businessType: _selectedBusinessType,
+      experienceYears: cleanExp,
+    );
+
+    await _apiService.updateUserProfile(userProfile);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text('Profile details saved successfully! (${userProfile.name})'),
+              ),
+            ],
+          ),
+          backgroundColor: AppTheme.primaryGreen,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -295,60 +341,79 @@ class _UserProfilingScreenState extends State<UserProfilingScreen> {
               ),
               child: SafeArea(
                 top: false,
-                child: Row(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (_currentStep > 1) ...[
-                      Expanded(
-                        flex: 1,
-                        child: OutlinedButton(
-                          onPressed: _previousStep,
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(50),
-                            side: const BorderSide(color: Color(0xFFCBD5E1)),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.arrow_back_rounded, size: 18, color: AppTheme.darkText),
-                              SizedBox(width: 6),
-                              Text('Back', style: TextStyle(color: AppTheme.darkText, fontWeight: FontWeight.w600)),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                    ],
-                    Expanded(
-                      flex: 2,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _nextStep,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryGreen,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size.fromHeight(50),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-                          elevation: 2,
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                              )
-                            : Row(
+                    Row(
+                      children: [
+                        if (_currentStep > 1) ...[
+                          Expanded(
+                            flex: 1,
+                            child: OutlinedButton(
+                              onPressed: _previousStep,
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(50),
+                                side: const BorderSide(color: Color(0xFFCBD5E1)),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                              ),
+                              child: const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    _currentStep == 4 ? 'Find Matching Schemes' : 'Continue',
-                                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Icon(Icons.arrow_forward_rounded, size: 18),
+                                  Icon(Icons.arrow_back_rounded, size: 18, color: AppTheme.darkText),
+                                  SizedBox(width: 6),
+                                  Text('Back', style: TextStyle(color: AppTheme.darkText, fontWeight: FontWeight.w600)),
                                 ],
                               ),
-                      ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                        ],
+                        Expanded(
+                          flex: 2,
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _nextStep,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryGreen,
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size.fromHeight(50),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                              elevation: 2,
+                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        _currentStep == 4 ? 'Find Matching Schemes' : 'Continue',
+                                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      const Icon(Icons.arrow_forward_rounded, size: 18),
+                                    ],
+                                  ),
+                          ),
+                        ),
+                      ],
                     ),
+                    if (_currentStep == 4) ...[
+                      const SizedBox(height: 10),
+                      OutlinedButton.icon(
+                        icon: const Icon(Icons.save_outlined, size: 18, color: AppTheme.primaryGreen),
+                        label: const Text('Save Profile Details', style: TextStyle(color: AppTheme.primaryGreen, fontWeight: FontWeight.bold)),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(46),
+                          side: const BorderSide(color: AppTheme.primaryGreen, width: 1.5),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                          backgroundColor: const Color(0xFFECFDF5),
+                        ),
+                        onPressed: _saveProfileDetails,
+                      ),
+                    ],
                   ],
                 ),
               ),
