@@ -332,20 +332,22 @@
                         <!-- Language & text input row -->
                         <div class="chat-dock-container">
                             <div class="chat-dock-pill">
-                                <select id="chatLangSelect" class="lang-select" onchange="onLanguageChanged()">
-                                    <option value="English">EN</option>
-                                    <option value="Hindi">HI (हिन्दी)</option>
-                                    <option value="Telugu">TE (తెలుగు)</option>
-                                    <option value="Tamil">TA (தமிழ்)</option>
-                                    <option value="Marathi">MR (मराठी)</option>
-                                    <option value="Kannada">KN (ಕನ್ನಡ)</option>
-                                    <option value="Bengali">BN (বাংলা)</option>
-                                </select>
-                                <input type="text" id="chatInput" placeholder="Type here..."
+                                <div class="dock-lang-badge">
+                                    <select id="chatLangSelect" class="dock-lang-select" onchange="onLanguageChanged()">
+                                        <option value="English">EN (English)</option>
+                                        <option value="Hindi">HI (हिन्दी)</option>
+                                        <option value="Telugu" selected>TE (తెలుగు)</option>
+                                        <option value="Tamil">TA (தமிழ்)</option>
+                                        <option value="Marathi">MR (मराठी)</option>
+                                        <option value="Kannada">KN (ಕನ್ನಡ)</option>
+                                        <option value="Bengali">BN (বাংলা)</option>
+                                    </select>
+                                </div>
+                                <input type="text" id="chatInput" class="dock-input" placeholder="Type here..."
                                     onkeypress="if(event.key==='Enter') sendChatMessage()">
-                                <button class="dock-mic-btn" id="voiceBtn" onclick="triggerBhashiniSpeechInput()" title="Speak with AI">🎙️</button>
+                                <button type="button" class="dock-mic-btn" id="voiceBtn" onclick="triggerBhashiniSpeechInput()" title="Speak with AI">🎙️</button>
                             </div>
-                            <button class="dock-send-btn" onclick="sendChatMessage()" title="Send message">➤</button>
+                            <button type="button" class="dock-send-btn" onclick="sendChatMessage()" title="Send message">➤</button>
                         </div>
                     </div>
 

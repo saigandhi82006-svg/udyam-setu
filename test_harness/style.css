@@ -1201,76 +1201,94 @@ body {
   text-transform: uppercase;
 }
 
-/* Modern Glassmorphic Floating Chat Input Dock */
+/* Modern Floating Chat Input Dock */
 .chat-dock-container {
   display: flex;
   align-items: center;
   gap: 8px;
   margin: 10px 0 6px 0;
+  padding: 0 2px;
 }
 
 .chat-dock-pill {
   flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: #FFFFFF;
-  border: 1.2px solid #CBD5E1;
-  border-radius: 28px;
-  padding: 6px 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 30px;
+  padding: 4px 6px 4px 10px;
+  box-shadow: 0 3px 14px rgba(15, 23, 42, 0.08);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .chat-dock-pill:focus-within {
-  border-color: #10B981;
-  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);
+  border-color: #0F766E;
+  box-shadow: 0 4px 18px rgba(15, 118, 110, 0.22);
 }
 
 .dock-lang-badge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
   background: #F1F5F9;
   border: 1px solid #E2E8F0;
   border-radius: 18px;
-  padding: 4px 8px;
-  font-size: 11px;
-  font-weight: 800;
-  color: #1E293B;
-  white-space: nowrap;
+  padding: 3px 6px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
-.dock-lang-select {
-  background: transparent;
-  border: none;
-  font-size: 11px;
-  font-weight: 800;
+.dock-lang-badge:hover {
+  background: #E2E8F0;
+  border-color: #CBD5E1;
+}
+
+.dock-lang-select,
+.lang-select,
+#chatLangSelect {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  font-size: 11.5px;
+  font-weight: 700;
   color: #1E293B;
   cursor: pointer;
-  outline: none;
-  padding-right: 2px;
+  padding: 1px 2px;
+  font-family: inherit;
 }
 
-.dock-input {
+.dock-input,
+#chatInput,
+.chat-dock-pill input {
   flex: 1;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 13px;
+  min-width: 0;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  font-size: 13.5px;
   font-weight: 500;
-  color: #1E293B;
-  padding: 6px 4px;
+  color: #0F172A;
+  padding: 6px 6px;
+  font-family: inherit;
+  margin: 0;
 }
 
-.dock-input::placeholder {
+.dock-input::placeholder,
+#chatInput::placeholder,
+.chat-dock-pill input::placeholder {
   color: #94A3B8;
   font-weight: 400;
+  font-size: 13px;
 }
 
-.dock-mic-btn {
-  background: #F1F5F9;
-  border: none;
+.dock-mic-btn,
+.chat-dock-pill .dock-mic-btn {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
   border-radius: 50%;
   width: 34px;
   height: 34px;
@@ -1279,46 +1297,51 @@ body {
   justify-content: center;
   font-size: 15px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  color: #64748B;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #475569;
+  flex-shrink: 0;
 }
 
 .dock-mic-btn:hover {
-  background: #E2E8F0;
-  color: #1E293B;
+  background: #ECFDF5;
+  border-color: #A7F3D0;
+  color: #059669;
+  transform: scale(1.08);
 }
 
 .dock-mic-btn.listening {
   background: #FEF2F2;
+  border-color: #FCA5A5;
   color: #EF4444;
   animation: micPulse 1.2s infinite;
 }
 
 .dock-send-btn {
-  background: linear-gradient(135deg, #10B981, #059669);
-  color: white;
+  background: linear-gradient(135deg, #0F766E, #059669);
+  color: #FFFFFF;
   border: none;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   font-size: 16px;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.38);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   flex-shrink: 0;
 }
 
 .dock-send-btn:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.55);
+  transform: translateY(-1px) scale(1.06);
+  box-shadow: 0 6px 18px rgba(15, 118, 110, 0.5);
 }
 
 .dock-send-btn:active {
   transform: scale(0.95);
 }
+
 
 /* AI Chat Scheme Recommendation Cards (Screen 4) */
 .ai-scheme-card {

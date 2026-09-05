@@ -413,19 +413,21 @@
             <!-- Chat Input Dock -->
             <div class="chat-dock-container">
               <div class="chat-dock-pill">
-                <select id="chatLangSelect" class="lang-select" onchange="onLanguageChanged(); if (window.setLanguage) setLanguage(this.value)" title="Change Language">
-                  <option value="English">EN</option>
-                  <option value="Hindi">HI (हिन्दी)</option>
-                  <option value="Telugu">TE (తెలుగు)</option>
-                  <option value="Tamil">TA (தமிழ்)</option>
-                  <option value="Marathi">MR (मराठी)</option>
-                  <option value="Kannada">KN (ಕನ್ನಡ)</option>
-                  <option value="Bengali">BN (বাংলা)</option>
-                </select>
-                <input type="text" id="chatInput" placeholder="Type here..." data-i18n-placeholder="screen4.input_placeholder" onkeypress="if(event.key==='Enter') sendChatMessage()">
-                <button class="dock-mic-btn" id="voiceBtn" onclick="triggerBhashiniSpeechInput()" title="Speak in your language">🎙️</button>
+                <div class="dock-lang-badge">
+                  <select id="chatLangSelect" class="dock-lang-select" onchange="onLanguageChanged(); if (window.setLanguage) setLanguage(this.value)" title="Change Language">
+                    <option value="English">EN (English)</option>
+                    <option value="Hindi">HI (हिन्दी)</option>
+                    <option value="Telugu" selected>TE (తెలుగు)</option>
+                    <option value="Tamil">TA (தமிழ்)</option>
+                    <option value="Marathi">MR (मराठी)</option>
+                    <option value="Kannada">KN (ಕನ್ನಡ)</option>
+                    <option value="Bengali">BN (বাংলা)</option>
+                  </select>
+                </div>
+                <input type="text" id="chatInput" class="dock-input" placeholder="Type here..." data-i18n-placeholder="screen4.input_placeholder" onkeypress="if(event.key==='Enter') sendChatMessage()">
+                <button type="button" class="dock-mic-btn" id="voiceBtn" onclick="triggerBhashiniSpeechInput()" title="Speak in your language">🎙️</button>
               </div>
-              <button class="dock-send-btn" onclick="sendChatMessage()" title="Send Message">➤</button>
+              <button type="button" class="dock-send-btn" onclick="sendChatMessage()" title="Send Message">➤</button>
             </div>
           </div>
 
