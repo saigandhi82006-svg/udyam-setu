@@ -81,6 +81,11 @@
                     <div class="step-meta"><strong>Document Checklist</strong><small>Upload & verify status</small>
                     </div>
                 </button>
+                <button class="step-btn" onclick="showScreen(11)">
+                    <span class="step-num">11</span>
+                    <div class="step-meta"><strong>My Applications</strong><small>Track applied schemes</small>
+                    </div>
+                </button>
             </div>
 
             <!-- SIH Impact Summary Box -->
@@ -263,7 +268,7 @@
                                 <div class="icon-circle blue">🧮</div>
                                 <span>EMI Calculator</span>
                             </div>
-                            <div class="quick-item" onclick="showScreen(10)">
+                            <div class="quick-item" onclick="showScreen(11)">
                                 <div class="icon-circle amber">📄</div>
                                 <span>My Applications</span>
                             </div>
@@ -284,7 +289,6 @@
                         <div class="dash-bottom-nav">
                             <div class="nav-tab active" onclick="showScreen(3)"><span>🏠</span><small>Home</small></div>
                             <div class="nav-tab" onclick="showScreen(4)"><span>💬</span><small>Chat</small></div>
-                            <div class="nav-tab" onclick="showScreen(6)"><span>⭐</span><small>Saved</small></div>
                             <div class="nav-tab" onclick="showScreen(5)"><span>👤</span><small>Profile</small></div>
                         </div>
                     </div>
@@ -557,9 +561,28 @@
                             <!-- Rendered via JS -->
                         </div>
 
-                        <div class="screen-footer">
-                            <button class="pill-btn primary" onclick="handleSubmitApplication()">Submit Application to
-                                Bank</button>
+                        <div class="screen-footer" style="display: flex; flex-direction: column; gap: 8px; margin-top: 14px;">
+                            <button class="pill-btn primary" onclick="handleSubmitApplication()">Submit Application to Bank</button>
+                            <button class="pill-btn outline" onclick="showScreen(9)">📍 Find Nearby Partner</button>
+                        </div>
+                    </div>
+
+                    <!-- SCREEN 11: MY APPLICATIONS (APPLIED SCHEMES LIFECYCLE TRACKER) -->
+                    <div class="screen" id="screen-11">
+                        <div class="sub-header">
+                            <button class="back-btn" onclick="showScreen(3)">‹</button>
+                            <div class="center-title">
+                                <h4>My Applications</h4>
+                                <small>Track applied loan & subsidy status</small>
+                            </div>
+                        </div>
+
+                        <div class="applications-container" id="applicationsContainer">
+                            <!-- Rendered dynamically via loadMyApplications() in app.js -->
+                        </div>
+
+                        <div class="screen-footer" style="margin-top: 14px;">
+                            <button class="pill-btn primary" onclick="showScreen(6)">+ Apply for Another Scheme</button>
                         </div>
                     </div>
                 </div>

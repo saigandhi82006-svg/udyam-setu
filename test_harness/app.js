@@ -59,11 +59,12 @@ window.addEventListener('udyam:languageChanged', (event) => {
     renderPartners(window.__lastPartners);
   }
   if (typeof updateAgeCategoryBadge === 'function') updateAgeCategoryBadge();
+  if (typeof loadMyApplications === 'function') loadMyApplications();
 });
 
 // Screen Switcher
 function showScreen(screenNumber) {
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 11; i++) {
     const s = document.getElementById(`screen-${i}`);
     if (s) s.classList.remove('active');
   }
@@ -82,6 +83,10 @@ function showScreen(screenNumber) {
       btn.classList.remove('active');
     }
   });
+
+  if (screenNumber === 11) {
+    loadMyApplications();
+  }
 }
 
 function switchView(view) {
@@ -1753,16 +1758,312 @@ function toggleDocStatus(index) {
   logTerminal(`[Document Manager] Toggled "${doc.docName}" status to: ${doc.status}`);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SCREEN 11: MY APPLICATIONS (APPLIED SCHEMES LIFECYCLE TRACKER)
+// ─────────────────────────────────────────────────────────────────────────────
+window.__appliedApplications = [
+  {
+    _id: '65e300000000000000000001',
+    trackingId: 'UDS-847291',
+    schemeId: 'PMMY',
+    schemeName: 'PM Mudra Yojana',
+    requestedAmount: 500000,
+    proposedBusiness: 'South Indian Organic Canteen & Tiffin Center',
+    status: 'Under Review',
+    partnerName: 'Andhra Pradesh Grameena Vikas Bank (APGVB) - Branch #401',
+    appliedDate: '12 Aug 2025',
+    remarks: 'Application pre-screened by Udyam Setu Rule Engine (90% Match). Documents verified by CSC VLE. Forwarded to Lead Bank for physical inspection & sanction.'
+  }
+];
+
+async function loadMyApplications() {
+  const container = document.getElementById('applicationsContainer');
+  if (!container) return;
+
+  const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
+
+  // Try fetching live from backend /api/applications
+  try {
+    const res = await fetch(`${API_BASE}/applications`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.applications && Array.isArray(data.applications) && data.applications.length > 0) {
+        window.__appliedApplications = data.applications;
+      }
+    }
+  } catch (e) {
+    // Keep local fallback window.__appliedApplications
+  }
+
+  const apps = window.__appliedApplications || [];
+
+  if (apps.length === 0) {
+    const emptyLabels = {
+      te: { title: 'దరఖాస్తులేవీ లేవు', sub: 'మీరు ఇంకా ఏ ప్రభుత్వ పథకానికీ దరఖాస్తు చేసుకోలేదు.', btn: 'అనువైన పథకాలను కనుగొనండి' },
+      hi: { title: 'कोई आवेदन नहीं मिला', sub: 'आपने अभी तक किसी सरकारी योजना के लिए आवेदन नहीं किया है।', btn: 'योजनाएं खोजें' },
+      kn: { title: 'ಯಾವುದೇ ಅರ್ಜಿಗಳಿಲ್ಲ', sub: 'ನೀವು ಇನ್ನೂ ಯಾವುದೇ ಸರ್ಕಾರಿ ಯೋಜನೆಗೆ ಅರ್ಜಿ ಸಲ್ಲಿಸಿಲ್ಲ.', btn: 'ಯೋಜನೆಗಳನ್ನು ಹುಡುಕಿ' },
+      ta: { title: 'விண்ணப்பங்கள் எதுவும் இல்லை', sub: 'நீங்கள் இதுவரை எந்த அரசு திட்டத்திற்கும் விண்ணப்பிக்கவில்லை.', btn: 'திட்டங்களைக் கண்டறியவும்' },
+      mr: { title: 'कोणतेही अर्ज नाहीत', sub: 'तुम्ही अद्याप कोणत्याही शासकीय योजनेसाठी अर्ज केलेला नाही.', btn: 'योजना शोधा' },
+      bn: { title: 'কোনো আবেদন নেই', sub: 'আপনি এখনও কোনো সরকারি প্রকল্পের জন্য আবেদন করেননি।', btn: 'প্রকল্প খুঁজুন' },
+      en: { title: 'No Applications Found', sub: 'You have not applied for any government schemes yet.', btn: 'Find Matching Schemes' }
+    };
+    const emptyText = emptyLabels[curLang] || emptyLabels.en;
+
+    container.innerHTML = `
+      <div style="text-align:center; padding: 40px 16px; background: white; border-radius: 14px; border: 1px solid var(--border-color);">
+        <div style="font-size: 40px; margin-bottom: 12px;">📑</div>
+        <h4 style="font-size: 16px; font-weight: 800; color: var(--dark-text); margin-bottom: 6px;">${emptyText.title}</h4>
+        <p style="font-size: 13px; color: #64748B; margin-bottom: 18px;">${emptyText.sub}</p>
+        <button class="pill-btn primary" onclick="showScreen(6)">${emptyText.btn} →</button>
+      </div>
+    `;
+    return;
+  }
+
+  // Label dictionaries for complete zero-English leakage
+  const LABELS = {
+    te: {
+      tracking: 'ట్రాకింగ్ ఐడీ',
+      requested: 'కోరిన రుణ మొత్తం',
+      pipeline_title: 'దరఖాస్తు పురోగతి దశలు:',
+      step1: 'సమర్పించబడింది',
+      step2: 'పత్రాల ధృవీకరణ',
+      step3: 'బ్యాంక్ మంజూరు',
+      step4: 'రుణ విడుదల',
+      view_docs: '📄 పత్రాలు',
+      lead_bank: '🏦 సమీప బ్యాంక్',
+      ask_ai: '💬 ఏఐ సహాయం',
+      status_under_review: 'పరిశీలనలో ఉంది',
+      status_submitted: 'సమర్పించబడింది',
+      status_approved: 'మంజూరైంది',
+      status_disbursed: 'విడుదల చేయబడింది'
+    },
+    hi: {
+      tracking: 'ट्रैकिंग आईडी',
+      requested: 'अनुरोधित ऋण राशि',
+      pipeline_title: 'आवेदन जीवनचक्र स्थिति:',
+      step1: 'जमा किया गया',
+      step2: 'दस्तावेज़ सत्यापन',
+      step3: 'बैंक स्वीकृति',
+      step4: 'वितरण',
+      view_docs: '📄 दस्तावेज़',
+      lead_bank: '🏦 लीड बैंक',
+      ask_ai: '💬 एआई सलाह',
+      status_under_review: 'समीक्षाधीन',
+      status_submitted: 'जमा हुआ',
+      status_approved: 'स्वीकृत',
+      status_disbursed: 'वितरित'
+    },
+    kn: {
+      tracking: 'ಟ್ರ್ಯಾಕಿಂಗ್ ಐಡಿ',
+      requested: 'ಕೋರಿದ ಸಾಲದ ಮೊತ್ತ',
+      pipeline_title: 'ಅರ್ಜಿ ಪ್ರಗತಿ ಹಂತಗಳು:',
+      step1: 'ಸಲ್ಲಿಸಲಾಗಿದೆ',
+      step2: 'ದಾಖಲೆ ಪರಿಶೀಲನೆ',
+      step3: 'ಬ್ಯಾಂಕ್ ಮಂಜೂರಾತಿ',
+      step4: 'ಸಾಲ ವಿತರಣೆ',
+      view_docs: '📄 ದಾಖಲೆಗಳು',
+      lead_bank: '🏦 ಬ್ಯಾಂಕ್',
+      ask_ai: '💬 ಎಐ ಸಲಹೆ',
+      status_under_review: 'ಪರಿಶೀಲನೆಯಲ್ಲಿದೆ',
+      status_submitted: 'ಸಲ್ಲಿಸಲಾಗಿದೆ',
+      status_approved: 'ಮಂಜೂರಾಗಿದೆ',
+      status_disbursed: 'ವಿತರಿಸಲಾಗಿದೆ'
+    },
+    ta: {
+      tracking: 'கண்காணிப்பு எண்',
+      requested: 'கோரப்பட்ட கடன் தொகை',
+      pipeline_title: 'விண்ணப்ப முன்னேற்ற நிலைகள்:',
+      step1: 'சமர்ப்பிக்கப்பட்டது',
+      step2: 'ஆவண சரிபார்ப்பு',
+      step3: 'வங்கி அனுமதி',
+      step4: 'கடன் வழங்கல்',
+      view_docs: '📄 ஆவணங்கள்',
+      lead_bank: '🏦 முன்னணி வங்கி',
+      ask_ai: '💬 AI ஆலோசனை',
+      status_under_review: 'ஆய்வில் உள்ளது',
+      status_submitted: 'சமர்ப்பிக்கப்பட்டது',
+      status_approved: 'அனுமதிக்கப்பட்டது',
+      status_disbursed: 'வழங்கப்பட்டது'
+    },
+    mr: {
+      tracking: 'ट्रॅकिंग आयडी',
+      requested: 'मागितलेली कर्ज रक्कम',
+      pipeline_title: 'अर्ज प्रगती टप्पे:',
+      step1: 'सादर केले',
+      step2: 'कागदपत्र पडताळणी',
+      step3: 'बँक मंजुरी',
+      step4: 'कर्ज वितरण',
+      view_docs: '📄 कागदपत्रे',
+      lead_bank: '🏦 लीड बँक',
+      ask_ai: '💬 AI सल्ला',
+      status_under_review: 'पुनरावलोकनात',
+      status_submitted: 'सादर केले',
+      status_approved: 'मंजूर',
+      status_disbursed: 'वितरित'
+    },
+    bn: {
+      tracking: 'ট্র্যাকিং আইডি',
+      requested: 'অনুরোধকৃত ঋণের পরিমাণ',
+      pipeline_title: 'আবেদন অগ্রগতি পর্যায়:',
+      step1: 'জমা দেওয়া হয়েছে',
+      step2: 'নথি যাচাইকরণ',
+      step3: 'ব্যাংক অনুমোদন',
+      step4: 'ঋণ বিতরণ',
+      view_docs: '📄 নথি',
+      lead_bank: '🏦 লিড ব্যাংক',
+      ask_ai: '💬 এআই পরামর্শ',
+      status_under_review: 'পর্যালোচনাধীন',
+      status_submitted: 'জমা হয়েছে',
+      status_approved: 'অনুমোদিত',
+      status_disbursed: 'বিতরণ হয়েছে'
+    },
+    en: {
+      tracking: 'Tracking ID',
+      requested: 'Requested Amount',
+      pipeline_title: 'Application Lifecycle Pipeline:',
+      step1: 'Submitted',
+      step2: 'Verification',
+      step3: 'Sanction',
+      step4: 'Disbursed',
+      view_docs: '📄 Documents',
+      lead_bank: '🏦 Lead Bank',
+      ask_ai: '💬 AI Advisor',
+      status_under_review: 'Under Review',
+      status_submitted: 'Submitted',
+      status_approved: 'Approved',
+      status_disbursed: 'Disbursed'
+    }
+  };
+
+  const L = LABELS[curLang] || LABELS.en;
+
+  container.innerHTML = apps.map(app => {
+    const rawStatus = (app.status || 'Under Review').toLowerCase();
+    let statusClass = 'under-review';
+    let statusLabel = L.status_under_review;
+
+    if (rawStatus.includes('submit')) {
+      statusClass = 'submitted';
+      statusLabel = L.status_submitted;
+    } else if (rawStatus.includes('approv')) {
+      statusClass = 'approved';
+      statusLabel = L.status_approved;
+    } else if (rawStatus.includes('disburs')) {
+      statusClass = 'disbursed';
+      statusLabel = L.status_disbursed;
+    }
+
+    // Determine pipeline step progress
+    const isSubmitted = true;
+    const isVerification = rawStatus.includes('review') || rawStatus.includes('approv') || rawStatus.includes('disburs');
+    const isSanctioned = rawStatus.includes('approv') || rawStatus.includes('disburs');
+    const isDisbursed = rawStatus.includes('disburs');
+
+    // Resolve localized scheme name
+    let schemeDisplayName = app.schemeName || 'PM Mudra Yojana';
+    if (window.UdyamI18n && typeof window.UdyamI18n.getLocalizedSchemeDetails === 'function') {
+      const locDetails = window.UdyamI18n.getLocalizedSchemeDetails(app.schemeId || 'PMMY', curLang);
+      if (locDetails && locDetails.name) schemeDisplayName = locDetails.name;
+    }
+
+    // Format Amount
+    const formattedAmount = (typeof app.requestedAmount === 'number')
+      ? (curLang === 'te' ? `రూ. ${app.requestedAmount.toLocaleString('en-IN')}` : `₹ ${app.requestedAmount.toLocaleString('en-IN')}`)
+      : (app.requestedAmount || '₹ 5,00,000');
+
+    return `
+      <div class="application-card">
+        <div class="app-header-row">
+          <span class="app-tracking-badge">#${app.trackingId || 'UDS-847291'}</span>
+          <span class="app-status-badge ${statusClass}">● ${statusLabel}</span>
+        </div>
+
+        <h4 class="app-scheme-title">🏷️ ${schemeDisplayName}</h4>
+        <div class="app-proposed-biz">💼 ${app.proposedBusiness || 'Micro Food Processing Enterprise'}</div>
+        <div class="app-amount-row">💰 ${L.requested}: ${formattedAmount}</div>
+
+        <!-- Visual Lifecycle Pipeline -->
+        <div class="pipeline-wrapper">
+          <span class="pipeline-title">${L.pipeline_title}</span>
+          <div class="pipeline-steps">
+            <div class="pipeline-step ${isSubmitted ? 'completed' : ''}">
+              <div class="pipeline-dot">✓</div>
+              <span class="pipeline-label">${L.step1}</span>
+            </div>
+            <div class="pipeline-line ${isVerification ? 'completed' : ''}"></div>
+            <div class="pipeline-step ${isVerification ? 'active' : ''}">
+              <div class="pipeline-dot">${isSanctioned ? '✓' : '2'}</div>
+              <span class="pipeline-label">${L.step2}</span>
+            </div>
+            <div class="pipeline-line ${isSanctioned ? 'completed' : ''}"></div>
+            <div class="pipeline-step ${isSanctioned ? 'completed' : ''}">
+              <div class="pipeline-dot">${isDisbursed ? '✓' : '3'}</div>
+              <span class="pipeline-label">${L.step3}</span>
+            </div>
+            <div class="pipeline-line ${isDisbursed ? 'completed' : ''}"></div>
+            <div class="pipeline-step ${isDisbursed ? 'completed' : ''}">
+              <div class="pipeline-dot">4</div>
+              <span class="pipeline-label">${L.step4}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Remarks / Partner Info -->
+        <div class="app-remarks-box">
+          <strong>🏛️ ${app.partnerName || 'Andhra Grameena Bank (Lead RRB)'}:</strong><br>
+          ${app.remarks || 'Application successfully verified by CSC VLE Officer and forwarded to Lead Bank for physical verification & loan disbursement.'}
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="app-actions-row">
+          <button class="app-action-btn" onclick="showScreen(10)">${L.view_docs}</button>
+          <button class="app-action-btn" onclick="showScreen(9)">${L.lead_bank}</button>
+          <button class="app-action-btn" onclick="showScreen(4)">${L.ask_ai}</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
 function handleSubmitApplication() {
   const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
   const partnerName = (window.UdyamI18n && typeof window.UdyamI18n.localizePartnerName === 'function')
     ? window.UdyamI18n.localizePartnerName('Andhra Grameena Bank (RRB)', curLang)
     : 'Andhra Grameena Bank (RRB)';
-  const msgFormat = (typeof t === 'function')
-    ? t('partner_details.app_submitted', 'Application successfully submitted to {partner}!\nTracking ID: #UDS-847291')
-    : 'Application successfully submitted to {partner}!\nTracking ID: #UDS-847291';
-  alert(msgFormat.replace('{partner}', partnerName));
-  showScreen(3);
+
+  const schemeCode = currentSelectedScheme ? (currentSelectedScheme.shortCode || currentSelectedScheme.schemeId || 'PMMY') : 'PMMY';
+  const schemeName = currentSelectedScheme ? (currentSelectedScheme.schemeName || 'PM Mudra Yojana') : 'PM Mudra Yojana';
+  const trackingId = 'UDS-' + Math.floor(100000 + Math.random() * 900000);
+
+  const newApp = {
+    _id: 'app_' + Date.now(),
+    trackingId: trackingId,
+    schemeId: schemeCode,
+    schemeName: schemeName,
+    requestedAmount: (currentSelectedScheme && currentSelectedScheme.maxGrantLoanAmount) || 500000,
+    proposedBusiness: currentProfile.businessType || 'Food Business',
+    status: 'Submitted',
+    partnerName: partnerName,
+    appliedDate: new Date().toLocaleDateString(),
+    remarks: 'Application submitted via Udyam Setu Digital Portal. Documents are currently being pre-screened for Lead Bank sanction.'
+  };
+
+  window.__appliedApplications = [newApp, ...(window.__appliedApplications || [])];
+
+  // Try POST to backend
+  try {
+    fetch(`${API_BASE}/applications`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newApp)
+    }).catch(() => {});
+  } catch (e) {}
+
+  logTerminal(`[Applications Engine] Created Application #${trackingId} for scheme "${schemeName}" to partner "${partnerName}".`);
+
+  // Navigate to My Applications Screen
+  showScreen(11);
 }
 
 // Terminal Logger
