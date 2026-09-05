@@ -865,8 +865,21 @@ function renderInitialChatWelcome() {
   scrollToBottomChat();
 }
 
+function autoExpandTextarea(el) {
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function handleChatInputKeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChatMessage();
+  }
+}
+
 function onLanguageChanged() {
-  const lang = document.getElementById('chatLangSelect').value;
+  const lang = document.getElementById('chatLangSelect')?.value || 'Telugu';
   const input = document.getElementById('chatInput');
   const voiceText = document.getElementById('voicePromptText');
   
@@ -877,27 +890,40 @@ function onLanguageChanged() {
     }
   }
 
-  if (lang.includes('Hindi')) {
-    input.placeholder = 'हिंदी में पूछें या बोलें...';
-    voiceText.innerText = '🎙️ बोलें (Tap to Speak in Hindi)';
-  } else if (lang.includes('Telugu')) {
-    input.placeholder = 'తెలుగులో అడగండి లేదా మాట్లాడండి...';
-    voiceText.innerText = '🎙️ మాట్లాడండి (Tap to Speak in Telugu)';
-  } else if (lang.includes('Tamil')) {
-    input.placeholder = 'தமிழில் பேசவும்...';
-    voiceText.innerText = '🎙️ பேசுங்கள் (Tap to Speak in Tamil)';
-  } else if (lang.includes('Marathi')) {
-    input.placeholder = 'मराठीत विचारा...';
-    voiceText.innerText = '🎙️ बोला (Tap to Speak in Marathi)';
-  } else if (lang.includes('Kannada')) {
-    input.placeholder = 'ಕನ್ನಡದಲ್ಲಿ ಕೇಳಿ ಅಥವಾ ಮಾತನಾಡಿ...';
-    voiceText.innerText = '🎙️ ಮಾತನಾಡಿ (Tap to Speak in Kannada)';
-  } else if (lang.includes('Bengali')) {
-    input.placeholder = 'বাংলায় জিজ্ঞাসা করুন বা কথা বলুন...';
-    voiceText.innerText = '🎙️ বলুন (Tap to Speak in Bengali)';
-  } else {
-    input.placeholder = 'Ask or speak in your language...';
-    voiceText.innerText = '🎙️ Tap to Speak in your Language';
+  if (input) {
+    if (lang.includes('Hindi')) {
+      input.placeholder = 'हिंदी में पूछें... (Type here...)';
+    } else if (lang.includes('Telugu')) {
+      input.placeholder = 'తెలుగులో అడగండి... (Type here...)';
+    } else if (lang.includes('Tamil')) {
+      input.placeholder = 'தமிழில் கேட்கவும்... (Type here...)';
+    } else if (lang.includes('Marathi')) {
+      input.placeholder = 'मराठीत विचारा... (Type here...)';
+    } else if (lang.includes('Kannada')) {
+      input.placeholder = 'ಕನ್ನಡದಲ್ಲಿ ಕೇಳಿ... (Type here...)';
+    } else if (lang.includes('Bengali')) {
+      input.placeholder = 'বাংলায় জিজ্ঞাসা করুন... (Type here...)';
+    } else {
+      input.placeholder = 'Type here...';
+    }
+  }
+
+  if (voiceText) {
+    if (lang.includes('Hindi')) {
+      voiceText.innerText = '🎙️ बोलें (Tap to Speak in Hindi)';
+    } else if (lang.includes('Telugu')) {
+      voiceText.innerText = '🎙️ మాట్లాడండి (Tap to Speak in Telugu)';
+    } else if (lang.includes('Tamil')) {
+      voiceText.innerText = '🎙️ பேசுங்கள் (Tap to Speak in Tamil)';
+    } else if (lang.includes('Marathi')) {
+      voiceText.innerText = '🎙️ बोला (Tap to Speak in Marathi)';
+    } else if (lang.includes('Kannada')) {
+      voiceText.innerText = '🎙️ ಮಾತನಾಡಿ (Tap to Speak in Kannada)';
+    } else if (lang.includes('Bengali')) {
+      voiceText.innerText = '🎙️ বলুন (Tap to Speak in Bengali)';
+    } else {
+      voiceText.innerText = '🎙️ Tap to Speak in your Language';
+    }
   }
 
   if (!chatHistory || chatHistory.length === 0) {
@@ -906,7 +932,7 @@ function onLanguageChanged() {
 }
 
 function triggerBhashiniSpeechInput() {
-  const langSelect = document.getElementById('chatLangSelect').value;
+  const langSelect = document.getElementById('chatLangSelect')?.value || 'Telugu';
   const voiceBtn = document.getElementById('voiceBtn');
   const voiceText = document.getElementById('voicePromptText');
   const input = document.getElementById('chatInput');
@@ -928,7 +954,7 @@ function triggerBhashiniSpeechInput() {
     recognition.interimResults = false;
 
     recognition.onstart = () => {
-      voiceBtn.classList.add('listening');
+      if (voiceBtn) voiceBtn.classList.add('listening');
       if (voiceText) voiceText.innerText = `Listening in ${langSelect}... Speak now!`;
     };
 
@@ -937,22 +963,25 @@ function triggerBhashiniSpeechInput() {
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       if (transcript && transcript.trim()) {
-        input.value = transcript;
+        if (input) {
+          input.value = transcript;
+          autoExpandTextarea(input);
+        }
         speechCaptured = true;
         if (voiceText) voiceText.innerText = `Heard: "${transcript}"`;
-        voiceBtn.classList.remove('listening');
+        if (voiceBtn) voiceBtn.classList.remove('listening');
         sendChatMessage(true); // Auto-send and auto-speak reply
       }
     };
 
     recognition.onerror = () => {
-      voiceBtn.classList.remove('listening');
+      if (voiceBtn) voiceBtn.classList.remove('listening');
       if (voiceText) voiceText.innerText = 'Tap to Speak';
       fallbackSimulatedSpeech(langSelect);
     };
 
     recognition.onend = () => {
-      voiceBtn.classList.remove('listening');
+      if (voiceBtn) voiceBtn.classList.remove('listening');
       if (!speechCaptured && input && input.value.trim()) {
         sendChatMessage(true);
       }
@@ -973,27 +1002,30 @@ function fallbackSimulatedSpeech(langSelect) {
   const txt = document.getElementById('voicePromptText');
   const input = document.getElementById('chatInput');
 
-  btn.classList.add('listening');
-  txt.innerText = `Listening in ${langSelect}... Speak now`;
+  if (btn) btn.classList.add('listening');
+  if (txt) txt.innerText = `Listening in ${langSelect}... Speak now`;
 
   setTimeout(() => {
-    btn.classList.remove('listening');
-    txt.innerText = '🎙️ Tap to Speak in your Language';
+    if (btn) btn.classList.remove('listening');
+    if (txt) txt.innerText = '🎙️ Tap to Speak in your Language';
 
-    if (langSelect === 'Hindi') {
-      input.value = 'मुझे दुकान खोलने के लिए सरकारी लोन चाहिए।';
-    } else if (langSelect === 'Telugu') {
-      input.value = 'నాకు చిన్న వ్యాపారం కోసం ముద్ర లోన్ కావాలి.';
-    } else if (langSelect === 'Tamil') {
-      input.value = 'எனக்கு சிறு தொழில் தொடங்க கடன் வேண்டும்.';
-    } else if (langSelect === 'Marathi') {
-      input.value = 'मला व्यवसाय सुरू करण्यासाठी कर्ज हवे आहे.';
-    } else if (langSelect === 'Kannada') {
-      input.value = 'ನನಗೆ ಹೊಸ ವ್ಯಾಪಾರಕ್ಕಾಗಿ ಸರ್ಕಾರಿ ಸಾಲ ಬೇಕು.';
-    } else if (langSelect === 'Bengali') {
-      input.value = 'আমার নতুন ব্যবসা শুরু করার জন্য সরকারি ঋণ প্রয়োজন।';
-    } else {
-      input.value = 'I want a loan for starting a small food business.';
+    if (input) {
+      if (langSelect === 'Hindi') {
+        input.value = 'मुझे दुकान खोलने के लिए सरकारी लोन चाहिए।';
+      } else if (langSelect === 'Telugu') {
+        input.value = 'నాకు చిన్న వ్యాపారం కోసం ముద్ర లోన్ కావాలి.';
+      } else if (langSelect === 'Tamil') {
+        input.value = 'எனக்கு சிறு தொழில் தொடங்க கடன் வேண்டும்.';
+      } else if (langSelect === 'Marathi') {
+        input.value = 'मला व्यवसाय सुरू करण्यासाठी कर्ज हवे आहे.';
+      } else if (langSelect === 'Kannada') {
+        input.value = 'ನನಗೆ ಹೊಸ ವ್ಯಾಪಾರಕ್ಕಾಗಿ ಸರ್ಕಾರಿ ಸಾಲ ಬೇಕು.';
+      } else if (langSelect === 'Bengali') {
+        input.value = 'আমার নতুন ব্যবসা শুরু করার জন্য সরকারি ঋণ প্রয়োজন।';
+      } else {
+        input.value = 'I want a loan for starting a small food business.';
+      }
+      autoExpandTextarea(input);
     }
 
     sendChatMessage(true);
@@ -1027,7 +1059,7 @@ function scrollToBottomChat() {
 
 async function sendChatMessage(autoSpeak = false) {
   const input = document.getElementById('chatInput');
-  const message = input.value.trim();
+  const message = input ? input.value.trim() : '';
   const lang = document.getElementById('chatLangSelect')?.value || window.__currentLanguageName || 'English';
   const langCode = window.__currentLanguage || (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : 'en');
 
@@ -1040,7 +1072,10 @@ async function sendChatMessage(autoSpeak = false) {
   userBubble.className = 'chat-bubble user';
   userBubble.innerText = message;
   chatContainer.appendChild(userBubble);
-  input.value = '';
+  if (input) {
+    input.value = '';
+    input.style.height = 'auto';
+  }
 
   // Append typing indicator
   const typingBubble = document.createElement('div');

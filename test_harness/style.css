@@ -1319,146 +1319,166 @@ body {
   text-transform: uppercase;
 }
 
-/* Modern Floating Chat Input Dock */
+/* Sleek Dark Chat Input Card (Matching Exact User Reference) */
 .chat-dock-container {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 10px 0 6px 0;
-  padding: 0 2px;
+  flex-direction: column;
+  margin: 6px 0 2px 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
-.chat-dock-pill {
-  flex: 1;
-  min-width: 0;
+.chat-dock-card {
+  background: #181C26;
+  border-radius: 26px;
+  padding: 12px 14px 10px 16px;
   display: flex;
-  align-items: center;
-  gap: 6px;
-  background: #FFFFFF;
-  border: 1.5px solid #CBD5E1;
-  border-radius: 30px;
-  padding: 4px 6px 4px 10px;
-  box-shadow: 0 3px 14px rgba(15, 23, 42, 0.08);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.chat-dock-pill:focus-within {
-  border-color: #0F766E;
-  box-shadow: 0 4px 18px rgba(15, 118, 110, 0.22);
-}
-
-.dock-lang-badge {
-  display: inline-flex;
-  align-items: center;
-  background: #F1F5F9;
-  border: 1px solid #E2E8F0;
-  border-radius: 18px;
-  padding: 3px 6px;
-  flex-shrink: 0;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   transition: all 0.2s ease;
 }
 
-.dock-lang-badge:hover {
-  background: #E2E8F0;
-  border-color: #CBD5E1;
+.chat-dock-card:focus-within {
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 6px 24px rgba(139, 92, 246, 0.25);
 }
 
-.dock-lang-select,
-.lang-select,
+.dock-card-top {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dock-card-input,
+#chatInput {
+  width: 100%;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  color: #FFFFFF !important;
+  font-size: 14.5px !important;
+  font-weight: 500 !important;
+  font-family: inherit;
+  resize: none;
+  line-height: 1.4;
+  padding: 2px 0;
+  margin: 0;
+  max-height: 80px;
+  min-height: 22px;
+  box-sizing: border-box;
+}
+
+.dock-card-input::placeholder,
+#chatInput::placeholder {
+  color: #94A3B8;
+  font-weight: 400;
+  font-size: 14.5px;
+  opacity: 0.85;
+}
+
+.dock-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dock-card-lang {
+  display: flex;
+  align-items: center;
+}
+
+.dock-select-text,
 #chatLangSelect {
   background: transparent !important;
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: #1E293B;
+  color: #94A3B8 !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
   cursor: pointer;
-  padding: 1px 2px;
+  padding: 2px 0;
   font-family: inherit;
+  appearance: auto;
 }
 
-.dock-input,
-#chatInput,
-.chat-dock-pill input {
-  flex: 1;
-  min-width: 0;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-  background: transparent !important;
-  font-size: 13.5px;
-  font-weight: 500;
-  color: #0F172A;
-  padding: 6px 6px;
-  font-family: inherit;
-  margin: 0;
+.dock-select-text option,
+#chatLangSelect option {
+  background: #1E293B;
+  color: #FFFFFF;
 }
 
-.dock-input::placeholder,
-#chatInput::placeholder,
-.chat-dock-pill input::placeholder {
-  color: #94A3B8;
-  font-weight: 400;
-  font-size: 13px;
+.dock-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.dock-mic-btn,
-.chat-dock-pill .dock-mic-btn {
-  background: #F8FAFC;
-  border: 1px solid #E2E8F0;
+.dock-gradient-mic-btn {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  width: 34px;
-  height: 34px;
+  background: linear-gradient(135deg, #8B5CF6, #EC4899);
+  color: #FFFFFF;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
+  font-size: 16px;
   cursor: pointer;
+  box-shadow: 0 0 12px rgba(236, 72, 153, 0.45);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  color: #475569;
   flex-shrink: 0;
 }
 
-.dock-mic-btn:hover {
-  background: #ECFDF5;
-  border-color: #A7F3D0;
-  color: #059669;
+.dock-gradient-mic-btn:hover {
   transform: scale(1.08);
+  box-shadow: 0 0 18px rgba(236, 72, 153, 0.65);
 }
 
-.dock-mic-btn.listening {
-  background: #FEF2F2;
-  border-color: #FCA5A5;
-  color: #EF4444;
+.dock-gradient-mic-btn.listening {
+  background: #DC2626;
+  box-shadow: 0 0 18px rgba(220, 38, 38, 0.8);
   animation: micPulse 1.2s infinite;
 }
 
-.dock-send-btn {
-  background: linear-gradient(135deg, #0F766E, #059669);
+.dock-green-send-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #10B981;
   color: #FFFFFF;
   border: none;
-  border-radius: 50%;
-  width: 42px;
-  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   font-size: 16px;
-  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.38);
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.45);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   flex-shrink: 0;
 }
 
-.dock-send-btn:hover {
-  transform: translateY(-1px) scale(1.06);
-  box-shadow: 0 6px 18px rgba(15, 118, 110, 0.5);
+.dock-green-send-btn:hover {
+  background: #059669;
+  transform: scale(1.08);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.65);
 }
 
-.dock-send-btn:active {
+.dock-green-send-btn:active {
   transform: scale(0.95);
 }
+
 
 
 /* AI Chat Scheme Recommendation Cards (Screen 4) - Compact Clean Layout */
@@ -1667,47 +1687,176 @@ body {
 }
 
 
-.chat-input-row {
+/* Sleek Dark Pill Chat Input Dock */
+.chat-dock-container {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 8px 0 2px 0;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.chat-dock-card {
+  background: #141722;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 26px;
+  padding: 12px 14px 10px 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
   display: flex;
+  flex-direction: column;
   gap: 6px;
+  box-sizing: border-box;
+  width: 100%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chat-dock-card:focus-within {
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(59, 130, 246, 0.3);
+}
+
+.dock-card-top {
+  width: 100%;
+}
+
+.dock-card-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #F8FAFC;
+  font-size: 13.5px;
+  font-family: inherit;
+  line-height: 1.4;
+  resize: none;
+  padding: 0;
+  margin: 0;
+  display: block;
+  min-height: 22px;
+  max-height: 80px;
+  box-sizing: border-box;
+}
+
+.dock-card-input::placeholder {
+  color: #8E9BAE;
+  font-size: 13.5px;
+}
+
+.dock-card-bottom {
+  display: flex;
   align-items: center;
-  background: white;
-  border: 1px solid var(--border-color);
-  border-radius: 20px;
-  padding: 4px 8px;
-  margin-top: 4px;
+  justify-content: space-between;
+  width: 100%;
 }
 
-.lang-select {
-  border: none;
-  background: #F1F5F9;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: bold;
-  padding: 4px 6px;
-  outline: none;
+.dock-card-lang {
+  display: flex;
+  align-items: center;
 }
 
-.chat-input-row input {
-  flex: 1;
+.dock-select-text {
+  background: transparent;
   border: none;
   outline: none;
-  font-size: 12px;
-  padding: 4px;
-}
-
-.send-btn {
-  background: var(--primary-green);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
+  color: #CBD5E1;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 6px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.dock-select-text:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dock-select-text option {
+  background: #1E2430;
+  color: #F8FAFC;
+  font-size: 13px;
+  padding: 6px;
+}
+
+.dock-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dock-gradient-mic-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8B5CF6 0%, #C084FC 30%, #EC4899 100%);
+  border: none;
+  color: #FFFFFF;
+  font-size: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(168, 85, 247, 0.45);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  flex-shrink: 0;
+}
+
+.dock-gradient-mic-btn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.6);
+}
+
+.dock-gradient-mic-btn:active {
+  transform: scale(0.94);
+}
+
+.dock-gradient-mic-btn.listening {
+  animation: micPulseGlow 1.2s infinite alternate ease-in-out;
+}
+
+@keyframes micPulseGlow {
+  0% {
+    box-shadow: 0 0 6px rgba(236, 72, 153, 0.6);
+    transform: scale(1);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.9), 0 0 30px rgba(236, 72, 153, 0.7);
+    transform: scale(1.1);
+  }
+}
+
+.dock-green-send-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  border: none;
+  color: #FFFFFF;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  flex-shrink: 0;
+}
+
+.dock-green-send-btn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.6);
+}
+
+.dock-green-send-btn:active {
+  transform: scale(0.94);
+}
+
+.voice-bar {
+  display: none !important;
 }
 
 /* Screen 5: Profiling */

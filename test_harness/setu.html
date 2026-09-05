@@ -313,32 +313,30 @@
                             <!-- Dynamically populated by renderInitialChatWelcome() on load -->
                         </div>
 
-                        <!-- Voice mic bar -->
-                        <div class="voice-bar">
-                            <span id="voicePromptText">🎙️ Tap to Speak in your Language</span>
-                            <button class="voice-btn" id="voiceBtn" onclick="triggerBhashiniSpeechInput()"
-                                title="Speak in your mother tongue">🎙️</button>
-                        </div>
-
-                        <!-- Language & text input row -->
+                        <!-- Chat Input Dock (Sleek Dark Pill Card) -->
                         <div class="chat-dock-container">
-                            <div class="chat-dock-pill">
-                                <div class="dock-lang-badge">
-                                    <select id="chatLangSelect" class="dock-lang-select" onchange="onLanguageChanged()">
-                                        <option value="English">EN (English)</option>
-                                        <option value="Hindi">HI (हिन्दी)</option>
-                                        <option value="Telugu" selected>TE (తెలుగు)</option>
-                                        <option value="Tamil">TA (தமிழ்)</option>
-                                        <option value="Marathi">MR (मराठी)</option>
-                                        <option value="Kannada">KN (ಕನ್ನಡ)</option>
-                                        <option value="Bengali">BN (বাংলা)</option>
-                                    </select>
+                            <div class="chat-dock-card">
+                                <div class="dock-card-top">
+                                    <textarea id="chatInput" class="dock-card-input" placeholder="Type here..." rows="1" oninput="autoExpandTextarea(this)" onkeydown="handleChatInputKeyDown(event)"></textarea>
                                 </div>
-                                <input type="text" id="chatInput" class="dock-input" placeholder="Type here..."
-                                    onkeypress="if(event.key==='Enter') sendChatMessage()">
-                                <button type="button" class="dock-mic-btn" id="voiceBtn" onclick="triggerBhashiniSpeechInput()" title="Speak with AI">🎙️</button>
+                                <div class="dock-card-bottom">
+                                    <div class="dock-card-lang">
+                                        <select id="chatLangSelect" class="dock-select-text" onchange="onLanguageChanged()">
+                                            <option value="English">English ▾</option>
+                                            <option value="Telugu" selected>Telugu ▾</option>
+                                            <option value="Hindi">Hindi ▾</option>
+                                            <option value="Tamil">Tamil ▾</option>
+                                            <option value="Marathi">Marathi ▾</option>
+                                            <option value="Kannada">Kannada ▾</option>
+                                            <option value="Bengali">Bengali ▾</option>
+                                        </select>
+                                    </div>
+                                    <div class="dock-card-actions">
+                                        <button type="button" class="dock-gradient-mic-btn" id="voiceBtn" onclick="triggerBhashiniSpeechInput()" title="Speak with AI">🎙️</button>
+                                        <button type="button" class="dock-green-send-btn" onclick="sendChatMessage()" title="Send message">➔</button>
+                                    </div>
+                                </div>
                             </div>
-                            <button type="button" class="dock-send-btn" onclick="sendChatMessage()" title="Send message">➤</button>
                         </div>
                     </div>
 
