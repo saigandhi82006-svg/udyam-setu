@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadNearbyPartners();
   renderDocumentChecklist();
   runSchemeMatching(false); // background populate
+  renderInitialChatWelcome();
 });
 
 // Reactively handle language changes across the entire app
@@ -713,6 +714,157 @@ function handleChatInputKeyDown(e) {
   }
 }
 
+const WELCOME_DISCOVERY_DATA = {
+  Telugu: {
+    greeting: 'నమస్కారం! ఉద్యమ్ సేతు ఏఐ ప్రభుత్వ పథకాల సలహా కేంద్రానికి స్వాగతం. మీ వ్యాపారానికి తగిన పూచీకత్తు లేని ప్రభుత్వ రుణాలు (రూ. 50,000 నుండి రూ. 2 కోట్ల వరకు) మరియు 35% వరకు సబ్సిడీలను కనుగొనడానికి క్రింది విభాగంలో మీ వ్యాపారాన్ని ఎంచుకోండి లేదా నేరుగా అడగండి:',
+    title: '👇 మీ వ్యాపార రంగాన్ని ఎంచుకోండి (తక్షణ పథక వివరాల కోసం):',
+    listen: '🔊 వినండి (Listen)',
+    options: [
+      { label: '🍲 ఫుడ్ బిజినెస్ / టిఫిన్', prompt: 'నాకు టిఫిన్ సెంటర్ లేదా ఫుడ్ బిజినెస్ కోసం రుణం కావాలి' },
+      { label: '🛒 కిరాణా / చిల్లర దుకాణం', prompt: 'నాకు కిరాణా దుకాణం కోసం ముద్ర లోన్ కావాలి' },
+      { label: '🌾 వ్యవసాయం & పాడి (KCC)', prompt: 'నాకు వ్యవసాయం లేదా పాడి పరిశ్రమ కోసం కిసాన్ క్రెడిట్ కార్డ్ రుణం కావాలి' },
+      { label: '🧵 చేనేత & చేతివృత్తులు (విశ్వకర్మ)', prompt: 'నేను చేతివృత్తి లేదా చేనేత కళాకారుడిని, నాకు విశ్వకర్మ పథకం రుణం కావాలి' },
+      { label: '👗 టైలరింగ్ & వస్త్ర వ్యాపారం', prompt: 'నాకు టైలరింగ్ లేదా వస్త్ర వ్యాపారం కోసం ప్రభుత్వ రుణ సహాయం కావాలి' },
+      { label: '🏭 చిన్న తయారీ పరిశ్రమ (MSME)', prompt: 'నాకు చిన్న తయారీ లేదా ఫ్యాబ్రికేషన్ యూనిట్ కోసం లోన్ కావాలి' },
+      { label: '🛺 కమర్షియల్ ఆటో / వాహన రుణం', prompt: 'నాకు కమర్షియల్ ఆటో రిక్షా లేదా వాహనం కొనడానికి లోన్ కావాలి' },
+      { label: '🛍️ వీధి వ్యాపారం (పీఎం స్వనిధి)', prompt: 'నేను వీధి వ్యాపారిని, నాకు పీఎం స్వనిధి పథకం రుణం కావాలి' },
+      { label: '♿ దివ్యాంగుల రుణం (NHFDC)', prompt: 'దివ్యాంగుల స్వయం ఉపాధి రుణ పథకం వివరాలు కావాలి' },
+      { label: '💡 ముద్ర లోన్ EMI & వడ్డీ వివరాలు', prompt: 'ముద్ర లోన్ వడ్డీ రేట్లు, EMI మరియు సబ్సిడీ వివరాలు ఏమిటి?' }
+    ]
+  },
+  Hindi: {
+    greeting: 'नमस्ते! उद्यम सेतु एआई सरकारी योजना सलाहकार केंद्र में आपका स्वागत है। आपके व्यवसाय के लिए बिना गारंटी सरकारी ऋण (₹50,000 से ₹2 करोड़) और 35% तक सब्सिडी प्राप्त करने के लिए नीचे दिए गए विकल्पों में से अपना व्यवसाय चुनें या बोलकर पूछें:',
+    title: '👇 अपने व्यवसाय का चयन करें:',
+    listen: '🔊 सुनिए (Listen)',
+    options: [
+      { label: '🍲 फूड बिजनेस / टिफिन सेंटर', prompt: 'मुझे टिफिन सेंटर या खाद्य व्यवसाय शुरू करने के लिए लोन चाहिए' },
+      { label: '🛒 किराना / जनरल स्टोर', prompt: 'मुझे किराना दुकान या खुदरा व्यापार के लिए लोन चाहिए' },
+      { label: '🌾 कृषि एवं डेयरी (KCC)', prompt: 'मुझे कृषि या डेयरी फार्मिंग के लिए किसान क्रेडिट कार्ड लोन चाहिए' },
+      { label: '🧵 पीएम विश्वकर्मा (कारीगर)', prompt: 'मैं एक कारीगर हूँ, मुझे पीएम विश्वकर्मा योजना लोन चाहिए' },
+      { label: '👗 सिलाई व कपड़ा व्यापार', prompt: 'मुझे सिलाई या कपड़ा व्यवसाय के लिए ऋण चाहिए' },
+      { label: '🏭 लघु उद्योग / विनिर्माण', prompt: 'मुझे विनिर्माण इकाई शुरू करने के लिए लोन चाहिए' },
+      { label: '🛺 कमर्शियल ऑटो / वाहन लोन', prompt: 'मुझे कमर्शियल ऑटो रिक्शा खरीदने के लिए लोन चाहिए' },
+      { label: '🛍️ रेहड़ी-पटरी (पीएम स्वनिधि)', prompt: 'मैं रेहड़ी-पटरी विक्रेता हूँ, मुझे पीएम स्वनिधि लोन चाहिए' },
+      { label: '♿ दिव्यांगजन ऋण (NHFDC)', prompt: 'दिव्यांगजन स्वरोजगार ऋण योजना की जानकारी चाहिए' },
+      { label: '💡 मुद्रा लोन EMI व ब्याज दरें', prompt: 'मुद्रा लोन की ब्याज दरें और EMI क्या है?' }
+    ]
+  },
+  Kannada: {
+    greeting: 'ನಮಸ್ಕಾರ! ಉದ್ಯಮ ಸೇತು ಎಐ ಸರ್ಕಾರಿ ಯೋಜನೆಗಳ ಸಲಹಾ ಕೇಂದ್ರಕ್ಕೆ ಸ್ವಾಗತ. ನಿಮ್ಮ ವ್ಯವಹಾರಕ್ಕೆ ಸೂಕ್ತವಾದ ಅಡಮಾನವಿಲ್ಲದ ಸಾಲಗಳು ಮತ್ತು ಸಬ್ಸಿಡಿಗಳನ್ನು ತಿಳಿಯಲು ಕೆಳಗಿನ ಆಯ್ಕೆಗಳಿಂದ ನಿಮ್ಮ ಉದ್ಯಮವನ್ನು ಆರಿಸಿ:',
+    title: '👇 ನಿಮ್ಮ ವ್ಯವಹಾರವನ್ನು ಆಯ್ಕೆಮಾಡಿ:',
+    listen: '🔊 ಕೇಳಿ (Listen)',
+    options: [
+      { label: '🍲 ಆಹಾರ / ಹೋಟೆಲ್ / ತಿಂಡಿ', prompt: 'ನನಗೆ ಹೋಟೆಲ್ ಅಥವಾ ತಿಂಡಿ ಕೇಂದ್ರ ಪ್ರಾರಂಭಿಸಲು ಸಾಲ ಬೇಕು' },
+      { label: '🛒 ಕಿರಾಣಿ / ಚಿಲ್ಲರೆ ಅಂಗಡಿ', prompt: 'ನನಗೆ ಕಿರಾಣಿ ಅಂಗಡಿ ಅಥವಾ ಚಿಲ್ಲರೆ ವ್ಯಾಪಾರಕ್ಕಾಗಿ ಸಾಲ ಬೇಕು' },
+      { label: '🌾 ಕೃಷಿ ಮತ್ತು ಹೈನುಗಾರಿಕೆ (KCC)', prompt: 'ನನಗೆ ಕೃಷಿ ಅಥವಾ ಹೈನುಗಾರಿಕೆಗಾಗಿ ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಸಾಲ ಬೇಕು' },
+      { label: '🧵 ಪಿಎಂ ವಿಶ್ವಕರ್ಮ (ಕರಕುಶಲ)', prompt: 'ನಾನು ನೇಕಾರ ಅಥವಾ ಕುಶಲಕರ್ಮಿ, ನನಗೆ ಸರ್ಕಾರದ ಸಾಲ ಬೇಕು' },
+      { label: '👗 ಟೈಲರಿಂಗ್ ಮತ್ತು ಗಾರ್ಮೆಂಟ್ಸ್', prompt: 'ನನಗೆ ಟೈಲರಿಂಗ್ ಅಥವಾ ಜವಳಿ ವ್ಯಾಪಾರಕ್ಕಾಗಿ ಸಾಲ ಬೇಕು' },
+      { label: '🏭 ಸಣ್ಣ ಕೈಗಾರಿಕೆ / ಉತ್ಪಾದನೆ', prompt: 'ನನಗೆ ಸಣ್ಣ ಉತ್ಪಾದನಾ ಘಟಕ ಸ್ಥಾಪಿಸಲು ಸಾಲ ಬೇಕು' },
+      { label: '🛺 ಕಮರ್ಷಿಯಲ್ ಆಟೋ ಸಾಲ', prompt: 'ನನಗೆ ಕಮರ್ಷಿಯಲ್ ಆಟೋ ರಿಕ್ಷಾ ಖರೀದಿಸಲು ಸಾಲ ಬೇಕು' },
+      { label: '🛍️ ಬೀದಿ ವ್ಯಾಪಾರ (ಪಿಎಂ ಸ್ವನಿಧಿ)', prompt: 'ನಾನು ಬೀದಿ ವ್ಯಾಪಾರಿ, ನನಗೆ ಪಿಎಂ ಸ್ವನಿಧಿ ಸಾಲ ಬೇಕು' },
+      { label: '♿ ವಿಕಲಚೇತನರ ಸಾಲ (NHFDC)', prompt: 'ವಿಕಲಚೇತನರ ಸ್ವಯಂ ಉದ್ಯೋಗ ಸಾಲ ಯೋಜನೆಯ ವಿವರಗಳು' },
+      { label: '💡 ಮುದ್ರಾ ಸಾಲದ EMI ಮತ್ತು ಬಡ್ಡಿ', prompt: 'ಮುದ್ರಾ ಸಾಲದ ಬಡ್ಡಿದರ ಮತ್ತು EMI ಎಷ್ಟು?' }
+    ]
+  },
+  Bengali: {
+    greeting: 'নমস্কার! উদ্যম সেতু এআই সরকারি প্রকল্পের পরামর্শ কেন্দ্রে আপনাকে স্বাগত জানাই। আপনার ব্যবসার জন্য সরকারি ঋণ ও ভর্তুকির বিবরণ জানতে নিচের বিকল্পগুলি থেকে বেছে নিন:',
+    title: '👇 আপনার ব্যবসার ধরন নির্বাচন করুন:',
+    listen: '🔊 শুনুন (Listen)',
+    options: [
+      { label: '🍲 খাদ্য ব্যবসা / টিফিন সেন্টার', prompt: 'আমার খাদ্য ব্যবসা বা টিফিন সেন্টার খোলার জন্য ঋণ প্রয়োজন' },
+      { label: '🛒 মুদি ও খুচরা দোকান', prompt: 'আমার মুদি দোকান বা খুচরা ব্যবসার জন্য ঋণ প্রয়োজন' },
+      { label: '🌾 কৃষি ও দুগ্ধ খামার (KCC)', prompt: 'আমার কৃষি বা দুগ্ধ খামারের জন্য কিসান ক্রেডিট কার্ড ঋণ প্রয়োজন' },
+      { label: '🧵 হস্তশিল্প ও তাঁতি (বিশ্বকর্মা)', prompt: 'আমি তাঁতি বা কারিগর, আমার সরকারি ঋণ ও অনুদান প্রয়োজন' },
+      { label: '👗 দর্জি ও পোশাক ব্যবসা', prompt: 'আমার দর্জি দোকান বা বস্ত্র ব্যবসার জন্য ঋণ প্রয়োজন' },
+      { label: '🏭 ক্ষুদ্র কারখানা / উৎপাদন', prompt: 'আমার ক্ষুদ্র কারখানা বা উৎপাদন ইউনিট স্থাপনের জন্য ঋণ প্রয়োজন' },
+      { label: '🛺 বাণিজ্যিক অটো / গাড়ি ঋণ', prompt: 'আমার বাণিজ্যিক যানবাহনের জন্য ঋণ প্রয়োজন' },
+      { label: '🛍️ রাস্তার হকার (প্রধানমন্ত্রী স্বনিধি)', prompt: 'আমি ফুটপাতের হকার, আমার প্রধানমন্ত্রী স্বনিধি ঋণ প্রয়োজন' },
+      { label: '♿ প্রতিবন্ধী ঋণ (NHFDC)', prompt: 'প্রতিবন্ধী ব্যক্তিদের স্বনির্ভর কর্মসংস্থান ঋণ প্রকল্পের বিবরণ' },
+      { label: '💡 মুদ্রা ঋণের EMI ও সুদ', prompt: 'মুদ্রা ঋণের সুদের হার এবং ইএমআই কত?' }
+    ]
+  },
+  English: {
+    greeting: 'Welcome to Udyam Setu AI, your intelligent government scheme advisor. To discover collateral-free business loans (₹50,000 to ₹2 Crore) and capital subsidies up to 35%, tap your business sector below or ask your question directly:',
+    title: '👇 Select your business sector to explore matching schemes:',
+    listen: '🔊 Listen',
+    options: [
+      { label: '🍲 Food Business / Tiffin / Hotel', prompt: 'I want a loan for starting a food business, hotel, or tiffin center' },
+      { label: '🛒 Retail / Kirana Grocery Shop', prompt: 'I want a loan for a kirana shop or retail grocery store' },
+      { label: '🌾 Agriculture & Dairy (KCC)', prompt: 'I want an agriculture, farming, or dairy loan (KCC / AIF)' },
+      { label: '🧵 PM Vishwakarma (Artisans)', prompt: 'I am an artisan or handloom weaver looking for Vishwakarma and Weaver Mudra schemes' },
+      { label: '👗 Tailoring & Garment Boutique', prompt: 'I want a loan for a tailoring boutique or textile garment manufacturing' },
+      { label: '🏭 Small Manufacturing / MSME', prompt: 'I want a loan to set up a small manufacturing or fabrication unit' },
+      { label: '🛺 Commercial Auto / Transport', prompt: 'I want a loan to buy a commercial auto-rickshaw or goods vehicle' },
+      { label: '🛍️ Street Vending (PM SVANidhi)', prompt: 'I am a street vendor looking for PM SVANidhi working capital loan' },
+      { label: '♿ Divyangjan PwD Loan (NHFDC)', prompt: 'I need details on self-employment loan schemes for persons with disabilities' },
+      { label: '💡 Mudra Loan EMI & Interest Rates', prompt: 'What are the interest rates, EMI terms, and subsidy under PM Mudra Yojana?' }
+    ]
+  }
+};
+
+function renderInitialChatWelcome() {
+  const chatContainer = document.getElementById('chatMessages');
+  if (!chatContainer) return;
+  if (chatHistory && chatHistory.length > 0) return; // preserve active conversation
+
+  const rawLang = document.getElementById('chatLangSelect')?.value || window.__currentLanguageName || 'Telugu';
+  const lang = rawLang.includes('Hindi') ? 'Hindi'
+    : (rawLang.includes('Kannada') ? 'Kannada'
+    : (rawLang.includes('Bengali') ? 'Bengali'
+    : (rawLang.includes('English') ? 'English'
+    : 'Telugu')));
+
+  const data = WELCOME_DISCOVERY_DATA[lang] || WELCOME_DISCOVERY_DATA.Telugu;
+
+  chatContainer.innerHTML = '';
+
+  const aiBubble = document.createElement('div');
+  aiBubble.className = 'chat-bubble ai';
+
+  const greetingDiv = document.createElement('div');
+  greetingDiv.innerText = data.greeting;
+  aiBubble.appendChild(greetingDiv);
+
+  const selDiv = document.createElement('div');
+  selDiv.className = 'business-selection-container';
+  const titleDiv = document.createElement('div');
+  titleDiv.className = 'selection-title';
+  titleDiv.innerText = data.title;
+  selDiv.appendChild(titleDiv);
+
+  const gridDiv = document.createElement('div');
+  gridDiv.className = 'business-chips-grid';
+  data.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'business-option-chip';
+    btn.innerHTML = `<span class="chip-label">${opt.label}</span><span class="chip-arrow">➔</span>`;
+    btn.addEventListener('click', () => {
+      sendSuggestedPrompt(opt.prompt);
+    });
+    gridDiv.appendChild(btn);
+  });
+  selDiv.appendChild(gridDiv);
+  aiBubble.appendChild(selDiv);
+
+  const listenBtn = document.createElement('button');
+  listenBtn.type = 'button';
+  listenBtn.className = 'listen-btn';
+  listenBtn.innerText = data.listen;
+  listenBtn.addEventListener('click', function() {
+    speakBhashiniVoice(data.greeting, lang, this);
+  });
+  aiBubble.appendChild(listenBtn);
+
+  const creditSmall = document.createElement('small');
+  creditSmall.className = 'ai-credit';
+  creditSmall.innerText = '✨ Powered by Google Gemini AI & Digital India BHASHINI';
+  aiBubble.appendChild(creditSmall);
+
+  chatContainer.appendChild(aiBubble);
+  scrollToBottomChat();
+}
+
 function onLanguageChanged() {
   const lang = document.getElementById('chatLangSelect').value;
   const input = document.getElementById('chatInput');
@@ -725,27 +877,31 @@ function onLanguageChanged() {
     }
   }
 
-  if (lang === 'Hindi') {
+  if (lang.includes('Hindi')) {
     input.placeholder = 'हिंदी में पूछें या बोलें...';
     voiceText.innerText = '🎙️ बोलें (Tap to Speak in Hindi)';
-  } else if (lang === 'Telugu') {
+  } else if (lang.includes('Telugu')) {
     input.placeholder = 'తెలుగులో అడగండి లేదా మాట్లాడండి...';
     voiceText.innerText = '🎙️ మాట్లాడండి (Tap to Speak in Telugu)';
-  } else if (lang === 'Tamil') {
+  } else if (lang.includes('Tamil')) {
     input.placeholder = 'தமிழில் பேசவும்...';
     voiceText.innerText = '🎙️ பேசுங்கள் (Tap to Speak in Tamil)';
-  } else if (lang === 'Marathi') {
+  } else if (lang.includes('Marathi')) {
     input.placeholder = 'मराठीत विचारा...';
     voiceText.innerText = '🎙️ बोला (Tap to Speak in Marathi)';
-  } else if (lang === 'Kannada') {
+  } else if (lang.includes('Kannada')) {
     input.placeholder = 'ಕನ್ನಡದಲ್ಲಿ ಕೇಳಿ ಅಥವಾ ಮಾತನಾಡಿ...';
     voiceText.innerText = '🎙️ ಮಾತನಾಡಿ (Tap to Speak in Kannada)';
-  } else if (lang === 'Bengali') {
+  } else if (lang.includes('Bengali')) {
     input.placeholder = 'বাংলায় জিজ্ঞাসা করুন বা কথা বলুন...';
     voiceText.innerText = '🎙️ বলুন (Tap to Speak in Bengali)';
   } else {
     input.placeholder = 'Ask or speak in your language...';
     voiceText.innerText = '🎙️ Tap to Speak in your Language';
+  }
+
+  if (!chatHistory || chatHistory.length === 0) {
+    renderInitialChatWelcome();
   }
 }
 
