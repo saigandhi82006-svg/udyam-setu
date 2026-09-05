@@ -1570,6 +1570,20 @@ function switchDetailTab(tab, element = null) {
       </div>
     `;
   }
+
+  const primaryBtn = document.querySelector('#screen-7 .scheme-action-bar .pill-btn.primary');
+  if (primaryBtn) {
+    if (tab === 'overview') {
+      primaryBtn.innerText = 'Continue';
+      primaryBtn.onclick = function() { switchDetailTab('benefits'); };
+    } else if (tab === 'benefits') {
+      primaryBtn.innerText = 'Continue';
+      primaryBtn.onclick = function() { switchDetailTab('eligibility'); };
+    } else if (tab === 'eligibility') {
+      primaryBtn.innerHTML = '📋 Documents';
+      primaryBtn.onclick = function() { showScreen(10); };
+    }
+  }
 }
 
 function handleBackFromDetails() {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/scheme.dart';
-import 'my_applications_screen.dart';
+import 'nearby_partners_screen.dart';
 
 class DocumentChecklistScreen extends StatefulWidget {
   final Scheme scheme;
@@ -14,7 +14,6 @@ class DocumentChecklistScreen extends StatefulWidget {
 
 class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
   late List<SchemeDocument> _documents;
-  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -121,56 +120,6 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
     );
   }
 
-  void _submitApplication() async {
-    setState(() => _isSubmitting = true);
-    await Future.delayed(const Duration(milliseconds: 700));
-    setState(() => _isSubmitting = false);
-
-    if (mounted) {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: const BoxDecoration(
-                  color: AppTheme.lightGreen,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.check_circle, color: AppTheme.primaryGreen, size: 48),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Application Submitted!',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Your application for ${widget.scheme.schemeName} has been generated with Tracking ID #UDS-847291.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const MyApplicationsScreen()),
-                  );
-                },
-                child: const Text('Track Application'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final uploadedCount = _documents.where((d) => d.status == 'Uploaded').length;
@@ -180,7 +129,7 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+          icon: const Icon(Icons.arrow_back_ios_new, size: 16),
           onPressed: () => Navigator.pop(context),
         ),
         title: Column(
@@ -188,11 +137,11 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
           children: [
             const Text(
               'Required Documents',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold),
             ),
             Text(
               widget.scheme.schemeName,
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontWeight: FontWeight.normal),
+              style: TextStyle(fontSize: 10.5, color: Colors.grey.shade600, fontWeight: FontWeight.normal),
             ),
           ],
         ),
@@ -202,11 +151,11 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
         children: [
           // Completion Status Bar
           Container(
-            padding: const EdgeInsets.all(16),
-            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
+            margin: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(14),
               border: Border.all(color: const Color(0xFFE2E8F0)),
             ),
             child: Row(
@@ -217,7 +166,7 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
                     children: [
                       Text(
                         '$uploadedCount of $totalCount Documents Uploaded',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.darkText),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5, color: AppTheme.darkText),
                       ),
                       const SizedBox(height: 6),
                       ClipRRect(
@@ -226,114 +175,226 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
                           value: uploadedCount / totalCount,
                           backgroundColor: Colors.grey.shade200,
                           valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryGreen),
-                          minHeight: 6,
+                          minHeight: 5,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 14),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                   decoration: BoxDecoration(
                     color: AppTheme.lightGreen,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     '${((uploadedCount / totalCount) * 100).round()}% Ready',
-                    style: const TextStyle(color: AppTheme.primaryGreen, fontWeight: FontWeight.bold, fontSize: 12),
+                    style: const TextStyle(color: AppTheme.primaryGreen, fontWeight: FontWeight.bold, fontSize: 10.5),
                   ),
                 ),
               ],
             ),
           ),
 
-          // Document Checklist Items (Screen 10)
+          // Document Checklist Items + Nearby Partners Option (Screen 10)
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _documents.length,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              itemCount: _documents.length + 1,
               itemBuilder: (context, index) {
-                final doc = _documents[index];
-                final isUploaded = doc.status == 'Uploaded';
+                if (index < _documents.length) {
+                  final doc = _documents[index];
+                  final isUploaded = doc.status == 'Uploaded';
 
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.grey.shade200),
-                  ),
-                  child: Row(
-                    children: [
-                      // Document Icon
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(Icons.description_outlined, color: AppTheme.darkText, size: 22),
-                      ),
-                      const SizedBox(width: 14),
-                      // Document Name & Status
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              doc.docName,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.darkText),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              isUploaded ? 'Uploaded (1.2 MB)' : 'Pending upload',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: isUploaded ? AppTheme.primaryGreen : AppTheme.pendingOrange,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Status Circle Indicator / Upload Action
-                      GestureDetector(
-                        onTap: () => _pickAndUploadDocument(doc),
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        // Document Icon
+                        Container(
+                          padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: isUploaded ? const Color(0xFFDCFCE7) : const Color(0xFFFEF3C7),
-                            shape: BoxShape.circle,
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Icon(
-                            isUploaded ? Icons.check : Icons.hourglass_top_rounded,
-                            color: isUploaded ? const Color(0xFF15803D) : const Color(0xFFD97706),
-                            size: 18,
+                          child: const Icon(Icons.description_outlined, color: AppTheme.darkText, size: 18),
+                        ),
+                        const SizedBox(width: 12),
+                        // Document Name & Status
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                doc.docName,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5, color: AppTheme.darkText),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                isUploaded ? 'Uploaded (1.2 MB)' : 'Pending upload',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: isUploaded ? AppTheme.primaryGreen : AppTheme.pendingOrange,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                    ],
+                        // Status Circle Indicator / Upload Action
+                        GestureDetector(
+                          onTap: () => _pickAndUploadDocument(doc),
+                          child: Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: isUploaded ? const Color(0xFFDCFCE7) : const Color(0xFFFEF3C7),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              isUploaded ? Icons.check : Icons.hourglass_top_rounded,
+                              color: isUploaded ? const Color(0xFF15803D) : const Color(0xFFD97706),
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                // In-list option card: Nearby Partners
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const NearbyPartnersScreen()),
+                    );
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 4, bottom: 14),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppTheme.lightGreen,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.location_on_rounded, color: AppTheme.primaryGreen, size: 18),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Nearby Partners',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5, color: AppTheme.darkText),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Find CSC centers & bank branches near you',
+                                style: TextStyle(fontSize: 10, color: Color(0xFF64748B)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.arrow_forward_ios_rounded, size: 13, color: Color(0xFF94A3B8)),
+                      ],
+                    ),
                   ),
                 );
               },
             ),
           ),
 
-          // Bottom Button: Upload Document / Submit Application
+          // Always Visible Bottom Bar Area: Nearby Partners Option + Done Button
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             decoration: const BoxDecoration(
               color: Colors.white,
               border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
             ),
             child: SafeArea(
-              child: ElevatedButton(
-                onPressed: _isSubmitting ? null : _submitApplication,
-                child: _isSubmitting
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text('Submit Application to Bank'),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Prominent Always Visible Nearby Partners Option (📍 Nearby Partners ->)
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const NearbyPartnersScreen()),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      margin: const EdgeInsets.only(bottom: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.location_on_rounded, size: 18, color: AppTheme.primaryGreen),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Nearby Partners',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.darkText,
+                              ),
+                            ),
+                          ),
+                          Icon(Icons.arrow_forward_ios_rounded, size: 13, color: Color(0xFF94A3B8)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Existing Done Button
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const NearbyPartnersScreen()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(44),
+                      backgroundColor: AppTheme.primaryGreen,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.check, size: 18, color: Colors.white),
+                        SizedBox(width: 6),
+                        Text(
+                          'Done',
+                          style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
