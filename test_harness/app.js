@@ -1,6 +1,9 @@
 // Udyam Setu - Interactive Prototype Client
-const API_BASE = '/api';
+const API_BASE = (window.location && window.location.origin && window.location.origin !== 'null' && !window.location.protocol.startsWith('file') && (window.location.port === '5000' || window.location.port === '')) 
+  ? '/api' 
+  : 'http://localhost:5000/api';
 
+let chatHistory = [];
 let currentSelectedScheme = null;
 let currentProfile = {
   name: 'Ravi Kumar',
@@ -900,6 +903,8 @@ async function sendChatMessage(autoSpeak = false) {
   scrollToBottomChat();
 
   try {
+    if (!Array.isArray(chatHistory)) chatHistory = [];
+
     const response = await fetch(`${API_BASE}/ai/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -914,9 +919,13 @@ async function sendChatMessage(autoSpeak = false) {
     const data = await response.json();
     typingBubble.remove();
 
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || data.error || `Server responded with ${response.status}`);
+    }
+
     // Track multi-turn conversation history
     chatHistory.push({ role: 'user', text: message });
-    chatHistory.push({ role: 'model', text: data.message || data.reply });
+    chatHistory.push({ role: 'model', text: data.message || data.reply || '' });
     if (chatHistory.length > 8) chatHistory = chatHistory.slice(-8);
 
     // Build dynamic interactive content container
