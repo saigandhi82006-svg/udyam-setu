@@ -9926,8 +9926,10 @@
       window.updateAgeCategoryBadge();
     }
 
-    // 7. Update html lang attribute
-    document.documentElement.setAttribute('lang', activeLang);
+    // 8. Update html lang attribute
+    if (document.documentElement && typeof document.documentElement.setAttribute === 'function') {
+      document.documentElement.setAttribute('lang', activeLang);
+    }
   }
 
   function setLanguage(langCode, triggerRender = true) {
@@ -9945,9 +9947,13 @@
     applyTranslationsToDOM();
 
     // Trigger custom event for app handlers
-    window.dispatchEvent(new CustomEvent('udyam:languageChanged', {
-      detail: { language: code, languageName: CODE_TO_NAME[code] || 'English' }
-    }));
+    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+      try {
+        window.dispatchEvent(new CustomEvent('udyam:languageChanged', {
+          detail: { language: code, languageName: CODE_TO_NAME[code] || 'English' }
+        }));
+      } catch (e) {}
+    }
 
     // If scheme details view is active, re-render it in the new language
     if (triggerRender && typeof window.refreshCurrentSchemeDetails === 'function') {
