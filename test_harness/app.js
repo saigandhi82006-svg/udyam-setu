@@ -3219,8 +3219,67 @@ window.submitSupportFeedback = submitSupportFeedback;
 // ==========================================================================
 
 const VOICE_PROFILING_DATA = {
+  English: {
+    modalTitle: '🎙️ AI Voice-Guided Profiling',
+    title: '🎙️ AI Voice-Guided Profiling',
+    stepLabel: 'Question {step} of 4',
+    replayAudioText: '🔊 Listen Again',
+    nextBtnText: 'Next Question ➔',
+    finishBtnText: '🎯 Find Matching Schemes ➔',
+    chipLabels: {
+      name: 'Name:',
+      age: 'Age:',
+      gender: 'Gender:',
+      category: 'Category:',
+      business: 'Business:',
+      investment: 'Loan:'
+    },
+    questions: [
+      {
+        step: 1,
+        text: 'Hello! What is your full name? And are you male or female?',
+        sub: 'Speak Name and Gender (e.g., My name is Bhaskar, Male)',
+        sample: 'My name is Bhaskar, Male'
+      },
+      {
+        step: 2,
+        text: 'What is your age? And what is your social category (OBC, SC, ST, General, Women)?',
+        sub: 'Speak Age and Category (e.g., Age 30, OBC Category)',
+        sample: 'I am 30 years old, OBC category'
+      },
+      {
+        step: 3,
+        text: 'What business do you run or want to start? And is your location rural or urban?',
+        sub: 'Speak Business & Location (e.g., Kirana Grocery Shop, Rural area)',
+        sample: 'Kirana grocery shop in a rural area'
+      },
+      {
+        step: 4,
+        text: 'How much loan or capital investment do you need? (e.g., ₹50,000, ₹2 Lakhs, or ₹5 Lakhs)?',
+        sub: 'Speak Needed Loan Amount (e.g., Need 5 Lakhs Mudra loan)',
+        sample: 'I need a 5 Lakh Mudra loan'
+      }
+    ],
+    successGreeting: 'Your profile details have been saved successfully! Showing your matching government schemes now.',
+    tapToSpeak: 'Tap to Speak',
+    listening: 'Listening... Speak now',
+    heardPrefix: 'Heard: '
+  },
   Telugu: {
+    modalTitle: '🎙️ AI వాయిస్ ప్రొఫైలింగ్',
     title: '🎙️ AI వాయిస్ ప్రొఫైలింగ్',
+    stepLabel: 'ప్రశ్న {step} / 4',
+    replayAudioText: '🔊 మళ్లీ వినండి',
+    nextBtnText: 'తదుపరి ప్రశ్న ➔',
+    finishBtnText: '🎯 సరిపోయే పథకాలను చూడండి ➔',
+    chipLabels: {
+      name: 'పేరు:',
+      age: 'వయస్సు:',
+      gender: 'లింగం:',
+      category: 'వర్గం:',
+      business: 'వ్యాపారం:',
+      investment: 'రుణం:'
+    },
     questions: [
       {
         step: 1,
@@ -3253,7 +3312,20 @@ const VOICE_PROFILING_DATA = {
     heardPrefix: 'వినబడినది: '
   },
   Hindi: {
+    modalTitle: '🎙️ AI वॉयस प्रोफाइलिंग',
     title: '🎙️ AI वॉयस प्रोफाइलिंग',
+    stepLabel: 'सवाल {step} / 4',
+    replayAudioText: '🔊 फिर से सुनें',
+    nextBtnText: 'अगला सवाल ➔',
+    finishBtnText: '🎯 उपयुक्त योजनाएं देखें ➔',
+    chipLabels: {
+      name: 'नाम:',
+      age: 'आयु:',
+      gender: 'लिंग:',
+      category: 'वर्ग:',
+      business: 'व्यवसाय:',
+      investment: 'ऋण:'
+    },
     questions: [
       {
         step: 1,
@@ -3286,7 +3358,20 @@ const VOICE_PROFILING_DATA = {
     heardPrefix: 'सुना गया: '
   },
   Tamil: {
+    modalTitle: '🎙️ AI குரல் சுயவிவரம்',
     title: '🎙️ AI குரல் சுயவிவரம்',
+    stepLabel: 'கேள்வி {step} / 4',
+    replayAudioText: '🔊 மீண்டும் கேட்கவும்',
+    nextBtnText: 'அடுத்த கேள்வி ➔',
+    finishBtnText: '🎯 பொருத்தமான திட்டங்களைக் காண்க ➔',
+    chipLabels: {
+      name: 'பெயர்:',
+      age: 'வயது:',
+      gender: 'பாலினம்:',
+      category: 'பிரிவு:',
+      business: 'வணிகம்:',
+      investment: 'கடன்:'
+    },
     questions: [
       {
         step: 1,
@@ -3319,7 +3404,20 @@ const VOICE_PROFILING_DATA = {
     heardPrefix: 'கேட்டது: '
   },
   Kannada: {
+    modalTitle: '🎙️ AI ಧ್ವನಿ ಪ್ರೊಫೈಲಿಂಗ್',
     title: '🎙️ AI ಧ್ವನಿ ಪ್ರೊಫೈಲಿಂಗ್',
+    stepLabel: 'ಪ್ರಶ್ನೆ {step} / 4',
+    replayAudioText: '🔊 ಪುನಃ ಕೇಳಿ',
+    nextBtnText: 'ಮುಂದಿನ ಪ್ರಶ್ನೆ ➔',
+    finishBtnText: '🎯 ಯೋಜನೆಗಳನ್ನು ನೋಡಿ ➔',
+    chipLabels: {
+      name: 'ಹೆಸರು:',
+      age: 'ವಯಸ್ಸು:',
+      gender: 'ಲಿಂಗ:',
+      category: 'ವರ್ಗ:',
+      business: 'ವ್ಯವಹಾರ:',
+      investment: 'ಸಾಲ:'
+    },
     questions: [
       {
         step: 1,
@@ -3352,7 +3450,20 @@ const VOICE_PROFILING_DATA = {
     heardPrefix: 'ಕೇಳಿದ್ದು: '
   },
   Marathi: {
+    modalTitle: '🎙️ AI व्हॉईस प्रोफाइलिंग',
     title: '🎙️ AI व्हॉईस प्रोफाइलिंग',
+    stepLabel: 'प्रश्न {step} / 4',
+    replayAudioText: '🔊 पुन्हा ऐका',
+    nextBtnText: 'पुढील प्रश्न ➔',
+    finishBtnText: '🎯 योग्य योजना पहा ➔',
+    chipLabels: {
+      name: 'नाव:',
+      age: 'वय:',
+      gender: 'लिंग:',
+      category: 'प्रवर्ग:',
+      business: 'व्यवसाय:',
+      investment: 'कर्ज:'
+    },
     questions: [
       {
         step: 1,
@@ -3385,7 +3496,20 @@ const VOICE_PROFILING_DATA = {
     heardPrefix: 'ऐकले: '
   },
   Bengali: {
+    modalTitle: '🎙️ AI ভয়েস প্রোফাইলিং',
     title: '🎙️ AI ভয়েস প্রোফাইলিং',
+    stepLabel: 'প্রশ্ন {step} / 4',
+    replayAudioText: '🔊 আবার শুনুন',
+    nextBtnText: 'পরবর্তী প্রশ্ন ➔',
+    finishBtnText: '🎯 উপযুক্ত প্রকল্প দেখুন ➔',
+    chipLabels: {
+      name: 'নাম:',
+      age: 'বয়স:',
+      gender: 'লিঙ্গ:',
+      category: 'শ্রেণি:',
+      business: 'ব্যবসা:',
+      investment: 'ঋণ:'
+    },
     questions: [
       {
         step: 1,
@@ -3403,7 +3527,7 @@ const VOICE_PROFILING_DATA = {
         step: 3,
         text: 'আপনি কোন ব্যবসা করছেন বা শুরু করতে চান? গ্রামীণ না শহুরে?',
         sub: 'ব্যবসা ও এলাকা',
-        sample: 'মুদি দোকান, গ্রামীণ এলাকা'
+        sample: 'মুদি দোকান, গ্রামীಣ এলাকা'
       },
       {
         step: 4,
@@ -3416,39 +3540,6 @@ const VOICE_PROFILING_DATA = {
     tapToSpeak: 'কথা বলতে ট্যাপ করুন',
     listening: 'শুনছি... বলুন',
     heardPrefix: 'শোনা গেছে: '
-  },
-  English: {
-    title: '🎙️ AI Voice-Guided Profiling',
-    questions: [
-      {
-        step: 1,
-        text: 'Hello! What is your full name? And are you male or female?',
-        sub: 'Speak Name and Gender (e.g., My name is Bhaskar, Male)',
-        sample: 'My name is Bhaskar, Male'
-      },
-      {
-        step: 2,
-        text: 'What is your age? And what is your social category (OBC, SC, ST, General, Women)?',
-        sub: 'Speak Age and Category (e.g., Age 30, OBC Category)',
-        sample: 'I am 30 years old, OBC category'
-      },
-      {
-        step: 3,
-        text: 'What business do you run or want to start? And is your location rural or urban?',
-        sub: 'Speak Business & Location (e.g., Kirana Grocery Shop, Rural area)',
-        sample: 'Kirana grocery shop in a rural area'
-      },
-      {
-        step: 4,
-        text: 'How much loan or capital investment do you need? (e.g., ₹50,000, ₹2 Lakhs, or ₹5 Lakhs)?',
-        sub: 'Speak Needed Loan Amount (e.g., Need 5 Lakhs Mudra loan)',
-        sample: 'I need a 5 Lakh Mudra loan'
-      }
-    ],
-    successGreeting: 'Your profile details have been saved successfully! Showing your matching government schemes now.',
-    tapToSpeak: 'Tap to Speak',
-    listening: 'Listening... Speak now',
-    heardPrefix: 'Heard: '
   }
 };
 
@@ -3499,13 +3590,19 @@ function updateVoiceStepUI() {
   const fill = document.getElementById('voiceProgressFill');
   const promptText = document.getElementById('voiceAiPromptText');
   const transcriptText = document.getElementById('voiceHeardText');
+  const replayBtn = document.getElementById('voiceReplayBtn');
   const nextBtn = document.getElementById('voiceNextStepBtn');
   const finishBtn = document.getElementById('voiceFinishMatchBtn');
+  const modalTitle = document.getElementById('voiceModalTitleText');
 
-  if (stepText) stepText.innerText = `${(typeof t === 'function') ? t('screen5.step_indicator', 'Step') : 'Step'} ${currentVoiceStep} / 4`;
+  if (modalTitle) modalTitle.innerText = data.modalTitle || data.title;
+  if (stepText) stepText.innerText = (data.stepLabel || 'Question {step} of 4').replace('{step}', currentVoiceStep);
   if (fill) fill.style.width = `${(currentVoiceStep / 4) * 100}%`;
   if (promptText) promptText.innerText = qData.text;
   if (transcriptText) transcriptText.innerText = qData.sub;
+  if (replayBtn) replayBtn.innerText = data.replayAudioText || '🔊 Listen Again';
+  if (nextBtn) nextBtn.innerText = data.nextBtnText || 'Next Question ➔';
+  if (finishBtn) finishBtn.innerHTML = `<span>${data.finishBtnText || '🎯 Find Matching Schemes ➔'}</span>`;
 
   if (currentVoiceStep === 4) {
     if (nextBtn) nextBtn.style.display = 'none';
@@ -3513,6 +3610,55 @@ function updateVoiceStepUI() {
   } else {
     if (nextBtn) nextBtn.style.display = 'block';
     if (finishBtn) finishBtn.style.display = 'none';
+  }
+
+  updateVoiceChipsUI();
+}
+
+function updateVoiceChipsUI() {
+  const data = getVoiceDataForCurrentLang();
+  const chips = data.chipLabels || {
+    name: 'Name:',
+    age: 'Age:',
+    gender: 'Gender:',
+    category: 'Category:',
+    business: 'Business:',
+    investment: 'Loan:'
+  };
+
+  const elName = document.getElementById('vChipName');
+  const elAge = document.getElementById('vChipAge');
+  const elGen = document.getElementById('vChipGender');
+  const elCat = document.getElementById('vChipCategory');
+  const elBiz = document.getElementById('vChipBusiness');
+  const elInv = document.getElementById('vChipInvestment');
+
+  if (elName) {
+    elName.innerHTML = `👤 ${chips.name} <span>${currentProfile.name || '-'}</span>`;
+    if (currentProfile.name) elName.classList.add('filled');
+  }
+  if (elAge) {
+    const ageVal = currentProfile.age ? `${currentProfile.age} yrs` : '-';
+    elAge.innerHTML = `🎂 ${chips.age} <span>${ageVal}</span>`;
+    if (currentProfile.age) elAge.classList.add('filled');
+  }
+  if (elGen) {
+    elGen.innerHTML = `⚧️ ${chips.gender} <span>${currentProfile.gender || '-'}</span>`;
+    if (currentProfile.gender) elGen.classList.add('filled');
+  }
+  if (elCat) {
+    elCat.innerHTML = `🏷️ ${chips.category} <span>${currentProfile.category || '-'}</span>`;
+    if (currentProfile.category) elCat.classList.add('filled');
+  }
+  if (elBiz) {
+    const bizShort = currentProfile.businessType ? currentProfile.businessType.split('/')[0].trim() : '-';
+    elBiz.innerHTML = `🏬 ${chips.business} <span>${bizShort}</span>`;
+    if (currentProfile.businessType) elBiz.classList.add('filled');
+  }
+  if (elInv) {
+    const invVal = currentProfile.neededInvestment ? `₹${currentProfile.neededInvestment.toLocaleString('en-IN')}` : '-';
+    elInv.innerHTML = `💰 ${chips.investment} <span>${invVal}</span>`;
+    if (currentProfile.neededInvestment) elInv.classList.add('filled');
   }
 }
 
