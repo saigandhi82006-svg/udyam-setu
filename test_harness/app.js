@@ -3,6 +3,9 @@ const API_BASE = '/api';
 
 let currentSelectedScheme = null;
 let currentProfile = {
+  name: 'Ravi Kumar',
+  phone: '9876543210',
+  email: 'ravi.kumar@example.com',
   age: 28,
   gender: 'Male',
   hasDisability: false,
@@ -11,6 +14,7 @@ let currentProfile = {
   hasUdidCard: false,
   category: 'OBC',
   annualIncome: 240000,
+  neededInvestment: 500000,
   businessType: 'Food Business',
   locationType: 'Rural',
   experienceYears: 2,
@@ -30,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.UdyamI18n && typeof window.UdyamI18n.initI18n === 'function') {
     window.UdyamI18n.initI18n();
   }
+  loadSavedUserProfile();
   checkBackendHealth();
   updateEMICalculator();
   loadNearbyPartners();
@@ -59,11 +64,12 @@ window.addEventListener('udyam:languageChanged', (event) => {
     renderPartners(window.__lastPartners);
   }
   if (typeof updateAgeCategoryBadge === 'function') updateAgeCategoryBadge();
+  if (typeof loadMyApplications === 'function') loadMyApplications();
 });
 
 // Screen Switcher
 function showScreen(screenNumber) {
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 11; i++) {
     const s = document.getElementById(`screen-${i}`);
     if (s) s.classList.remove('active');
   }
@@ -82,6 +88,14 @@ function showScreen(screenNumber) {
       btn.classList.remove('active');
     }
   });
+
+  if (screenNumber === 9) {
+    requestUserLiveLocation();
+  }
+
+  if (screenNumber === 11) {
+    loadMyApplications();
+  }
 }
 
 function switchView(view) {
@@ -319,6 +333,8 @@ async function selectGoogleAccount(email, name, avatarInitials = 'G') {
 
     currentProfile.name = name;
     currentProfile.email = email;
+    if (document.getElementById('profName')) document.getElementById('profName').value = name;
+    if (document.getElementById('profEmail')) document.getElementById('profEmail').value = email;
 
     const avatarEl = document.querySelector('.user-avatar');
     if (avatarEl) avatarEl.innerText = avatarInitials;
@@ -331,6 +347,8 @@ async function selectGoogleAccount(email, name, avatarInitials = 'G') {
   } catch (err) {
     currentProfile.name = name;
     currentProfile.email = email;
+    if (document.getElementById('profName')) document.getElementById('profName').value = name;
+    if (document.getElementById('profEmail')) document.getElementById('profEmail').value = email;
     const avatarEl = document.querySelector('.user-avatar');
     if (avatarEl) avatarEl.innerText = avatarInitials;
     showScreen(3);
@@ -490,6 +508,8 @@ async function handleVerifyOTP() {
     const data = await res.json();
 
     if (data.success) {
+      currentProfile.phone = phone;
+      if (document.getElementById('profPhone')) document.getElementById('profPhone').value = phone;
       logTerminal(`[Auth] User +91 ${phone} verified successfully.`);
       showScreen(3);
     } else {
@@ -499,6 +519,8 @@ async function handleVerifyOTP() {
   } catch (err) {
     // If entered OTP matches generated OTP or test OTP 123456
     if (enteredOtp === generatedOtp || enteredOtp === '123456') {
+      currentProfile.phone = phone;
+      if (document.getElementById('profPhone')) document.getElementById('profPhone').value = phone;
       logTerminal(`[Auth] User +91 ${phone} verified successfully (Offline mode).`);
       showScreen(3);
     } else {
@@ -807,7 +829,16 @@ async function sendChatMessage(autoSpeak = false) {
   // Append typing indicator
   const typingBubble = document.createElement('div');
   typingBubble.className = 'chat-bubble ai typing';
-  typingBubble.innerText = '... RAG Engine analyzing 30+ government schemes';
+  const TYPING_TEXT = {
+    te: '... 30+ ప్రభుత్వ పథకాలను విశ్లేషిస్తున్నాం',
+    hi: '... 30+ सरकारी योजनाओं का विश्लेषण हो रहा है',
+    kn: '... 30+ ಸರ್ಕಾರಿ ಯೋಜನೆಗಳನ್ನು ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ',
+    ta: '... 30+ அரசு திட்டங்களை ஆய்வு செய்கிறோம்',
+    mr: '... 30+ सरकारी योजनांचे विश्लेषण केले जात आहे',
+    bn: '... 30+ সরকারি প্রকল্প বিশ্লেষণ করা হচ্ছে',
+    en: '... RAG Engine analyzing 30+ government schemes'
+  };
+  typingBubble.innerText = TYPING_TEXT[langCode] || TYPING_TEXT.en;
   chatContainer.appendChild(typingBubble);
   chatContainer.scrollTop = chatContainer.scrollHeight;
 
@@ -963,7 +994,7 @@ async function sendChatMessage(autoSpeak = false) {
               </div>
               <p class="ai-scheme-desc">${s.description}</p>
               <button type="button" class="ai-view-scheme-btn" onclick="event.stopPropagation(); navigateToSchemeFromCardKey('${schemeKey}')">
-                <span>View Full Scheme Details</span> ➔
+                <span>${{te:'పూర్తి వివరాలు చూడండి',hi:'पूरी जानकारी देखें',kn:'ಸಂಪೂರ್ಣ ವಿವರ ನೋಡಿ',ta:'முழு விவரங்கள் காண்க',mr:'संपूर्ण तपशील पहा',bn:'বিস্তারিত দেখুন',en:'View Full Scheme Details'}[langCode]||'View Full Scheme Details'}</span> ➔
               </button>
             </div>
           `;}).join('')}
@@ -980,7 +1011,7 @@ async function sendChatMessage(autoSpeak = false) {
             <div class="scheme-pill" data-schemekey="${schemeKey}" onclick="navigateToSchemeFromCardKey('${schemeKey}')">
               <div>
                 <strong>🏷️ ${s.schemeName}</strong><br>
-                <small style="color:#64748B;">Sector: ${s.sector || 'Govt Scheme'}</small>
+                <small style="color:#64748B;">${{te:'రంగం',hi:'क्षेत्र',kn:'ಕ್ಷೇತ್ರ',ta:'துறை',mr:'क्षेत्र',bn:'ক্ষেত্র',en:'Sector'}[langCode]||'Sector'}: ${s.sector || 'Govt Scheme'}</small>
               </div>
               <span>${s.loanAmount || ''} ${s.subsidy ? '• ' + s.subsidy : ''}</span>
             </div>
@@ -991,19 +1022,18 @@ async function sendChatMessage(autoSpeak = false) {
 
     const sectorName = data.target_sector || data.detectedSector;
     let sectorBadge = '';
+    const ADVISORY_LABEL = {te:'💡 AI ఆర్థిక సలహా • EMI & తిరిగి చెల్లింపు',hi:'💡 AI वित्तीय सलाह • EMI और पुनर्भुगतान',kn:'💡 AI ಹಣಕಾಸು ಸಲಹೆ • EMI ಮತ್ತು ಮರುಪಾವತಿ',ta:'💡 AI நிதி ஆலோசனை • EMI & திரும்பச் செலுத்தல்',mr:'💡 AI आर्थिक सल्ला • EMI व परतफेड',bn:'💡 AI আর্থিক পরামর্শ • EMI ও পরিশোধ',en:'💡 AI Financial Advisory • EMI & Repayment Terms'};
+    const SECTOR_PREFIX = {te:'🎯 లক్ష్య రంగం',hi:'🎯 लक्षित क्षेत्र',kn:'🎯 ಗುರಿ ಕ್ಷೇತ್ರ',ta:'🎯 இலக்கு துறை',mr:'🎯 लक्ष्य क्षेत्र',bn:'🎯 লক্ষ্য ক্ষেত্র',en:'🎯 Target Sector'};
     if (data.type === 'financial_advisory') {
-      sectorBadge = `<div class="sector-indicator" style="background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;">💡 AI Financial Advisory • EMI & Repayment Terms</div>`;
+      sectorBadge = `<div class="sector-indicator" style="background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;">${ADVISORY_LABEL[langCode]||ADVISORY_LABEL.en}</div>`;
     } else if (sectorName && sectorName !== 'General Advisory') {
-      sectorBadge = `<div class="sector-indicator">🎯 Target Sector: ${sectorName}</div>`;
+      sectorBadge = `<div class="sector-indicator">${SECTOR_PREFIX[langCode]||SECTOR_PREFIX.en}: ${sectorName}</div>`;
     }
 
     const displayText = data.message || data.reply;
 
-    const listenBtnLabel = lang === 'Telugu' ? '🔊 వినండి (Listen)'
-      : (lang === 'Hindi' ? '🔊 सुनिए (Listen)'
-      : (lang === 'Kannada' ? '🔊 ಕೇಳಿ (Listen)'
-      : (lang === 'Bengali' ? '🔊 শুনুন (Listen)'
-      : '🔊 Listen / వినండి')));
+    const LISTEN_LABEL = {te:'🔊 వినండి',hi:'🔊 सुनिए',kn:'🔊 ಕೇಳಿ',ta:'🔊 கேளுங்கள்',mr:'🔊 ऐका',bn:'🔊 শুনুন',en:'🔊 Listen'};
+    const listenBtnLabel = LISTEN_LABEL[langCode] || LISTEN_LABEL.en;
 
     const aiBubble = document.createElement('div');
     aiBubble.className = 'chat-bubble ai';
@@ -1227,11 +1257,13 @@ function setProfStep(step) {
 }
 window.setProfStep = setProfStep;
 
-// 3. Profiling & Rule-Based Matching (Screen 5 & 6)
-async function runSchemeMatching(shouldNavigate = true) {
-  currentProfile.name = document.getElementById('profName')?.value || 'Ravi Kumar';
+async function saveUserProfileDetails(showAlert = true) {
+  currentProfile.name = document.getElementById('profName')?.value || currentProfile.name || 'Ravi Kumar';
+  currentProfile.phone = document.getElementById('profPhone')?.value || currentProfile.phone || '9876543210';
+  currentProfile.email = document.getElementById('profEmail')?.value || currentProfile.email || '';
   currentProfile.age = parseInt(document.getElementById('profAge')?.value) || 28;
   currentProfile.gender = document.getElementById('profGender')?.value || 'Male';
+  
   const disabilityVal = document.getElementById('profDisability')?.value || 'No';
   currentProfile.hasDisability = disabilityVal === 'Yes';
   currentProfile.disabilityType = currentProfile.hasDisability ? (document.getElementById('profDisabilityType')?.value || 'Locomotor / Physical') : 'None';
@@ -1244,6 +1276,112 @@ async function runSchemeMatching(shouldNavigate = true) {
   currentProfile.businessType = document.getElementById('profBusiness')?.value || 'Food Business';
   currentProfile.experienceYears = parseInt(document.getElementById('profExperience')?.value) || 2;
   currentProfile.education = document.getElementById('profEducation')?.value || '8th Pass or Above';
+
+  try {
+    localStorage.setItem('udyam_user_profile', JSON.stringify(currentProfile));
+  } catch (e) {}
+
+  // Update user avatar initials on Screen 3
+  const initials = currentProfile.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'RK';
+  document.querySelectorAll('.user-avatar').forEach(el => el.innerText = initials);
+
+  // Persist / Sync profile to MongoDB database backend
+  try {
+    const res = await fetch(`${API_BASE}/users/profile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(currentProfile)
+    });
+    const data = await res.json();
+    if (data.success) {
+      logTerminal(`[POST /api/users/profile] Profile details saved to MongoDB for ${currentProfile.name} (Phone: ${currentProfile.phone}, Email: ${currentProfile.email || 'N/A'})`);
+    }
+  } catch (err) {
+    console.warn('Backend MongoDB sync error, data retained in local storage:', err);
+  }
+
+  if (showAlert) {
+    const contactInfo = currentProfile.phone ? `📱 ${currentProfile.phone}` : (currentProfile.email ? `✉️ ${currentProfile.email}` : '');
+    showCustomToast(`✅ Profile Details Saved to MongoDB! (${currentProfile.name} • ${contactInfo})`);
+  }
+}
+window.saveUserProfileDetails = saveUserProfileDetails;
+
+async function loadSavedUserProfile() {
+  try {
+    const saved = localStorage.getItem('udyam_user_profile');
+    if (saved) {
+      const data = JSON.parse(saved);
+      Object.assign(currentProfile, data);
+
+      if (document.getElementById('profName') && data.name) document.getElementById('profName').value = data.name;
+      if (document.getElementById('profPhone') && data.phone) document.getElementById('profPhone').value = data.phone;
+      if (document.getElementById('profEmail') && data.email) document.getElementById('profEmail').value = data.email;
+      if (document.getElementById('profAge') && data.age) document.getElementById('profAge').value = data.age;
+      if (document.getElementById('profGender') && data.gender) document.getElementById('profGender').value = data.gender;
+      if (document.getElementById('profCategory') && data.category) document.getElementById('profCategory').value = data.category;
+      if (document.getElementById('profLocationType') && data.locationType) document.getElementById('profLocationType').value = data.locationType;
+      if (document.getElementById('profIncome') && data.annualIncome) document.getElementById('profIncome').value = data.annualIncome;
+      if (document.getElementById('profInvestment') && data.neededInvestment) document.getElementById('profInvestment').value = data.neededInvestment;
+      if (document.getElementById('profBusiness') && data.businessType) document.getElementById('profBusiness').value = data.businessType;
+      if (document.getElementById('profEducation') && data.education) document.getElementById('profEducation').value = data.education;
+
+      if (data.hasDisability && document.getElementById('profDisability')) {
+        document.getElementById('profDisability').value = 'Yes';
+        if (typeof toggleDisabilityFields === 'function') toggleDisabilityFields();
+        if (document.getElementById('profDisabilityType') && data.disabilityType) document.getElementById('profDisabilityType').value = data.disabilityType;
+        if (document.getElementById('profDisabilityPercent') && data.disabilityPercentage) document.getElementById('profDisabilityPercent').value = data.disabilityPercentage;
+        if (document.getElementById('profHasUdid')) document.getElementById('profHasUdid').value = data.hasUdidCard ? 'Yes' : 'No';
+      }
+
+      if (typeof updateAgeCategoryBadge === 'function') updateAgeCategoryBadge();
+    }
+  } catch (e) {}
+
+  // Fetch from MongoDB backend on initialization
+  try {
+    const queryParam = currentProfile.phone || currentProfile.email || 'usr_demo';
+    const res = await fetch(`${API_BASE}/users/profile?userId=${encodeURIComponent(queryParam)}`);
+    const data = await res.json();
+    if (data.success && data.user) {
+      if (!localStorage.getItem('udyam_user_profile')) {
+        Object.assign(currentProfile, data.user);
+        if (document.getElementById('profName') && data.user.name) document.getElementById('profName').value = data.user.name;
+        if (document.getElementById('profPhone') && data.user.phone) document.getElementById('profPhone').value = data.user.phone;
+        if (document.getElementById('profEmail') && data.user.email) document.getElementById('profEmail').value = data.user.email;
+        if (document.getElementById('profAge') && data.user.age) document.getElementById('profAge').value = data.user.age;
+      }
+    }
+  } catch (e) {}
+}
+window.loadSavedUserProfile = loadSavedUserProfile;
+
+function showCustomToast(message, duration = 3000) {
+  const existing = document.querySelector('.udyam-toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.className = 'udyam-toast';
+  toast.innerHTML = `
+    <span style="font-size: 16px;">💾</span>
+    <span style="flex: 1;">${message}</span>
+  `;
+
+  const targetContainer = document.getElementById('phoneScreen') || document.body;
+  targetContainer.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(-10px)';
+    setTimeout(() => toast.remove(), 400);
+  }, duration);
+}
+window.showCustomToast = showCustomToast;
+
+// 3. Profiling & Rule-Based Matching (Screen 5 & 6)
+async function runSchemeMatching(shouldNavigate = true) {
+  saveUserProfileDetails(false); // auto-save on matching
 
   try {
     const res = await fetch(`${API_BASE}/schemes/match`, {
@@ -1634,34 +1772,202 @@ function updateEMICalculator() {
   if (pPctText) pPctText.innerText = principalPct + '%';
 }
 
-// 6. Nearby Channel Partners (Screen 9)
-async function loadNearbyPartners() {
+// 6. Nearby Channel Partners & Real Live GPS Location Integration (Screen 9)
+let currentPartnerFilter = 'All';
+window.userLiveLocation = {
+  lat: 17.3850,
+  lng: 78.4867,
+  label: 'Hyderabad, TS',
+  isLive: false,
+  accuracy: null
+};
+
+async function requestUserLiveLocation(forcePrompt = false) {
+  const banner = document.getElementById('locPermissionBanner');
+  const subText = document.getElementById('partnerLocSubText');
+  const liveBar = document.querySelector('.gmaps-live-bar');
+
+  if (subText) subText.innerText = '📡 Detecting live GPS location...';
+
+  if (!("geolocation" in navigator)) {
+    console.warn('Geolocation API is not supported by this browser.');
+    if (subText) subText.innerText = 'Near Your Location';
+    loadNearbyPartners(currentPartnerFilter);
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      const accuracy = Math.round(position.coords.accuracy || 15);
+
+      if (banner) banner.style.display = 'none';
+
+      // Reverse geocode locality for display
+      let locLabel = `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`;
+      try {
+        const reverseLoc = await reverseGeocodeCoords(lat, lng);
+        if (reverseLoc) locLabel = reverseLoc;
+      } catch (err) {}
+
+      window.userLiveLocation = {
+        lat,
+        lng,
+        label: locLabel,
+        isLive: true,
+        accuracy
+      };
+
+      if (subText) {
+        subText.innerHTML = `📍 <span style="color: var(--primary-green); font-weight: 700;">Live GPS: ${locLabel}</span>`;
+      }
+
+      updateLiveGMapDisplay(lat, lng, locLabel, accuracy);
+      loadNearbyPartners(currentPartnerFilter);
+    },
+    (error) => {
+      console.warn('Geolocation permission error:', error.code, error.message);
+      if (banner) banner.style.display = 'block';
+      if (subText) subText.innerText = '📍 Default Area (Hyderabad)';
+
+      updateLiveGMapDisplay(window.userLiveLocation.lat, window.userLiveLocation.lng, window.userLiveLocation.label, null, false);
+      loadNearbyPartners(currentPartnerFilter);
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 12000,
+      maximumAge: forcePrompt ? 0 : 300000
+    }
+  );
+}
+
+async function reverseGeocodeCoords(lat, lng) {
   try {
-    const res = await fetch(`${API_BASE}/partners/nearby?lat=17.3850&lng=78.4867`);
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14`, {
+      headers: { 'Accept': 'application/json' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const addr = data.address || {};
+      const locality = addr.suburb || addr.neighbourhood || addr.city || addr.town || addr.village || addr.county || 'Local Area';
+      const state = addr.state_district || addr.state || '';
+      return state ? `${locality}, ${state}` : locality;
+    }
+  } catch (e) {}
+  return `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`;
+}
+
+function updateLiveGMapDisplay(lat, lng, label, accuracy = null, isLive = true) {
+  const iframe = document.getElementById('gmapsIframe');
+  const liveBar = document.querySelector('.gmaps-live-bar');
+
+  if (iframe) {
+    let q = `${lat},${lng}+(My+Current+Location)`;
+    if (currentPartnerFilter === 'Bank') q = `Banks near ${lat},${lng}`;
+    else if (currentPartnerFilter === 'CSC') q = `CSC Digital Seva Kendra near ${lat},${lng}`;
+    else if (currentPartnerFilter === 'KVK') q = `Krishi Vigyan Kendra near ${lat},${lng}`;
+
+    iframe.src = `https://maps.google.com/maps?q=${encodeURIComponent(q)}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+  }
+
+  if (liveBar) {
+    const dotClass = isLive ? 'live-dot pulse' : 'live-dot';
+    const dotColor = isLive ? '#10B981' : '#F59E0B';
+    const accText = accuracy ? ` • ±${accuracy}m` : '';
+    liveBar.innerHTML = `
+      <span class="${dotClass}" style="background: ${dotColor};"></span>
+      <span class="live-loc-text">📍 <strong>${label}</strong> (${lat.toFixed(4)}°, ${lng.toFixed(4)}°)${accText}</span>
+    `;
+  }
+}
+
+async function loadNearbyPartners(filterType = null) {
+  if (filterType) currentPartnerFilter = filterType;
+  const container = document.getElementById('partnerListContainer');
+  if (container) {
+    container.innerHTML = '<div style="text-align: center; padding: 20px; color: #64748B; font-size: 12px;">⏳ Finding verified partners at your live GPS coordinates...</div>';
+  }
+
+  const userLat = window.userLiveLocation.lat || 17.3850;
+  const userLng = window.userLiveLocation.lng || 78.4867;
+  const queryParam = currentPartnerFilter && currentPartnerFilter !== 'All' ? `&type=${currentPartnerFilter}` : '';
+
+  try {
+    const res = await fetch(`${API_BASE}/partners/nearby?lat=${userLat}&lng=${userLng}${queryParam}&radius=25`);
     const data = await res.json();
-    if (data.partners) {
+    if (data.partners && data.partners.length > 0) {
       window.__lastPartners = data.partners;
       renderPartners(data.partners);
+    } else {
+      throw new Error('No partners returned from API');
     }
   } catch (e) {
+    // Dynamic Fallback partners calculated relative to user's coordinates
     const fallback = [
-      { partnerName: 'Andhra Grameena Bank', distanceKm: 0.8, type: 'Bank', contactPhone: '+91 40 2475 8890' },
-      { partnerName: 'KVK Business Center', distanceKm: 1.5, type: 'KVK', contactPhone: '+91 40 2401 5380' },
-      { partnerName: 'State Bank of India', distanceKm: 2.3, type: 'Bank', contactPhone: '+91 40 2320 1200' }
+      {
+        partnerName: 'State Bank of India (MSME Lead Branch)',
+        distanceKm: 0.45,
+        type: 'Bank',
+        address: `Main Road, Near Head Post Office, ${window.userLiveLocation.label}`,
+        location: { coordinates: [userLng + 0.0035, userLat + 0.0028] },
+        rating: 4.8
+      },
+      {
+        partnerName: 'CSC Digital Seva Kendra (Common Service Center)',
+        distanceKm: 0.85,
+        type: 'CSC',
+        address: `e-Seva Kendra, Ward Commercial Complex, ${window.userLiveLocation.label}`,
+        location: { coordinates: [userLng + 0.0050, userLat - 0.0040] },
+        rating: 4.9
+      },
+      {
+        partnerName: 'Regional Rural Bank (Gramin Bank)',
+        distanceKm: 1.20,
+        type: 'Bank',
+        address: `Station Road, Near Tehsil Office, ${window.userLiveLocation.label}`,
+        location: { coordinates: [userLng - 0.0060, userLat + 0.0070] },
+        rating: 4.6
+      },
+      {
+        partnerName: 'Krishi Vigyan Kendra (KVK / ICAR Center)',
+        distanceKm: 1.75,
+        type: 'KVK',
+        address: `District Agriculture & Training Center, ${window.userLiveLocation.label}`,
+        location: { coordinates: [userLng - 0.0080, userLat - 0.0090] },
+        rating: 4.7
+      }
     ];
-    window.__lastPartners = fallback;
-    renderPartners(fallback);
+
+    let filtered = fallback;
+    if (currentPartnerFilter && currentPartnerFilter !== 'All') {
+      filtered = fallback.filter(p => p.type === currentPartnerFilter);
+    }
+
+    window.__lastPartners = filtered;
+    renderPartners(filtered);
   }
 }
 
 function renderPartners(partners) {
   const container = document.getElementById('partnerListContainer');
+  if (!container) return;
   container.innerHTML = '';
+
   const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
   const kmAwayWord = (typeof t === 'function') ? t('common.km_away', 'km away') : 'km away';
-  const callTooltip = (typeof t === 'function') ? t('partner_details.call_partner', 'Call Partner') : 'Call Partner';
 
-  partners.slice(0, 3).forEach(p => {
+  if (!partners || partners.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 24px; color: #64748B; font-size: 12px; background: white; border-radius: 12px; border: 1px solid #E2E8F0;">
+        <p>No partners found for category <strong>${currentPartnerFilter}</strong> within radius.</p>
+        <button class="gmaps-chip active" style="margin-top: 8px;" onclick="filterGMap('All')">Show All Partners</button>
+      </div>
+    `;
+    return;
+  }
+
+  partners.forEach(p => {
     const pName = (window.UdyamI18n && typeof window.UdyamI18n.localizePartnerName === 'function')
       ? window.UdyamI18n.localizePartnerName(p.partnerName, curLang)
       : p.partnerName;
@@ -1670,21 +1976,107 @@ function renderPartners(partners) {
       ? window.UdyamI18n.localizePartnerType(p.type, curLang)
       : p.type;
 
-    const callAlertText = (typeof t === 'function') 
-      ? t('partner_details.call_alert', `Calling ${p.contactPhone}...`).replace('{phone}', p.contactPhone)
-      : `Calling ${p.contactPhone}...`;
+    let iconClass = 'bank';
+    let iconEmoji = '🏦';
+    if (p.type === 'CSC') {
+      iconClass = 'csc';
+      iconEmoji = '💻';
+    } else if (p.type === 'KVK') {
+      iconClass = 'kvk';
+      iconEmoji = '🔬';
+    } else if (p.type === 'DIC') {
+      iconClass = 'dic';
+      iconEmoji = '🏢';
+    }
 
     const card = document.createElement('div');
     card.className = 'partner-card';
+    card.title = 'Click to open Google Maps navigation directions';
+    card.onclick = () => openGoogleMapsForPartner(p);
+
     card.innerHTML = `
+      <div class="partner-icon-box ${iconClass}">
+        ${iconEmoji}
+      </div>
       <div class="partner-info">
         <h5>${pName}</h5>
-        <p>${p.distanceKm} ${kmAwayWord} • ${pType}</p>
+        <div class="partner-meta-row">
+          <span class="partner-dist-badge">📍 ${p.distanceKm} ${kmAwayWord}</span>
+          <span>•</span>
+          <span class="partner-type-tag">${pType}</span>
+          ${p.rating ? `<span>•</span> <span style="color: #F59E0B; font-weight: 700;">★ ${p.rating}</span>` : ''}
+        </div>
+        <p class="partner-addr-text">${p.address || window.userLiveLocation.label}</p>
       </div>
-      <button class="call-btn" title="${callTooltip}" onclick="alert('${escapeTextForAttr(callAlertText)}')">📞</button>
+      <div class="partner-map-action" onclick="event.stopPropagation(); openGoogleMapsForPartner(window.__lastPartners.find(x => x.partnerName === '${p.partnerName.replace(/'/g, "\\'")}'))">
+        <span>🗺️</span>
+        <span>Map</span>
+      </div>
     `;
     container.appendChild(card);
   });
+}
+
+function filterGMap(type, chipElement) {
+  currentPartnerFilter = type;
+
+  // Update active chip styles
+  document.querySelectorAll('.gmaps-chip').forEach(chip => {
+    if (chipElement && chip === chipElement) {
+      chip.classList.add('active');
+    } else if (!chipElement && chip.innerText.toLowerCase().includes(type.toLowerCase())) {
+      chip.classList.add('active');
+    } else {
+      chip.classList.remove('active');
+    }
+  });
+
+  const lat = window.userLiveLocation.lat || 17.3850;
+  const lng = window.userLiveLocation.lng || 78.4867;
+  updateLiveGMapDisplay(lat, lng, window.userLiveLocation.label, window.userLiveLocation.accuracy, window.userLiveLocation.isLive);
+  loadNearbyPartners(type);
+}
+
+function openGoogleMapsForPartner(partner) {
+  if (!partner) {
+    openGoogleMapsGeneral();
+    return;
+  }
+
+  const userLat = window.userLiveLocation.lat || 17.3850;
+  const userLng = window.userLiveLocation.lng || 78.4867;
+
+  let destLat = userLat + 0.0035;
+  let destLng = userLng + 0.0042;
+
+  if (partner.location && partner.location.coordinates && partner.location.coordinates.length >= 2) {
+    destLng = partner.location.coordinates[0];
+    destLat = partner.location.coordinates[1];
+  } else if (partner.latitude && partner.longitude) {
+    destLat = partner.latitude;
+    destLng = partner.longitude;
+  }
+
+  const mapsDirUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${destLat},${destLng}&travelmode=driving`;
+  window.open(mapsDirUrl, '_blank');
+}
+
+function openGoogleMapsGeneral() {
+  const userLat = window.userLiveLocation.lat || 17.3850;
+  const userLng = window.userLiveLocation.lng || 78.4867;
+
+  let query = `Banks and CSC near ${userLat},${userLng}`;
+  if (currentPartnerFilter === 'Bank') {
+    query = `Banks near ${userLat},${userLng}`;
+  } else if (currentPartnerFilter === 'CSC') {
+    query = `CSC Digital Seva Kendra near ${userLat},${userLng}`;
+  } else if (currentPartnerFilter === 'KVK') {
+    query = `Krishi Vigyan Kendra near ${userLat},${userLng}`;
+  }
+
+  // Locks Google Maps directly to the user's exact coordinates with street-level 15z zoom
+  const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}/@${userLat},${userLng},15z`;
+  window.open(mapsUrl, '_blank');
 }
 
 // 7. Document Checklist (Screen 10)
@@ -1745,16 +2137,312 @@ function toggleDocStatus(index) {
   logTerminal(`[Document Manager] Toggled "${doc.docName}" status to: ${doc.status}`);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SCREEN 11: MY APPLICATIONS (APPLIED SCHEMES LIFECYCLE TRACKER)
+// ─────────────────────────────────────────────────────────────────────────────
+window.__appliedApplications = [
+  {
+    _id: '65e300000000000000000001',
+    trackingId: 'UDS-847291',
+    schemeId: 'PMMY',
+    schemeName: 'PM Mudra Yojana',
+    requestedAmount: 500000,
+    proposedBusiness: 'South Indian Organic Canteen & Tiffin Center',
+    status: 'Under Review',
+    partnerName: 'Andhra Pradesh Grameena Vikas Bank (APGVB) - Branch #401',
+    appliedDate: '12 Aug 2025',
+    remarks: 'Application pre-screened by Udyam Setu Rule Engine (90% Match). Documents verified by CSC VLE. Forwarded to Lead Bank for physical inspection & sanction.'
+  }
+];
+
+async function loadMyApplications() {
+  const container = document.getElementById('applicationsContainer');
+  if (!container) return;
+
+  const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
+
+  // Try fetching live from backend /api/applications
+  try {
+    const res = await fetch(`${API_BASE}/applications`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.applications && Array.isArray(data.applications) && data.applications.length > 0) {
+        window.__appliedApplications = data.applications;
+      }
+    }
+  } catch (e) {
+    // Keep local fallback window.__appliedApplications
+  }
+
+  const apps = window.__appliedApplications || [];
+
+  if (apps.length === 0) {
+    const emptyLabels = {
+      te: { title: 'దరఖాస్తులేవీ లేవు', sub: 'మీరు ఇంకా ఏ ప్రభుత్వ పథకానికీ దరఖాస్తు చేసుకోలేదు.', btn: 'అనువైన పథకాలను కనుగొనండి' },
+      hi: { title: 'कोई आवेदन नहीं मिला', sub: 'आपने अभी तक किसी सरकारी योजना के लिए आवेदन नहीं किया है।', btn: 'योजनाएं खोजें' },
+      kn: { title: 'ಯಾವುದೇ ಅರ್ಜಿಗಳಿಲ್ಲ', sub: 'ನೀವು ಇನ್ನೂ ಯಾವುದೇ ಸರ್ಕಾರಿ ಯೋಜನೆಗೆ ಅರ್ಜಿ ಸಲ್ಲಿಸಿಲ್ಲ.', btn: 'ಯೋಜನೆಗಳನ್ನು ಹುಡುಕಿ' },
+      ta: { title: 'விண்ணப்பங்கள் எதுவும் இல்லை', sub: 'நீங்கள் இதுவரை எந்த அரசு திட்டத்திற்கும் விண்ணப்பிக்கவில்லை.', btn: 'திட்டங்களைக் கண்டறியவும்' },
+      mr: { title: 'कोणतेही अर्ज नाहीत', sub: 'तुम्ही अद्याप कोणत्याही शासकीय योजनेसाठी अर्ज केलेला नाही.', btn: 'योजना शोधा' },
+      bn: { title: 'কোনো আবেদন নেই', sub: 'আপনি এখনও কোনো সরকারি প্রকল্পের জন্য আবেদন করেননি।', btn: 'প্রকল্প খুঁজুন' },
+      en: { title: 'No Applications Found', sub: 'You have not applied for any government schemes yet.', btn: 'Find Matching Schemes' }
+    };
+    const emptyText = emptyLabels[curLang] || emptyLabels.en;
+
+    container.innerHTML = `
+      <div style="text-align:center; padding: 40px 16px; background: white; border-radius: 14px; border: 1px solid var(--border-color);">
+        <div style="font-size: 40px; margin-bottom: 12px;">📑</div>
+        <h4 style="font-size: 16px; font-weight: 800; color: var(--dark-text); margin-bottom: 6px;">${emptyText.title}</h4>
+        <p style="font-size: 13px; color: #64748B; margin-bottom: 18px;">${emptyText.sub}</p>
+        <button class="pill-btn primary" onclick="showScreen(6)">${emptyText.btn} →</button>
+      </div>
+    `;
+    return;
+  }
+
+  // Label dictionaries for complete zero-English leakage
+  const LABELS = {
+    te: {
+      tracking: 'ట్రాకింగ్ ఐడీ',
+      requested: 'కోరిన రుణ మొత్తం',
+      pipeline_title: 'దరఖాస్తు పురోగతి దశలు:',
+      step1: 'సమర్పించబడింది',
+      step2: 'పత్రాల ధృవీకరణ',
+      step3: 'బ్యాంక్ మంజూరు',
+      step4: 'రుణ విడుదల',
+      view_docs: '📄 పత్రాలు',
+      lead_bank: '🏦 సమీప బ్యాంక్',
+      ask_ai: '💬 ఏఐ సహాయం',
+      status_under_review: 'పరిశీలనలో ఉంది',
+      status_submitted: 'సమర్పించబడింది',
+      status_approved: 'మంజూరైంది',
+      status_disbursed: 'విడుదల చేయబడింది'
+    },
+    hi: {
+      tracking: 'ट्रैकिंग आईडी',
+      requested: 'अनुरोधित ऋण राशि',
+      pipeline_title: 'आवेदन जीवनचक्र स्थिति:',
+      step1: 'जमा किया गया',
+      step2: 'दस्तावेज़ सत्यापन',
+      step3: 'बैंक स्वीकृति',
+      step4: 'वितरण',
+      view_docs: '📄 दस्तावेज़',
+      lead_bank: '🏦 लीड बैंक',
+      ask_ai: '💬 एआई सलाह',
+      status_under_review: 'समीक्षाधीन',
+      status_submitted: 'जमा हुआ',
+      status_approved: 'स्वीकृत',
+      status_disbursed: 'वितरित'
+    },
+    kn: {
+      tracking: 'ಟ್ರ್ಯಾಕಿಂಗ್ ಐಡಿ',
+      requested: 'ಕೋರಿದ ಸಾಲದ ಮೊತ್ತ',
+      pipeline_title: 'ಅರ್ಜಿ ಪ್ರಗತಿ ಹಂತಗಳು:',
+      step1: 'ಸಲ್ಲಿಸಲಾಗಿದೆ',
+      step2: 'ದಾಖಲೆ ಪರಿಶೀಲನೆ',
+      step3: 'ಬ್ಯಾಂಕ್ ಮಂಜೂರಾತಿ',
+      step4: 'ಸಾಲ ವಿತರಣೆ',
+      view_docs: '📄 ದಾಖಲೆಗಳು',
+      lead_bank: '🏦 ಬ್ಯಾಂಕ್',
+      ask_ai: '💬 ಎಐ ಸಲಹೆ',
+      status_under_review: 'ಪರಿಶೀಲನೆಯಲ್ಲಿದೆ',
+      status_submitted: 'ಸಲ್ಲಿಸಲಾಗಿದೆ',
+      status_approved: 'ಮಂಜೂರಾಗಿದೆ',
+      status_disbursed: 'ವಿತರಿಸಲಾಗಿದೆ'
+    },
+    ta: {
+      tracking: 'கண்காணிப்பு எண்',
+      requested: 'கோரப்பட்ட கடன் தொகை',
+      pipeline_title: 'விண்ணப்ப முன்னேற்ற நிலைகள்:',
+      step1: 'சமர்ப்பிக்கப்பட்டது',
+      step2: 'ஆவண சரிபார்ப்பு',
+      step3: 'வங்கி அனுமதி',
+      step4: 'கடன் வழங்கல்',
+      view_docs: '📄 ஆவணங்கள்',
+      lead_bank: '🏦 முன்னணி வங்கி',
+      ask_ai: '💬 AI ஆலோசனை',
+      status_under_review: 'ஆய்வில் உள்ளது',
+      status_submitted: 'சமர்ப்பிக்கப்பட்டது',
+      status_approved: 'அனுமதிக்கப்பட்டது',
+      status_disbursed: 'வழங்கப்பட்டது'
+    },
+    mr: {
+      tracking: 'ट्रॅकिंग आयडी',
+      requested: 'मागितलेली कर्ज रक्कम',
+      pipeline_title: 'अर्ज प्रगती टप्पे:',
+      step1: 'सादर केले',
+      step2: 'कागदपत्र पडताळणी',
+      step3: 'बँक मंजुरी',
+      step4: 'कर्ज वितरण',
+      view_docs: '📄 कागदपत्रे',
+      lead_bank: '🏦 लीड बँक',
+      ask_ai: '💬 AI सल्ला',
+      status_under_review: 'पुनरावलोकनात',
+      status_submitted: 'सादर केले',
+      status_approved: 'मंजूर',
+      status_disbursed: 'वितरित'
+    },
+    bn: {
+      tracking: 'ট্র্যাকিং আইডি',
+      requested: 'অনুরোধকৃত ঋণের পরিমাণ',
+      pipeline_title: 'আবেদন অগ্রগতি পর্যায়:',
+      step1: 'জমা দেওয়া হয়েছে',
+      step2: 'নথি যাচাইকরণ',
+      step3: 'ব্যাংক অনুমোদন',
+      step4: 'ঋণ বিতরণ',
+      view_docs: '📄 নথি',
+      lead_bank: '🏦 লিড ব্যাংক',
+      ask_ai: '💬 এআই পরামর্শ',
+      status_under_review: 'পর্যালোচনাধীন',
+      status_submitted: 'জমা হয়েছে',
+      status_approved: 'অনুমোদিত',
+      status_disbursed: 'বিতরণ হয়েছে'
+    },
+    en: {
+      tracking: 'Tracking ID',
+      requested: 'Requested Amount',
+      pipeline_title: 'Application Lifecycle Pipeline:',
+      step1: 'Submitted',
+      step2: 'Verification',
+      step3: 'Sanction',
+      step4: 'Disbursed',
+      view_docs: '📄 Documents',
+      lead_bank: '🏦 Lead Bank',
+      ask_ai: '💬 AI Advisor',
+      status_under_review: 'Under Review',
+      status_submitted: 'Submitted',
+      status_approved: 'Approved',
+      status_disbursed: 'Disbursed'
+    }
+  };
+
+  const L = LABELS[curLang] || LABELS.en;
+
+  container.innerHTML = apps.map(app => {
+    const rawStatus = (app.status || 'Under Review').toLowerCase();
+    let statusClass = 'under-review';
+    let statusLabel = L.status_under_review;
+
+    if (rawStatus.includes('submit')) {
+      statusClass = 'submitted';
+      statusLabel = L.status_submitted;
+    } else if (rawStatus.includes('approv')) {
+      statusClass = 'approved';
+      statusLabel = L.status_approved;
+    } else if (rawStatus.includes('disburs')) {
+      statusClass = 'disbursed';
+      statusLabel = L.status_disbursed;
+    }
+
+    // Determine pipeline step progress
+    const isSubmitted = true;
+    const isVerification = rawStatus.includes('review') || rawStatus.includes('approv') || rawStatus.includes('disburs');
+    const isSanctioned = rawStatus.includes('approv') || rawStatus.includes('disburs');
+    const isDisbursed = rawStatus.includes('disburs');
+
+    // Resolve localized scheme name
+    let schemeDisplayName = app.schemeName || 'PM Mudra Yojana';
+    if (window.UdyamI18n && typeof window.UdyamI18n.getLocalizedSchemeDetails === 'function') {
+      const locDetails = window.UdyamI18n.getLocalizedSchemeDetails(app.schemeId || 'PMMY', curLang);
+      if (locDetails && locDetails.name) schemeDisplayName = locDetails.name;
+    }
+
+    // Format Amount
+    const formattedAmount = (typeof app.requestedAmount === 'number')
+      ? (curLang === 'te' ? `రూ. ${app.requestedAmount.toLocaleString('en-IN')}` : `₹ ${app.requestedAmount.toLocaleString('en-IN')}`)
+      : (app.requestedAmount || '₹ 5,00,000');
+
+    return `
+      <div class="application-card">
+        <div class="app-header-row">
+          <span class="app-tracking-badge">#${app.trackingId || 'UDS-847291'}</span>
+          <span class="app-status-badge ${statusClass}">● ${statusLabel}</span>
+        </div>
+
+        <h4 class="app-scheme-title">🏷️ ${schemeDisplayName}</h4>
+        <div class="app-proposed-biz">💼 ${app.proposedBusiness || 'Micro Food Processing Enterprise'}</div>
+        <div class="app-amount-row">💰 ${L.requested}: ${formattedAmount}</div>
+
+        <!-- Visual Lifecycle Pipeline -->
+        <div class="pipeline-wrapper">
+          <span class="pipeline-title">${L.pipeline_title}</span>
+          <div class="pipeline-steps">
+            <div class="pipeline-step ${isSubmitted ? 'completed' : ''}">
+              <div class="pipeline-dot">✓</div>
+              <span class="pipeline-label">${L.step1}</span>
+            </div>
+            <div class="pipeline-line ${isVerification ? 'completed' : ''}"></div>
+            <div class="pipeline-step ${isVerification ? 'active' : ''}">
+              <div class="pipeline-dot">${isSanctioned ? '✓' : '2'}</div>
+              <span class="pipeline-label">${L.step2}</span>
+            </div>
+            <div class="pipeline-line ${isSanctioned ? 'completed' : ''}"></div>
+            <div class="pipeline-step ${isSanctioned ? 'completed' : ''}">
+              <div class="pipeline-dot">${isDisbursed ? '✓' : '3'}</div>
+              <span class="pipeline-label">${L.step3}</span>
+            </div>
+            <div class="pipeline-line ${isDisbursed ? 'completed' : ''}"></div>
+            <div class="pipeline-step ${isDisbursed ? 'completed' : ''}">
+              <div class="pipeline-dot">4</div>
+              <span class="pipeline-label">${L.step4}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Remarks / Partner Info -->
+        <div class="app-remarks-box">
+          <strong>🏛️ ${app.partnerName || 'Andhra Grameena Bank (Lead RRB)'}:</strong><br>
+          ${app.remarks || 'Application successfully verified by CSC VLE Officer and forwarded to Lead Bank for physical verification & loan disbursement.'}
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="app-actions-row">
+          <button class="app-action-btn" onclick="showScreen(10)">${L.view_docs}</button>
+          <button class="app-action-btn" onclick="showScreen(9)">${L.lead_bank}</button>
+          <button class="app-action-btn" onclick="showScreen(4)">${L.ask_ai}</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
 function handleSubmitApplication() {
   const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
   const partnerName = (window.UdyamI18n && typeof window.UdyamI18n.localizePartnerName === 'function')
     ? window.UdyamI18n.localizePartnerName('Andhra Grameena Bank (RRB)', curLang)
     : 'Andhra Grameena Bank (RRB)';
-  const msgFormat = (typeof t === 'function')
-    ? t('partner_details.app_submitted', 'Application successfully submitted to {partner}!\nTracking ID: #UDS-847291')
-    : 'Application successfully submitted to {partner}!\nTracking ID: #UDS-847291';
-  alert(msgFormat.replace('{partner}', partnerName));
-  showScreen(3);
+
+  const schemeCode = currentSelectedScheme ? (currentSelectedScheme.shortCode || currentSelectedScheme.schemeId || 'PMMY') : 'PMMY';
+  const schemeName = currentSelectedScheme ? (currentSelectedScheme.schemeName || 'PM Mudra Yojana') : 'PM Mudra Yojana';
+  const trackingId = 'UDS-' + Math.floor(100000 + Math.random() * 900000);
+
+  const newApp = {
+    _id: 'app_' + Date.now(),
+    trackingId: trackingId,
+    schemeId: schemeCode,
+    schemeName: schemeName,
+    requestedAmount: (currentSelectedScheme && currentSelectedScheme.maxGrantLoanAmount) || 500000,
+    proposedBusiness: currentProfile.businessType || 'Food Business',
+    status: 'Submitted',
+    partnerName: partnerName,
+    appliedDate: new Date().toLocaleDateString(),
+    remarks: 'Application submitted via Udyam Setu Digital Portal. Documents are currently being pre-screened for Lead Bank sanction.'
+  };
+
+  window.__appliedApplications = [newApp, ...(window.__appliedApplications || [])];
+
+  // Try POST to backend
+  try {
+    fetch(`${API_BASE}/applications`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newApp)
+    }).catch(() => {});
+  } catch (e) {}
+
+  logTerminal(`[Applications Engine] Created Application #${trackingId} for scheme "${schemeName}" to partner "${partnerName}".`);
+
+  // Navigate to My Applications Screen
+  showScreen(11);
 }
 
 // Terminal Logger
@@ -1796,6 +2484,17 @@ async function testEmiApi() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ loanAmount: 500000, interestRate: 10, tenureYears: 3 })
+  });
+  const data = await res.json();
+  logTerminal(JSON.stringify(data, null, 2));
+}
+
+async function testProfileApi() {
+  saveUserProfileDetails(false);
+  const res = await fetch(`${API_BASE}/users/profile`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(currentProfile)
   });
   const data = await res.json();
   logTerminal(JSON.stringify(data, null, 2));

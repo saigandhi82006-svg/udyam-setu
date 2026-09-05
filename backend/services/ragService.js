@@ -608,8 +608,185 @@ async function retrieveRelevantSchemes(query, userProfile = null) {
   return uniqueSchemes;
 }
 
+// ─── Universal Sector Translation Map ─────────────────────────────────────────
+const SECTOR_TRANSLATIONS = {
+  te: {
+    'Food Business': 'ఆహార వ్యాపారం', 'Retail / Kirana Shop': 'కిరాణా / రిటైల్ దుకాణం',
+    'Handicrafts & Handlooms': 'చేనేత & చేతివృత్తులు', 'Agriculture & Allied': 'వ్యవసాయం & అనుబంధ రంగాలు',
+    'Textile & Garments': 'వస్త్ర & దుస్తుల రంగం', 'Manufacturing & Fabrication': 'తయారీ & ఫ్యాబ్రికేషన్',
+    'Services / Commercial Transport': 'సర్వీసులు / వాణిజ్య రవాణా', 'Commercial Transport': 'వాణిజ్య రవాణా',
+    'Services / Repair Shop': 'రిపేర్ & సర్వీస్ రంగం', 'Services & Workshops': 'సేవలు & వర్క్‌షాప్‌లు',
+    'Street Vending': 'వీధి వ్యాపారం', 'Street Vendors': 'వీధి వ్యాపారులు',
+    'Education / Youth': 'విద్య / యువత', 'Differently Abled / Divyangjan': 'దివ్యాంగుల సాధికారత',
+    'Women Entrepreneur': 'మహిళా వ్యాపారవేత్తలు', 'Women & SC/ST Enterprise': 'మహిళలు & SC/ST వ్యాపారాలు',
+    'Urban Livelihoods & Street Vendors': 'పట్టణ వీధి వ్యాపారులు & జీవనోపాధి',
+    'Retail Trade / MSME': 'రిటైల్ వ్యాపారం / సూక్ష్మ & చిన్న పరిశ్రమలు',
+    'MSME / Retail & Micro Business': 'రిటైల్ & సూక్ష్మ వ్యాపారం (ఎంఎస్ఎంఈ)',
+    'MSME / Agro-Food & Manufacturing': 'వ్యవసాయ ఆహార & తయారీ రంగం (ఎంఎస్ఎంఈ)',
+    'Govt Scheme': 'ప్రభుత్వ పథకం', 'MSME / Small Business': 'ఎంఎస్ఎంఈ / చిన్న వ్యాపారం',
+    'Food Processing / Culinary': 'ఆహార శుద్ధి & ప్రాసెసింగ్',
+    'Artisans & Craftsmen': 'కళాకారులు & చేతివృత్తి', 'Artisans & Handlooms': 'చేతివృత్తులు & చేనేత కళాకారులు',
+    'Handloom Weavers': 'చేనేత కార్మికులు', 'Women Artisans / Handicrafts': 'మహిళా కళాకారులు / హస్తకళలు',
+    'Handloom & Textiles': 'చేనేత & వస్త్ర రంగం', 'Fisheries': 'మత్స్య పరిశ్రమ',
+    'Fisheries & Aquaculture': 'చేపల పెంపకం & ఆక్వాకల్చర్',
+    'Dairy & Poultry': 'పాడి & పోల్ట్రీ', 'Dairy & Livestock Infrastructure': 'పాడి & పశుసంవర్ధక మౌలిక సదుపాయాలు',
+    'Agriculture': 'వ్యవసాయం', 'Agriculture & Dairy': 'వ్యవసాయం & పాడి పరిశ్రమ',
+    'Agri-Infrastructure': 'వ్యవసాయ మౌలిక వసతులు', 'Agriculture Machinery': 'వ్యవసాయ యంత్రాలు & ఉపకరణాలు',
+    'Animal Husbandry': 'పశుపాలన', 'Micro Enterprises': 'సూక్ష్మ వ్యాపారాలు',
+    'PwD / Divyangjan': 'దివ్యాంగులు', 'Higher Education': 'ఉన్నత విద్య',
+    'MSME Certification': 'ఎంఎస్ఎంఈ ధృవీకరణ', 'Discovery': 'వ్యాపార ఆవిష్కరణ',
+    'General Advisory': 'సాధారణ సలహా',
+  },
+  hi: {
+    'Food Business': 'खाद्य व्यवसाय', 'Retail / Kirana Shop': 'किराना / खुदरा दुकान',
+    'Handicrafts & Handlooms': 'हस्तशिल्प एवं हथकरघा', 'Agriculture & Allied': 'कृषि एवं संबद्ध क्षेत्र',
+    'Textile & Garments': 'वस्त्र एवं परिधान', 'Manufacturing & Fabrication': 'विनिर्माण एवं फैब्रिकेशन',
+    'Services / Commercial Transport': 'सेवाएं / वाणिज्यिक परिवहन', 'Commercial Transport': 'वाणिज्यिक परिवहन',
+    'Services / Repair Shop': 'मरम्मत एवं सेवा केंद्र', 'Services & Workshops': 'सेवाएं एवं कार्यशालाएं',
+    'Street Vending': 'स्ट्रीट वेंडिंग', 'Street Vendors': 'स्ट्रीट वेंडर्स (फेरीवाले)',
+    'Education / Youth': 'शिक्षा / युवा', 'Differently Abled / Divyangjan': 'दिव्यांगजन सशक्तिकरण',
+    'Women Entrepreneur': 'महिला उद्यमी', 'Women & SC/ST Enterprise': 'महिला एवं अजा/अजजा उद्यम',
+    'Urban Livelihoods & Street Vendors': 'शहरी आजीविका एवं फेरीवाले',
+    'Retail Trade / MSME': 'खुदरा व्यापार / एमएसएमई',
+    'MSME / Retail & Micro Business': 'खुदरा एवं सूक्ष्म व्यवसाय (एमएसएमई)',
+    'MSME / Agro-Food & Manufacturing': 'कृषि-खाद्य एवं विनिर्माण (एमएसएमई)',
+    'Govt Scheme': 'सरकारी योजना', 'MSME / Small Business': 'एमएसएमई / लघु व्यवसाय',
+    'Food Processing / Culinary': 'खाद्य प्रसंस्करण एवं पाकशाला',
+    'Artisans & Craftsmen': 'कारीगर एवं दस्तकार', 'Artisans & Handlooms': 'कारीगर एवं हथकरघा',
+    'Handloom Weavers': 'हथकरघा बुनकर', 'Women Artisans / Handicrafts': 'महिला कारीगर / हस्तशिल्प',
+    'Handloom & Textiles': 'हथकरघा एवं वस्त्र', 'Fisheries': 'मत्स्य पालन',
+    'Fisheries & Aquaculture': 'मत्स्य पालन एवं जलकृषि',
+    'Dairy & Poultry': 'डेयरी एवं पोल्ट्री', 'Dairy & Livestock Infrastructure': 'डेयरी एवं पशुधन अवसंरचना',
+    'Agriculture': 'कृषि', 'Agriculture & Dairy': 'कृषि एवं डेयरी',
+    'Agri-Infrastructure': 'कृषि अवसंरचना', 'Agriculture Machinery': 'कृषि मशीनरी एवं उपकरण',
+    'Animal Husbandry': 'पशुपालन', 'Micro Enterprises': 'सूक्ष्म उद्यम',
+    'PwD / Divyangjan': 'दिव्यांगजन', 'Higher Education': 'उच्च शिक्षा',
+    'MSME Certification': 'एमएसएमई प्रमाणीकरण', 'Discovery': 'व्यवसाय खोज',
+    'General Advisory': 'सामान्य सलाह',
+  },
+  kn: {
+    'Food Business': 'ಆಹಾರ ವ್ಯವಹಾರ', 'Retail / Kirana Shop': 'ಕಿರಾಣಿ / ಚಿಲ್ಲರೆ ಅಂಗಡಿ',
+    'Handicrafts & Handlooms': 'ಕರಕುಶಲ ಮತ್ತು ಕೈಮಗ್ಗ', 'Agriculture & Allied': 'ಕೃಷಿ ಮತ್ತು ಸಂಬಂಧಿತ',
+    'Textile & Garments': 'ಜವಳಿ ಮತ್ತು ಉಡುಗೆ', 'Manufacturing & Fabrication': 'ಉತ್ಪಾದನೆ ಮತ್ತು ಫ್ಯಾಬ್ರಿಕೇಶನ್',
+    'Services / Commercial Transport': 'ಸೇವೆಗಳು / ವಾಣಿಜ್ಯ ಸಾರಿಗೆ', 'Commercial Transport': 'ವಾಣಿಜ್ಯ ಸಾರಿಗೆ',
+    'Services / Repair Shop': 'ರಿಪೇರಿ ಮತ್ತು ಸೇವಾ ಕೇಂದ್ರ', 'Services & Workshops': 'ಸೇವೆಗಳು ಮತ್ತು ಕಾರ್ಯಾಗಾರಗಳು',
+    'Street Vending': 'ಬೀದಿ ವ್ಯಾಪಾರ', 'Street Vendors': 'ಬೀದಿ ವ್ಯಾಪಾರಿಗಳು',
+    'Education / Youth': 'ಶಿಕ್ಷಣ / ಯುವಜನ', 'Differently Abled / Divyangjan': 'ವಿಕಲಚೇತನ ಸಬಲೀಕರಣ',
+    'Women Entrepreneur': 'ಮಹಿಳಾ ಉದ್ಯಮಿ', 'Women & SC/ST Enterprise': 'ಮಹಿಳಾ ಮತ್ತು ಪರಿಶಿಷ್ಟ ಜಾತಿ/ಪಂಗಡ ಉದ್ಯಮ',
+    'Urban Livelihoods & Street Vendors': 'ನಗರ ಜೀವನೋಪಾಯ ಮತ್ತು ಬೀದಿ ವ್ಯಾಪಾರಿಗಳು',
+    'Retail Trade / MSME': 'ಚಿಲ್ಲರೆ ವ್ಯಾಪಾರ / ಸಣ್ಣ ಉದ್ಯಮ',
+    'MSME / Retail & Micro Business': 'ಚಿಲ್ಲರೆ ಮತ್ತು ಸೂಕ್ಷ್ಮ ವ್ಯಾಪಾರ (ಎಂಎಸ್ಎಂಇ)',
+    'MSME / Agro-Food & Manufacturing': 'ಕೃಷಿ-ಆಹಾರ ಮತ್ತು ಉತ್ಪಾದನೆ (ಎಂಎಸ್ಎಂಇ)',
+    'Govt Scheme': 'ಸರ್ಕಾರಿ ಯೋಜನೆ', 'MSME / Small Business': 'ಎಂಎಸ್ಎಂಇ / ಸಣ್ಣ ವ್ಯಾಪಾರ',
+    'Food Processing / Culinary': 'ಆಹಾರ ಸಂಸ್ಕರಣೆ ಮತ್ತು ಪಾಕಶಾಸ್ತ್ರ',
+    'Artisans & Craftsmen': 'ಕುಶಲಕರ್ಮಿಗಳು', 'Artisans & Handlooms': 'ಕುಶಲಕರ್ಮಿಗಳು ಮತ್ತು ಕೈಮಗ್ಗ',
+    'Handloom Weavers': 'ಕೈಮಗ್ಗ ನೇಕಾರರು', 'Women Artisans / Handicrafts': 'ಮಹಿಳಾ ಕುಶಲಕರ್ಮಿಗಳು / ಕರಕುಶಲ',
+    'Handloom & Textiles': 'ಕೈಮಗ್ಗ ಮತ್ತು ಜವಳಿ', 'Fisheries': 'ಮೀನುಗಾರಿಕೆ',
+    'Fisheries & Aquaculture': 'ಮೀನುಗಾರಿಕೆ ಮತ್ತು ಜಲಕೃಷಿ',
+    'Dairy & Poultry': 'ಹೈನುಗಾರಿಕೆ ಮತ್ತು ಕೋಳಿ ಸಾಕಣೆ', 'Dairy & Livestock Infrastructure': 'ಹೈನುಗಾರಿಕೆ ಮತ್ತು ಜಾನುವಾರು ಮೂಲಸೌಕರ್ಯ',
+    'Agriculture': 'ಕೃಷಿ', 'Agriculture & Dairy': 'ಕೃಷಿ ಮತ್ತು ಹೈನುಗಾರಿಕೆ',
+    'Agri-Infrastructure': 'ಕೃಷಿ ಮೂಲಸೌಕರ್ಯ', 'Agriculture Machinery': 'ಕೃಷಿ ಯಂತ್ರೋಪಕರಣಗಳು',
+    'Animal Husbandry': 'ಪಶು ಸಂಗೋಪನೆ', 'Micro Enterprises': 'ಸೂಕ್ಷ್ಮ ಉದ್ಯಮಗಳು',
+    'PwD / Divyangjan': 'ವಿಕಲಚೇತನ', 'Higher Education': 'ಉನ್ನತ ಶಿಕ್ಷಣ',
+    'MSME Certification': 'ಎಂಎಸ್ಎಂಇ ಪ್ರಮಾಣೀಕರಣ', 'Discovery': 'ವ್ಯವಹಾರ ಆವಿಷ್ಕಾರ',
+    'General Advisory': 'ಸಾಮಾನ್ಯ ಸಲಹೆ',
+  },
+  ta: {
+    'Food Business': 'உணவு வணிகம்', 'Retail / Kirana Shop': 'மளிகை / சில்லறை கடை',
+    'Handicrafts & Handlooms': 'கைவினை & கைத்தறி', 'Agriculture & Allied': 'விவசாயம் & தொடர்பு துறைகள்',
+    'Textile & Garments': 'ஜவுளி & ஆடை', 'Manufacturing & Fabrication': 'உற்பத்தி & பட்டறை',
+    'Services / Commercial Transport': 'சேவைகள் / வணிக போக்குவரத்து', 'Commercial Transport': 'வணிக போக்குவரத்து',
+    'Services / Repair Shop': 'பழுதுபார்ப்பு & சேவை மையம்', 'Services & Workshops': 'சேவைகள் & பணிமனைகள்',
+    'Street Vending': 'தெருவோர வியாபாரம்', 'Street Vendors': 'தெருவோர வியாபாரிகள்',
+    'Education / Youth': 'கல்வி / இளைஞர்', 'Differently Abled / Divyangjan': 'மாற்றுத்திறனாளி மேம்பாடு',
+    'Women Entrepreneur': 'பெண் தொழில்முனைவோர்', 'Women & SC/ST Enterprise': 'பெண்கள் & SC/ST தொழில்முனைவு',
+    'Urban Livelihoods & Street Vendors': 'நகர்ப்புற வாழ்வாதாரம் & தெருவோர வியாபாரிகள்',
+    'Retail Trade / MSME': 'சில்லறை வணிகம் / சிறு தொழில்',
+    'MSME / Retail & Micro Business': 'சில்லறை & குறுந்தொழில் (MSME)',
+    'MSME / Agro-Food & Manufacturing': 'வேளாண் உணவு & உற்பத்தி (MSME)',
+    'Govt Scheme': 'அரசு திட்டம்', 'MSME / Small Business': 'சிறு & நடுத்தர தொழில்',
+    'Food Processing / Culinary': 'உணவு பதப்படுத்துதல் & சமையற்கலை',
+    'Artisans & Craftsmen': 'கைவினைஞர்கள்', 'Artisans & Handlooms': 'கைவினைஞர்கள் & கைத்தறி',
+    'Handloom Weavers': 'கைத்தறி நெசவாளர்கள்', 'Women Artisans / Handicrafts': 'பெண் கைவினைஞர்கள் / கைவினைப்பொருள்',
+    'Handloom & Textiles': 'கைத்தறி & ஜவுளி', 'Fisheries': 'மீன்வளம்',
+    'Fisheries & Aquaculture': 'மீன்வளம் & நீர்வாழ் உயிரின வளர்ப்பு',
+    'Dairy & Poultry': 'பால் பண்ணை & கோழி வளர்ப்பு', 'Dairy & Livestock Infrastructure': 'பால் & கால்நடை கட்டமைப்பு',
+    'Agriculture': 'விவசாயம்', 'Agriculture & Dairy': 'விவசாயம் & பால்பண்ணை',
+    'Agri-Infrastructure': 'வேளாண் கட்டமைப்பு', 'Agriculture Machinery': 'விவசாய இயந்திரங்கள்',
+    'Animal Husbandry': 'கால்நடை வளர்ப்பு', 'Micro Enterprises': 'சிறு தொழில் நிறுவனங்கள்',
+    'PwD / Divyangjan': 'மாற்றுத்திறனாளி', 'Higher Education': 'உயர்கல்வி',
+    'MSME Certification': 'சிறு தொழில் சான்றிதழ்', 'Discovery': 'வணிக ஆய்வு',
+    'General Advisory': 'பொது ஆலோசனை',
+  },
+  mr: {
+    'Food Business': 'खाद्य व्यवसाय', 'Retail / Kirana Shop': 'किराणा / किरकोळ दुकान',
+    'Handicrafts & Handlooms': 'हस्तकला व हातमाग', 'Agriculture & Allied': 'शेती व संलग्न क्षेत्र',
+    'Textile & Garments': 'वस्त्रोद्योग व कपडे', 'Manufacturing & Fabrication': 'उत्पादन व फॅब्रिकेशन',
+    'Services / Commercial Transport': 'सेवा / व्यावसायिक वाहतूक', 'Commercial Transport': 'व्यावसायिक वाहतूक',
+    'Services / Repair Shop': 'दुरुस्ती व सेवा केंद्र', 'Services & Workshops': 'सेवा व कार्यशाळा',
+    'Street Vending': 'फेरीवाले व हातगाडी', 'Street Vendors': 'फेरीवाले व पथविक्रेते',
+    'Education / Youth': 'शिक्षण / तरुण पिढी', 'Differently Abled / Divyangjan': 'दिव्यांग सशक्तीकरण',
+    'Women Entrepreneur': 'महिला उद्योजक', 'Women & SC/ST Enterprise': 'महिला व अजा/अजजा उद्योग',
+    'Urban Livelihoods & Street Vendors': 'शहरी उपजीविका व फेरीवाले',
+    'Retail Trade / MSME': 'किरकोळ व्यापार / सूक्ष्म उद्योग',
+    'MSME / Retail & Micro Business': 'किरकोळ व सूक्ष्म व्यवसाय (एमएसएमई)',
+    'MSME / Agro-Food & Manufacturing': 'कृषी-अन्न व उत्पादन (एमएसएमई)',
+    'Govt Scheme': 'शासकीय योजना', 'MSME / Small Business': 'सूक्ष्म-लघु उद्योग',
+    'Food Processing / Culinary': 'अन्न प्रक्रिया व पाककला',
+    'Artisans & Craftsmen': 'कारागीर व हस्तकलाकार', 'Artisans & Handlooms': 'कारागीर व हातमाग',
+    'Handloom Weavers': 'हातमाग विणकर', 'Women Artisans / Handicrafts': 'महिला कारागीर / हस्तकला',
+    'Handloom & Textiles': 'हातमाग व वस्त्रोद्योग', 'Fisheries': 'मत्स्यपालन',
+    'Fisheries & Aquaculture': 'मत्स्यपालन व जलसंवर्धन',
+    'Dairy & Poultry': 'दुग्धव्यवसाय व कुक्कुटपालन', 'Dairy & Livestock Infrastructure': 'दुग्ध व पशुधन पायाभूत सुविधा',
+    'Agriculture': 'शेती', 'Agriculture & Dairy': 'शेती व दुग्धव्यवसाय',
+    'Agri-Infrastructure': 'कृषी पायाभूत सुविधा', 'Agriculture Machinery': 'कृषी यंत्रसामग्री',
+    'Animal Husbandry': 'पशुपालन', 'Micro Enterprises': 'सूक्ष्म उद्योग',
+    'PwD / Divyangjan': 'दिव्यांग', 'Higher Education': 'उच्च शिक्षण',
+    'MSME Certification': 'एमएसएमई प्रमाणपत्र', 'Discovery': 'व्यवसाय शोध',
+    'General Advisory': 'सामान्य सल्ला',
+  },
+  bn: {
+    'Food Business': 'খাদ্য ব্যবসা', 'Retail / Kirana Shop': 'মুদি / খুচরা দোকান',
+    'Handicrafts & Handlooms': 'হস্তশিল্প ও তাঁত শিল্প', 'Agriculture & Allied': 'কৃষি ও সংশ্লিষ্ট ক্ষেত্র',
+    'Textile & Garments': 'বস্ত্র ও পোশাক শিল্প', 'Manufacturing & Fabrication': 'উৎপাদন ও ফ্যাব্রিকেশন',
+    'Services / Commercial Transport': 'সেবা / বাণিজ্যিক পরিবহন', 'Commercial Transport': 'বাণিজ্যিক পরিবহন',
+    'Services / Repair Shop': 'মেরামত ও সার্ভিস সেন্টার', 'Services & Workshops': 'সেবা ও ওয়ার্কশপ',
+    'Street Vending': 'রাস্তার হকার ও ঠেলাগাড়ি', 'Street Vendors': 'রাস্তার হকার ও ফুটপাতের বিক্রেতা',
+    'Education / Youth': 'শিক্ষা / যুব সমাজ', 'Differently Abled / Divyangjan': 'প্রতিবন্ধী সক্ষমতা',
+    'Women Entrepreneur': 'মহিলা উদ্যোক্তা', 'Women & SC/ST Enterprise': 'মহিলা এবং তপশিলি জাতি/উপজাতি উদ্যোগ',
+    'Urban Livelihoods & Street Vendors': 'নগর জীবিকা ও ফুটপাতের হকার',
+    'Retail Trade / MSME': 'খুচরা বাণিজ্য / ক্ষুদ্র উদ্যোগ',
+    'MSME / Retail & Micro Business': 'খুচরা ও ক্ষুদ্র ব্যবসা (এমএসএমই)',
+    'MSME / Agro-Food & Manufacturing': 'কৃষি-খাদ্য ও উৎপাদন (এমএসএমই)',
+    'Govt Scheme': 'সরকারি প্রকল্প', 'MSME / Small Business': 'ক্ষুদ্র ও মাঝারি ব্যবসা',
+    'Food Processing / Culinary': 'খাদ্য প্রক্রিয়াকরণ ও রন্ধনশিল্প',
+    'Artisans & Craftsmen': 'কারিগর ও হস্তশিল্পী', 'Artisans & Handlooms': 'কারিগর ও তাঁতশিল্প',
+    'Handloom Weavers': 'তাঁত তাঁতি', 'Women Artisans / Handicrafts': 'মহিলা কারিগর / হস্তশিল্প',
+    'Handloom & Textiles': 'তাঁত ও বস্ত্র শিল্প', 'Fisheries': 'মৎস্য পালন',
+    'Fisheries & Aquaculture': 'মৎস্য পালন ও জলজ চাষ',
+    'Dairy & Poultry': 'দুগ্ধ ও মুরগি পালন', 'Dairy & Livestock Infrastructure': 'দুগ্ধ ও পশুপালন পরিকাঠামো',
+    'Agriculture': 'কৃষি', 'Agriculture & Dairy': 'কৃষি ও দুগ্ধ শিল্প',
+    'Agri-Infrastructure': 'কৃষি পরিকাঠামো', 'Agriculture Machinery': 'কৃষি যন্ত্রপাতি',
+    'Animal Husbandry': 'পশুপালন', 'Micro Enterprises': 'ক্ষুদ্র উদ্যোগ',
+    'PwD / Divyangjan': 'প্রতিবন্ধী', 'Higher Education': 'উচ্চ শিক্ষা',
+    'MSME Certification': 'এমএসএমই সার্টিফিকেশন', 'Discovery': 'ব্যবসা অন্বেষণ',
+    'General Advisory': 'সাধারণ পরামর্শ',
+  }
+};
+
+/**
+ * Translates a sector name to the target language.
+ */
+function translateSector(sector, langCode) {
+  if (!sector || !langCode || langCode === 'en') return sector;
+  const map = SECTOR_TRANSLATIONS[langCode];
+  if (!map) return sector;
+  return map[sector] || sector;
+}
+
 /**
  * Formats a scheme into the strict JSON schema specification with 100% pure native language.
+ * Uses vernacularDetails[langCode] for all 21 schemes — zero English fallback for all 7 languages.
  */
 function formatSchemeForSchema(scheme, detectedSector, language = 'English') {
   const lang = (language || 'English').toLowerCase();
@@ -617,382 +794,74 @@ function formatSchemeForSchema(scheme, detectedSector, language = 'English') {
   const schemeId = code;
   const redirect_url = `/schemes/${schemeId}`;
 
-  // TELUGU LOCALIZATION (100% Pure Telugu, Zero English)
-  if (lang.includes('telugu') || lang === 'te') {
-    if (code === 'PMMY') {
-      const isTransport = detectedSector === 'Commercial Transport';
-      return {
-        scheme_id: schemeId,
-        title: isTransport ? 'ప్రధానమంత్రి ముద్ర యోజన (వాణిజ్య వాహన & ఆటో రుణం)' : 'ప్రధానమంత్రి ముద్ర యోజన (PMMY)',
-        sector: isTransport ? 'వాణిజ్య రవాణా / చిన్న వ్యాపారం' : 'చిన్న వ్యాపారం / ఎంఎస్ఎంఈ',
-        max_amount: 'రూ. 10,00,000 వరకు',
-        benefit_tag: 'పూచీకత్తు లేని రుణం (జీరో కొలేటరల్)',
-        description: isTransport 
-          ? 'ఆటో రిక్షా, గూడ్స్ వాహనం, లేదా ట్రాన్స్‌పోర్ట్ బిజినెస్ ప్రారంభించడానికి ముద్ర కిశోర్ మరియు తరుణ్ లోన్లు ఎటువంటి ఆస్తి తాకట్టు లేకుండా లభిస్తాయి. సులభమైన నెలవారీ వాయిదాలలో తక్కువ వడ్డీతో ఈ రుణాన్ని తిరిగి చెల్లించవచ్చు.'
-          : 'చిన్న వ్యాపారులు, దుకాణదారులు ఎటువంటి ఆస్తి తాకట్టు లేకుండా రూ. 10 లక్షల వరకు సులభంగా రుణం పొందవచ్చు. బ్యాంకుల ద్వారా సులభమైన వాయిదాలలో ఈ రుణం లభిస్తుంది.',
-        redirect_url
-      };
-    }
-    if (code === 'STAND-UP') {
-      return {
-        scheme_id: schemeId,
-        title: 'స్టాండప్ ఇండియా పథకం (రవాణా & వాణిజ్య వాహనాలు)',
-        sector: 'మహిళలు & ఎస్సీ/ఎస్టీ పారిశ్రామికవేత్తలు',
-        max_amount: 'రూ. 10 లక్షల నుండి రూ. 1 కోటి వరకు',
-        benefit_tag: 'దీర్ఘకాలిక రుణ సదుపాయం & ప్రభుత్వ హామీ',
-        description: 'మహిళా మరియు ఎస్సీ/ఎస్టీ పారిశ్రామికవేత్తలు వాణిజ్య వాహనాలు, లారీలు, రవాణా యూనిట్లను ఏర్పాటు చేయడానికి బ్యాంకుల ద్వారా రూ. 1 కోటి వరకు రుణం పొందవచ్చు. ప్రభుత్వ క్రెడిట్ గ్యారెంటీతో సురక్షితమైన మూలధనం లభిస్తుంది.',
-        redirect_url
-      };
-    }
-    if (code === 'PMEGP') {
-      return {
-        scheme_id: schemeId,
-        title: 'పీఎంఈజీపీ పథకం (సేవా & తయారీ రంగం)',
-        sector: 'తయారీ & రవాణా సర్వీస్ రంగం',
-        max_amount: 'రూ. 20 లక్షల నుండి రూ. 50 లక్షల వరకు',
-        benefit_tag: '35% వరకు ప్రభుత్వ నగదు రాయితీ (సబ్సిడీ)',
-        description: 'రవాణా సర్వీసులు లేదా సరికొత్త వ్యాపార పరిశ్రమల స్థాపనకు ప్రభుత్వం 35% వరకు తిరిగి చెల్లించనవసరం లేని ఉచిత నగదు సబ్సిడీని అందిస్తుంది. గ్రామీణ నిరుద్యోగ యువత మరియు మహిళలకు ఇది అత్యుత్తమ పథకం.',
-        redirect_url
-      };
-    }
-    if (code === 'PM-SVANIDHI') {
-      return {
-        scheme_id: schemeId,
-        title: 'పీఎం స్వనిధి పథకం (వీధి వ్యాపారుల మైక్రో క్రెడిట్)',
-        sector: 'వీధి వ్యాపారులు & తోపుడు బండ్లు',
-        max_amount: 'రూ. 10,000 నుండి రూ. 50,000 వరకు',
-        benefit_tag: '7% వడ్డీ రాయితీ & క్యాష్‌బ్యాక్ ప్రోత్సాహకాలు',
-        description: 'తోపుడు బండ్ల వ్యాపారులు, టిఫిన్ బండ్ల విక్రేతలు ఎటువంటి హామీ లేకుండా ప్రారంభ మూలధనంగా సులభంగా రుణం పొందవచ్చు. సకాలంలో రుణం చెల్లిస్తే 7% వడ్డీ రాయితీ మరియు డిజిటల్ క్యాష్‌బ్యాక్ లభిస్తుంది.',
-        redirect_url
-      };
-    }
-    if (code === 'KCC') {
-      return {
-        scheme_id: schemeId,
-        title: 'కిసాన్ క్రెడిట్ కార్డ్ (KCC) పథకం',
-        sector: 'వ్యవసాయం & పాడి పరిశ్రమ',
-        max_amount: 'రూ. 3,00,000 వరకు',
-        benefit_tag: 'కేవలం 4% తక్కువ ప్రభావవంతమైన వడ్డీ రేటు',
-        description: 'రైతులు, పాడి పెంపకందారులు మరియు మత్స్యకారులకు పంట పెట్టుబడి మరియు పశువుల పోషణ కోసం తక్కువ వడ్డీకే రుణం లభిస్తుంది. సకాలంలో చెల్లిస్తే ప్రభుత్వం 3% వడ్డీ రాయితీని అందిస్తుంది.',
-        redirect_url
-      };
-    }
-    if (code === 'SMAM') {
-      return {
-        scheme_id: schemeId,
-        title: 'వ్యవసాయ యాంత్రీకరణ సబ్సిడీ పథకం (ట్రాక్టర్ సబ్సిడీ)',
-        sector: 'వ్యవసాయం',
-        max_amount: '40% నుండి 50% ప్రభుత్వ సబ్సిడీ',
-        benefit_tag: 'ట్రాక్టర్లు & ఆధునిక వ్యవసాయ పనిముట్ల కొనుగోలు',
-        description: 'రైతులు కొత్త ట్రాక్టర్లు, వరి కోత యంత్రాలు మరియు ఆధునిక వ్యవసాయ పరికరాలు కొనుగోలు చేయడానికి ప్రభుత్వం 50% వరకు నగదు సబ్సిడీని అందిస్తుంది. దీని ద్వారా వ్యవసాయ ఉత్పాదకత పెరుగుతుంది.',
-        redirect_url
-      };
-    }
-    if (code === 'PM-VISHWAKARMA') {
-      return {
-        scheme_id: schemeId,
-        title: 'పీఎం విశ్వకర్మ యోజన (చేతివృత్తుల పథకం)',
-        sector: 'చేతివృత్తులు & సంప్రదాయ కళాకారులు',
-        max_amount: 'రూ. 15,000 టూల్‌కిట్ గ్రాంట్ + రూ. 3 లక్షల రుణం',
-        benefit_tag: 'కేవలం 5% తక్కువ వడ్డీ & ఉచిత శిక్షణ',
-        description: 'వడ్రంగులు, కమ్మరులు, కుమ్మరులు, దర్జీలు మరియు చేనేత కార్మికులకు ఉచిత ఆధునిక పనిముట్లు మరియు తక్కువ వడ్డీతో ఆర్థిక రుణం లభిస్తుంది. రోజువారీ స్టైపెండ్‌తో కూడిన నైపుణ్య శిక్షణ కూడా ప్రభుత్వం ఉచితంగా అందిస్తుంది.',
-        redirect_url
-      };
-    }
-    if (code === 'NHFDC-DSY') {
-      return {
-        scheme_id: schemeId,
-        title: 'దివ్యాంగుల స్వావలంబన యోజన (NHFDC)',
-        sector: 'దివ్యాంగుల సాధికారత (PwD)',
-        max_amount: 'రూ. 50,00,000 వరకు',
-        benefit_tag: 'కేవలం 5% నుండి 8% రాయితీ వడ్డీ రేటు',
-        description: '40% లేదా అంతకంటే ఎక్కువ వైకల్యం ఉన్న దివ్యాంగులకు స్వయం ఉపాధి మరియు వ్యాపార స్థాపన కోసం ప్రత్యేక రాయితీ రుణం లభిస్తుంది. మహిళా దివ్యాంగులకు అదనంగా 1% వడ్డీ రాయితీ మరియు రూ. 50,000 వరకు పూచీకత్తు అవసరం లేదు.',
-        redirect_url
-      };
-    }
+  // Map language name → ISO code
+  const langCode =
+    (lang.includes('telugu') || lang === 'te') ? 'te' :
+    (lang.includes('kannada') || lang === 'kn') ? 'kn' :
+    (lang.includes('bengali') || lang === 'bn') ? 'bn' :
+    (lang.includes('tamil') || lang === 'ta') ? 'ta' :
+    (lang.includes('marathi') || lang === 'mr') ? 'mr' :
+    (lang.includes('hindi') || lang === 'hi') ? 'hi' : 'en';
+
+  // ─── Primary: vernacularDetails for the requested language ───────────────────
+  let vd = scheme.vernacularDetails && scheme.vernacularDetails[langCode];
+
+  // Fallback: if vernacularDetails missing (e.g. from MongoDB without updated field),
+  // look up in the comprehensive in-memory schemes data
+  if (!vd && langCode !== 'en') {
+    const { COMPREHENSIVE_GOVT_SCHEMES } = require('../data/comprehensiveSchemes');
+    const inMemScheme = COMPREHENSIVE_GOVT_SCHEMES.find(m =>
+      (m.shortCode && m.shortCode === code) ||
+      (m.schemeId && m.schemeId === code) ||
+      (m.schemeName && m.schemeName === scheme.schemeName)
+    );
+    vd = inMemScheme && inMemScheme.vernacularDetails && inMemScheme.vernacularDetails[langCode];
   }
 
-  // KANNADA LOCALIZATION (100% Pure Kannada, Zero English)
-  if (lang.includes('kannada') || lang === 'kn') {
-    if (code === 'PMMY') {
-      const isTransport = detectedSector === 'Commercial Transport';
-      return {
-        scheme_id: schemeId,
-        title: isTransport ? 'ಪ್ರಧಾನಮಂತ್ರಿ ಮುದ್ರಾ ಯೋಜನೆ (ವಾಣಿಜ್ಯ ವಾಹನ & ಆಟೋ ಸಾಲ)' : 'ಪ್ರಧಾನಮಂತ್ರಿ ಮುದ್ರಾ ಯೋಜನೆ (PMMY)',
-        sector: isTransport ? 'ವಾಣಿಜ್ಯ ಸಾರಿಗೆ / ಸಣ್ಣ ವ್ಯಾಪಾರ' : 'ಸಣ್ಣ ಮತ್ತು ಮಧ್ಯಮ ಉದ್ಯಮ',
-        max_amount: '₹10,00,000 ವರೆಗೆ',
-        benefit_tag: 'ಯಾವುದೇ ಅಡಮಾನವಿಲ್ಲದ ಸಾಲ (ಕೊಲ್ಯಾಟರಲ್-ಮುಕ್ತ)',
-        description: isTransport 
-          ? 'ವಾಣಿಜ್ಯ ಆಟೋ ರಿಕ್ಷಾ, ಸಣ್ಣ ಸರಕು ಸಾಗಣೆ ವಾಹನ ಅಥವಾ ಟ್ಯಾಕ್ಸಿ ಖರೀದಿಸಲು ಮುದ್ರಾ ಕಿಶೋರ್ ಮತ್ತು ತರುಣ್ ಸಾಲಗಳು ಯಾವುದೇ ಆಸ್ತಿ ಅಡಮಾನವಿಲ್ಲದೆ ಲಭ್ಯವಿವೆ. ಸುಲಭ ಮಾಸಿಕ ಕಂತುಗಳ ಮೂಲಕ ಬ್ಯಾಂಕ್ ಸಾಲವನ್ನು ಮರುಪಾವತಿಸಬಹುದು.'
-          : 'ಸಣ್ಣ ವ್ಯಾಪಾರಿಗಳು ಮತ್ತು ಅಂಗಡಿಕಾರರು ಯಾವುದೇ ಆಸ್ತಿ ಅಡಮಾನವಿಲ್ಲದೆ ₹10 ಲಕ್ಷದವರೆಗೆ ಸುಲಭ ಸಾಲ ಪಡೆಯಬಹುದು. ಬ್ಯಾಂಕುಗಳ ಮೂಲಕ ಸುಲಭ ಕಂತುಗಳಲ್ಲಿ ಈ ಸಾಲ ಲಭ್ಯವಿದೆ.',
-        redirect_url
-      };
-    }
-    if (code === 'STAND-UP') {
-      return {
-        scheme_id: schemeId,
-        title: 'ಸ್ಟ್ಯಾಂಡಪ್ ಇಂಡಿಯಾ ಯೋಜನೆ (ವಾಣಿಜ್ಯ ವಾಹನಗಳು & ಸಾರಿಗೆ)',
-        sector: 'ಮಹಿಳೆಯರು & ಪರಿಶಿಷ್ಟ ಜಾತಿ/ಪಂಗಡದ ಉದ್ಯಮಿಗಳು',
-        max_amount: '₹10 ಲಕ್ಷದಿಂದ ₹1 ಕೋಟಿವರೆಗೆ',
-        benefit_tag: 'ದೀರ್ಘಾವಧಿ ಸಾಲ ಸೌಲಭ್ಯ & ಸರ್ಕಾರಿ ಗ್ಯಾರಂಟಿ',
-        description: 'ಮಹಿಳೆಯರು ಮತ್ತು ಎಸ್‌ಸಿ/ಎಸ್‌ಟಿ ಉದ್ಯಮಿಗಳು ವಾಣಿಜ್ಯ ವಾಹನಗಳು, ಲಾರಿಗಳು ಅಥವಾ ಸಾರಿಗೆ ವ್ಯವಹಾರ ಸ್ಥಾಪಿಸಲು ₹1 ಕೋಟಿವರೆಗೆ ಬ್ಯಾಂಕ್ ಸಾಲ ಪಡೆಯಬಹುದು. ಇದು ಉದ್ಯಮಶೀಲತೆಯನ್ನು ನೇರವಾಗಿ ಪ್ರೋತ್ಸಾಹಿಸುತ್ತದೆ.',
-        redirect_url
-      };
-    }
-    if (code === 'PMEGP') {
-      return {
-        scheme_id: schemeId,
-        title: 'ಪ್ರಧಾನಮಂತ್ರಿ ಉದ್ಯೋಗ ಸೃಜನ ಕಾರ್ಯಕ್ರಮ (PMEGP)',
-        sector: 'ಉತ್ಪಾದನೆ & ಸೇವಾ ರಂಗ',
-        max_amount: '₹20 ಲಕ್ಷದಿಂದ ₹50 ಲಕ್ಷವರೆಗೆ',
-        benefit_tag: '35% ವರೆಗೆ ಸರ್ಕಾರಿ ನಗದು ಸಬ್ಸಿಡಿ (ಅನುದಾನ)',
-        description: 'ಸಾರಿಗೆ ಸೇವೆಗಳು ಅಥವಾ ಹೊಸ ಉತ್ಪಾದನಾ ಕೈಗಾರಿಕೆಗಳ ಸ್ಥಾಪನೆಗೆ ಸರ್ಕಾರವು 35% ವರೆಗೆ ಮರುಪಾವತಿಸಬೇಕಿಲ್ಲದ ನಗದು ಸಬ್ಸಿಡಿಯನ್ನು ನೀಡುತ್ತದೆ. ಗ್ರಾಮೀಣ ನಿರುದ್ಯೋಗಿ ಯುವಕರು ಮತ್ತು ಮಹಿಳೆಯರಿಗೆ ಇದು ಅತ್ಯುತ್ತಮ ಯೋಜನೆ.',
-        redirect_url
-      };
-    }
-    if (code === 'PM-SVANIDHI') {
-      return {
-        scheme_id: schemeId,
-        title: 'ಪಿಎಂ ಸ್ವನಿಧಿ ಯೋಜನೆ (ಬೀದಿ ಬದಿ ವ್ಯಾಪಾರಿಗಳ ಮೈಕ್ರೋ ಕ್ರೆಡಿಟ್)',
-        sector: 'ಬೀದಿ ಬದಿ ವ್ಯಾಪಾರಿಗಳು & ತಳ್ಳುವ ಗಾಡಿಗಳು',
-        max_amount: '₹10,000 ದಿಂದ ₹50,000 ವರೆಗೆ',
-        benefit_tag: '7% ಬಡ್ಡಿ ಸಬ್ಸಿಡಿ & ಡಿಜಿಟಲ್ ಕ್ಯಾಶ್‌ಬ್ಯಾಕ್',
-        description: 'ಬೀದಿ ಬದಿ ವ್ಯಾಪಾರಿಗಳು, ತಳ್ಳುವ ಗಾಡಿ ವ್ಯಾಪಾರಿಗಳು ಯಾವುದೇ ಗ್ಯಾರಂಟಿ ಇಲ್ಲದೆ ಆರಂಭಿಕ ಬಂಡವಾಳ ಸಾಲ ಪಡೆಯಬಹುದು. ಸಕಾಲದಲ್ಲಿ ಮರುಪಾವತಿಸಿದರೆ 7% ಬಡ್ಡಿ ಸಬ್ಸಿಡಿ ಸಿಗುತ್ತದೆ.',
-        redirect_url
-      };
-    }
-    if (code === 'KCC') {
-      return {
-        scheme_id: schemeId,
-        title: 'ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ (KCC) ಯೋಜನೆ',
-        sector: 'ಕೃಷಿ & ಪಶುಸಂಗೋಪನೆ',
-        max_amount: '₹3,00,000 ವರೆಗೆ',
-        benefit_tag: 'ಕೇವಲ 4% ರಿಯಾಯಿತಿ ಬಡ್ಡಿ ದರ',
-        description: 'ರೈತರು, ಹೈನುಗಾರಿಕೆ ಮತ್ತು ಮೀನುಗಾರರಿಗೆ ಬೆಳೆ ಹೂಡಿಕೆ ಹಾಗೂ ಜಾನುವಾರು ಪೋಷಣೆಗಾಗಿ ರಿಯಾಯಿತಿ ಬಡ್ಡಿ ದರದಲ್ಲಿ ಸುಲಭ ಸಾಲ ಲಭ್ಯವಿದೆ. ಸಕಾಲದಲ್ಲಿ ಪಾವತಿಸಿದರೆ ಸರ್ಕಾರವು 3% ಬಡ್ಡಿ ರಿಯಾಯಿತಿ ನೀಡುತ್ತದೆ.',
-        redirect_url
-      };
-    }
-    if (code === 'SMAM') {
-      return {
-        scheme_id: schemeId,
-        title: 'ಕೃಷಿ ಯಾಂತ್ರೀಕರಣ ಸಬ್ಸಿಡಿ ಯೋಜನೆ (ಟ್ರಾಕ್ಟರ್ ಸಬ್ಸಿಡಿ)',
-        sector: 'ಕೃಷಿ',
-        max_amount: '40% ರಿಂದ 50% ಸರ್ಕಾರಿ ಸಬ್ಸಿಡಿ',
-        benefit_tag: 'ಟ್ರಾಕ್ಟರ್ & ಆಧುನಿಕ ಕೃಷಿ ಉಪಕರಣಗಳ ಖರೀದಿ',
-        description: 'ರೈತರು ಹೊಸ ಟ್ರಾಕ್ಟರ್‌ಗಳು, ಕೊಯ್ಲು ಯಂತ್ರಗಳು ಮತ್ತು ಆಧುನಿಕ ಕೃಷಿ ಉಪಕರಣಗಳನ್ನು ಖರೀದಿಸಲು ಸರ್ಕಾರವು 50% ವರೆಗೆ ನಗದು ಸಬ್ಸಿಡಿ ನೀಡುತ್ತದೆ.',
-        redirect_url
-      };
-    }
-    if (code === 'PM-VISHWAKARMA') {
-      return {
-        scheme_id: schemeId,
-        title: 'ಪಿಎಂ ವಿಶ್ವಕರ್ಮ ಯೋಜನೆ (ಸಾಂಪ್ರದಾಯಿಕ ಕುಶಲಕರ್ಮಿಗಳು)',
-        sector: 'ಕುಶಲಕರ್ಮಿಗಳು & ಕರಕುಶಲ ಕಲಾವಿದರು',
-        max_amount: '₹15,000 ಟೂಲ್‌ಕಿಟ್ ಅನುದಾನ + ₹3 ಲಕ್ಷ ಸಾಲ',
-        benefit_tag: 'ಕೇವಲ 5% ಕಡಿಮೆ ಬಡ್ಡಿ ದರ & ಉಚಿತ ತರಬೇತಿ',
-        description: 'ಬಡಗಿಗಳು, ಕಮ್ಮಾರರು, ಕುಂಬಾರರು, ದರ್ಜಿಗಳು ಮತ್ತು ನೇಕಾರರಿಗೆ ಉಚಿತ ಆಧುನಿಕ ಉಪಕರಣಗಳು ಮತ್ತು ಕಡಿಮೆ ಬಡ್ಡಿದರದಲ್ಲಿ ಆರ್ಥಿಕ ಸಾಲ ಲಭ್ಯವಿದೆ. ದಿನನಿತ್ಯದ ಭತ್ಯೆಯೊಂದಿಗೆ ಕೌಶಲ್ಯ ತರಬೇತಿಯನ್ನು ಸರ್ಕಾರ ನೀಡುತ್ತದೆ.',
-        redirect_url
-      };
-    }
-    if (code === 'NHFDC-DSY') {
-      return {
-        scheme_id: schemeId,
-        title: 'ದಿವ್ಯಾಂಗಜನ ಸ್ವಾವಲಂಬನ ಯೋಜನೆ (NHFDC)',
-        sector: 'ವಿಕಲಚೇತನರ ಸಬಲೀಕರಣ (PwD)',
-        max_amount: '₹50,00,000 ವರೆಗೆ',
-        benefit_tag: 'ಕೇವಲ 5% ರಿಂದ 8% ರಿಯಾಯಿತಿ ಬಡ್ಡಿ ದರ',
-        description: '40% ಅಥವಾ ಹೆಚ್ಚಿನ ವಿಕಲಚೇತನ ಹೊಂದಿರುವ ನಾಗರಿಕರಿಗೆ ಸ್ವಯಂ ಉದ್ಯೋಗ ಮತ್ತು ವ್ಯಾಪಾರ ಸ್ಥಾಪನೆಗೆ ವಿಶೇಷ ರಿಯಾಯಿತಿ ಸಾಲ ದೊರೆಯುತ್ತದೆ. ಮಹಿಳಾ ವಿಕಲಚೇತನರಿಗೆ ಹೆಚ್ಚುವರಿ 1% ಬಡ್ಡಿ ರಿಯಾಯಿತಿ ಸಿಗುತ್ತದೆ.',
-        redirect_url
-      };
-    }
+  if (vd && langCode !== 'en') {
+    const sectorNative = translateSector(scheme.targetSector || detectedSector, langCode);
+    // Use first benefit as the benefit_tag card badge
+    const benefitTag = vd.benefits && vd.benefits.length > 0
+      ? vd.benefits[0]
+      : (vd.loanAmount || vd.interestRate || '');
+
+    return {
+      scheme_id: schemeId,
+      title: vd.name || scheme.schemeName,
+      sector: sectorNative,
+      max_amount: vd.loanAmount || scheme.loanAmountFormatted || '',
+      benefit_tag: benefitTag,
+      description: vd.description || '',
+      redirect_url
+    };
   }
 
-  // BENGALI LOCALIZATION (100% Pure Bengali, Zero English)
-  if (lang.includes('bengali') || lang === 'bn') {
-    if (code === 'PMMY') {
-      const isTransport = detectedSector === 'Commercial Transport';
-      return {
-        scheme_id: schemeId,
-        title: isTransport ? 'প্রধানমন্ত্রী মুদ্রা যোজনা (বাণিজ্যিক যানবাহন ও অটো ঋণ)' : 'প্রধানমন্ত্রী মুদ্রা যোজনা (PMMY)',
-        sector: isTransport ? 'বাণিজ্যিক পরিবহন / ক্ষুদ্র ব্যবসা' : 'ক্ষুদ্র ও মাঝারি ব্যবসা',
-        max_amount: '₹১০,০০,০০০ পর্যন্ত',
-        benefit_tag: 'কোনো গ্যারান্টি ছাড়া (কোল্যাটারাল-মুক্ত ঋণ)',
-        description: isTransport 
-          ? 'বাণিজ্যিক অটো-রিকশা, ছোট পণ্যবাহী গাড়ি বা ট্যাক্সি কেনার জন্য মুদ্রা কিশোর ও তরুণ ঋণ কোনো সম্পত্তি বন্ধক ছাড়াই পাওয়া যায়। ব্যাংকের মাধ্যমে সহজ মাসিক কিস্তিতে এই ঋণ পরিশোধ করা যায়।'
-          : 'ছোট ব্যবসায়ী এবং দোকানদাররা কোনো সম্পত্তি বন্ধক ছাড়াই ₹১০ লাখ পর্যন্ত সহজ ঋণ পেতে পারেন। ব্যাংকের মাধ্যমে সহজ কিস্তিতে এই ঋণ দেওয়া হয়।',
-        redirect_url
-      };
-    }
-    if (code === 'STAND-UP') {
-      return {
-        scheme_id: schemeId,
-        title: 'স্ট্যান্ড-আপ ইন্ডিয়া প্রকল্প (বাণিজ্যিক পরিবহন ও যানবাহন)',
-        sector: 'মহিলা এবং এসসি/এসটি উদ্যোক্তা',
-        max_amount: '₹১০ লাখ থেকে ₹১ কোটি পর্যন্ত',
-        benefit_tag: 'দীর্ঘমেয়াদী ঋণ সুবিধা ও সরকারি গ্যারান্টি',
-        description: 'মহিলা এবং তফশিলি জাতি/উপজাতির উদ্যোক্তারা বাণিজ্যিক গাড়ি, ট্রাক বা পরিবহন ব্যবসা শুরু করার জন্য ₹১ কোটি পর্যন্ত ব্যাংক ঋণ পেতে পারেন। এটি স্বনির্ভরতা বাড়াতে অত্যন্ত সহায়ক।',
-        redirect_url
-      };
-    }
-    if (code === 'PMEGP') {
-      return {
-        scheme_id: schemeId,
-        title: 'প্রধানমন্ত্রী কর্মসংস্থান সৃষ্টি কর্মসূচি (PMEGP)',
-        sector: 'উৎপাদন ও সেবা খাত',
-        max_amount: '₹২০ লাখ থেকে ₹৫০ লাখ পর্যন্ত',
-        benefit_tag: '৩৫% পর্যন্ত সরকারি নগদ ভর্তুকি (সাবসিডি)',
-        description: 'পরিবহন পরিষেবা বা নতুন শিল্প স্থাপনের জন্য সরকার ৩৫% পর্যন্ত অফেরতযোগ্য নগদ ভর্তুকি প্রদান করে। গ্রামীণ বেকার যুবক এবং মহিলা উদ্যোক্তাদের জন্য এটি একটি সেরা প্রকল্প।',
-        redirect_url
-      };
-    }
-    if (code === 'PM-SVANIDHI') {
-      return {
-        scheme_id: schemeId,
-        title: 'পিএম স্বনিধি প্রকল্প (রাস্তার বিক্রেতাদের মাইক্রো ক্রেডিট)',
-        sector: 'পথচলতি হকার ও ঠেলাগাড়ি বিক্রেতা',
-        max_amount: '₹১০,০০০ থেকে ₹৫০,০০০ পর্যন্ত',
-        benefit_tag: '৭% সুদ ভর্তুকি ও ডিজিটাল ক্যাশব্যাক',
-        description: 'রাস্তার ধারের ক্ষুদ্র বিক্রেতা ও টিফিন বিক্রেতারা কোনো গ্যারান্টি ছাড়াই ব্যবসার পুঁজির জন্য ঋণ পেতে পারেন। সময়মতো ঋণ শোধ করলে ৭% সুদ ছাড় এবং ক্যাশব্যাক পাওয়া যায়।',
-        redirect_url
-      };
-    }
-    if (code === 'KCC') {
-      return {
-        scheme_id: schemeId,
-        title: 'কিসান ক্রেডিট কার্ড (KCC) প্রকল্প',
-        sector: 'কৃষি ও পশুপালন',
-        max_amount: '₹৩,০০,০০০ পর্যন্ত',
-        benefit_tag: 'মাত্র ৪% কার্যকর সুদের হার',
-        description: 'কৃষক, ডেয়ারি খামারি এবং মৎস্যজীবীদের ফসলের উৎপাদন ও গবাদি পশু পালনের জন্য সহজ শর্তে কম সুদে ঋণ দেওয়া হয়। সময়মতো পরিশোধে ৩% সরকারি সুদ ছাড় পাওয়া যায়।',
-        redirect_url
-      };
-    }
-    if (code === 'SMAM') {
-      return {
-        scheme_id: schemeId,
-        title: 'কৃষি যান্ত্রিকীকরণ প্রকল্প (ট্র্যাক্টর সাবসিডি)',
-        sector: 'কৃষি',
-        max_amount: '৪০% থেকে ৫০% সরকারি ভর্তুকি',
-        benefit_tag: 'ট্র্যাক্টর ও আধুনিক কৃষি যন্ত্রপাতি ক্রয়',
-        description: 'কৃষকদের নতুন ট্র্যাক্টর, ফসল কাটার মেশিন ও আধুনিক কৃষি যন্ত্রপাতি কেনার জন্য সরকার ৫০% পর্যন্ত নগদ অনুদান প্রদান করে।',
-        redirect_url
-      };
-    }
-    if (code === 'PM-VISHWAKARMA') {
-      return {
-        scheme_id: schemeId,
-        title: 'পিএম বিশ্বকর্মা যোজনা (ঐতিহ্যবাহী কারিগর প্রকল্প)',
-        sector: 'হস্তশিল্প ও ঐতিহ্যবাহী কারিগর',
-        max_amount: '₹১৫,০০০ টুলকিট অনুদান + ₹৩ লাখ পর্যন্ত ঋণ',
-        benefit_tag: 'মাত্র ৫% কম সুদের হার ও বিনামূল্যে প্রশিক্ষণ',
-        description: 'ছুতোর, কামার, কুমার, দর্জি এবং তাঁতিদের বিনামূল্যে আধুনিক যন্ত্রপাতি এবং কম সুদে আর্থিক ঋণ দেওয়া হয়। সাথে প্রতিদিনের ভাতাসহ সরকারি প্রশিক্ষণ প্রদান করা হয়।',
-        redirect_url
-      };
-    }
-    if (code === 'NHFDC-DSY') {
-      return {
-        scheme_id: schemeId,
-        title: 'দিব্যাঙ্গজন স্বাবলম্বন যোজনা (NHFDC)',
-        sector: 'প্রতিবন্ধী ক্ষমতায়ন (PwD)',
-        max_amount: '₹৫০,০০,০০০ পর্যন্ত',
-        benefit_tag: 'মাত্র ৫% থেকে ৮% বিশেষ ছাড়যুক্ত সুদের হার',
-        description: '৪০% বা তার বেশি প্রতিবন্ধকতাযুক্ত ব্যক্তিদের স্বনির্ভরতা ও নতুন ব্যবসা শুরু করার জন্য কম সুদে বিশেষ ঋণ দেওয়া হয়। মহিলা প্রতিবন্ধীদের জন্য অতিরিক্ত ১% সুদের ছাড় রয়েছে।',
-        redirect_url
-      };
-    }
-  }
-
-  // HINDI LOCALIZATION (100% Pure Hindi, Zero English)
-  if (lang.includes('hindi') || lang === 'hi') {
-    if (code === 'PMMY') {
-      const isTransport = detectedSector === 'Commercial Transport';
-      return {
-        scheme_id: schemeId,
-        title: isTransport ? 'प्रधानमंत्री मुद्रा योजना (वाणिज्यिक वाहन एवं ऑटो लोन)' : 'प्रधानमंत्री मुद्रा योजना (PMMY)',
-        sector: isTransport ? 'वाणिज्यिक परिवहन / सूक्ष्म व्यवसाय' : 'सूक्ष्म एवं लघु व्यवसाय',
-        max_amount: '₹10,00,000 तक',
-        benefit_tag: 'बिना किसी गारंटी (कोलैटरल-फ्री)',
-        description: isTransport
-          ? 'कमर्शियल ऑटो-रिक्शा, छोटा मालवाहक वाहन या टैक्सी खरीदने के लिए मुद्रा किशोर एवं तरुण लोन बिना किसी संपत्ति गारंटी के उपलब्ध हैं। बैंकों द्वारा आसान मासिक किस्तों पर यह ऋण दिया जाता है।'
-          : 'छोटे दुकानदार और सूक्ष्म व्यापारी बिना किसी संपत्ति गारंटी के ₹10 लाख तक का आसान ऋण प्राप्त कर सकते हैं। समय पर भुगतान से व्यवसाय बढ़ाना अत्यंत सरल है।',
-        redirect_url
-      };
-    }
-    if (code === 'STAND-UP') {
-      return {
-        scheme_id: schemeId,
-        title: 'स्टैंड-अप इंडिया योजना (वाणिज्यिक वाहन एवं परिवहन)',
-        sector: 'महिला एवं अनुसूचित जाति/जनजाति उद्यमी',
-        max_amount: '₹10 लाख से ₹1 करोड़ तक',
-        benefit_tag: 'दीर्घकालिक ऋण एवं सरकारी गारंटी',
-        description: 'महिलाएं और अनुसूचित जाति/जनजाति के उद्यमी वाणिज्यिक वाहन, बस, ट्रक या ट्रांसपोर्ट व्यवसाय शुरू करने के लिए ₹1 करोड़ तक का बैंक ऋण प्राप्त कर सकते हैं। यह उद्यमशीलता को सीधा बढ़ावा देता है।',
-        redirect_url
-      };
-    }
-    if (code === 'PMEGP') {
-      return {
-        scheme_id: schemeId,
-        title: 'प्रधानमंत्री रोजगार सृजन कार्यक्रम (PMEGP)',
-        sector: 'विनिर्माण एवं सेवा उद्यम',
-        max_amount: '₹20 लाख से ₹50 लाख तक',
-        benefit_tag: '35% तक सरकारी नकद अनुदान (सब्सिडी)',
-        description: 'परिवहन सेवाओं और नए विनिर्माण उद्यमों के लिए सरकार 35% तक की गैर-वापसी योग्य सब्सिडी प्रदान करती है। ग्रामीण युवाओं और महिला उद्यमियों के लिए यह सर्वोत्कृष्ट योजना है।',
-        redirect_url
-      };
-    }
-    if (code === 'PM-SVANIDHI') {
-      return {
-        scheme_id: schemeId,
-        title: 'पीएम स्वनिधि योजना (रेहड़ी-पटरी माइक्रो क्रेडिट)',
-        sector: 'स्ट्रीट वेंडर एवं फेरीवाले',
-        max_amount: '₹10,000 से ₹50,000 तक',
-        benefit_tag: '7% ब्याज सब्सिडी एवं डिजिटल कैशबैक',
-        description: 'सड़क किनारे दुकान लगाने वाले, फल-सब्जी और नाश्ता विक्रेता बिना किसी गारंटी के कार्यशील पूंजी ऋण पा सकते हैं। समय पर अदायगी करने पर 7% ब्याज छूट मिलती है।',
-        redirect_url
-      };
-    }
-    if (code === 'KCC') {
-      return {
-        scheme_id: schemeId,
-        title: 'किसान क्रेडिट कार्ड (KCC) योजना',
-        sector: 'कृषि एवं पशुपालन',
-        max_amount: '₹3,00,000 तक',
-        benefit_tag: 'केवल 4% प्रभावी ब्याज दर',
-        description: 'किसानों, डेयरी संचालकों और मत्स्य पालकों को फसल और पशुधन के लिए रियायती ब्याज दर पर आसान लोन मिलता है। समय पर भुगतान पर 3% सरकारी ब्याज छूट मिलती है।',
-        redirect_url
-      };
-    }
-    if (code === 'NHFDC-DSY') {
-      return {
-        scheme_id: schemeId,
-        title: 'दिव्यांगजन स्वावलंबन योजना (NHFDC)',
-        sector: 'दिव्यांगजन सशक्तिकरण',
-        max_amount: '₹50,00,000 तक',
-        benefit_tag: 'केवल 5% से 8% रियायती ब्याज दर',
-        description: '40% या अधिक दिव्यांगता वाले नागरिकों को स्वरोजगार व नए व्यवसाय के लिए कम ब्याज पर विशेष ऋण मिलता है। महिला दिव्यांगजनों को 1% अतिरिक्त ब्याज छूट दी जाती है।',
-        redirect_url
-      };
-    }
-  }
-
-  // DEFAULT / ENGLISH
-  const isTransport = detectedSector === 'Commercial Transport';
-  const defaultDesc = scheme.description 
-    ? scheme.description.split('.').slice(0, 2).join('.') + '.'
-    : 'Collateral-free credit support provided by the Government of India.';
+  // ─── English fallback ─────────────────────────────────────────────────────────
+  const isTransport = detectedSector === 'Services / Commercial Transport' || detectedSector === 'Commercial Transport';
+  const enVd = scheme.vernacularDetails && scheme.vernacularDetails['en'];
+  const defaultDesc = enVd
+    ? enVd.description
+    : (scheme.description
+        ? scheme.description.split('.').slice(0, 2).join('.') + '.'
+        : 'Collateral-free credit support provided by the Government of India.');
 
   return {
     scheme_id: schemeId,
-    title: (code === 'PMMY' && isTransport) ? 'PM Mudra Yojana (Commercial Vehicle / Auto Loan)' : scheme.schemeName,
-    sector: isTransport ? 'Commercial Transport / Small Business' : scheme.targetSector,
-    max_amount: scheme.loanAmountFormatted || 'Up to ₹10,00,000',
-    benefit_tag: scheme.subsidyPercentage ? `${scheme.subsidyPercentage}% Capital Subsidy` : 'No Collateral Required',
+    title: (code === 'PMMY' && isTransport)
+      ? 'PM Mudra Yojana (Commercial Vehicle / Auto Loan)'
+      : (enVd ? enVd.name : scheme.schemeName),
+    sector: scheme.targetSector || detectedSector || 'Govt Scheme',
+    max_amount: (enVd ? enVd.loanAmount : scheme.loanAmountFormatted) || 'Up to ₹10,00,000',
+    benefit_tag: scheme.subsidyPercentage
+      ? `${scheme.subsidyPercentage}% Capital Subsidy`
+      : (enVd && enVd.benefits && enVd.benefits[0] ? enVd.benefits[0] : 'No Collateral Required'),
     description: (code === 'PMMY' && isTransport)
       ? 'Purchase auto-rickshaws, small commercial vehicles, or goods carriages with zero property mortgage under Mudra Kishore and Tarun loans. Repay comfortably through easy monthly bank installments.'
       : defaultDesc,
     redirect_url
   };
 }
+
 
 /**
  * 3. Dynamic Vernacular Fallback Generator (Strict JSON Schema Compliant)
@@ -1041,6 +910,22 @@ function buildVernacularResponse(message, schemes, language = 'English', userPro
     } else {
       conversationalMessage = 'आपके प्रश्न और आवश्यकता के अनुसार सबसे उपयुक्त सरकारी योजनाएं निम्नलिखित हैं:';
     }
+  } else if (lang.includes('tamil') || lang === 'ta' || /[\u0B80-\u0BFF]/.test(message)) {
+    if (detectedSector === 'Commercial Transport') {
+      conversationalMessage = 'வணிக வாகனம் (ஆட்டோ ரிக்ஷா / லாரி / டாக்சி) வாங்குவதற்கு அரசிடமிருந்து கிடைக்கும் சிறந்த திட்டங்கள் இங்கே:';
+    } else if (detectedSector === 'Food Business') {
+      conversationalMessage = 'உணவு வணிகம், சிறு உணவகம் அல்லது டிபன் சென்டருக்கான அரசு கடன் மற்றும் மானிய திட்டங்கள் இங்கே:';
+    } else {
+      conversationalMessage = 'உங்கள் கேள்வி மற்றும் தொழில் தேவையின் அடிப்படையில் மிகவும் பொருத்தமான அரசு திட்டங்கள் இங்கே:';
+    }
+  } else if (lang.includes('marathi') || lang === 'mr' || /[\u0900-\u097F]/.test(message)) {
+    if (detectedSector === 'Commercial Transport') {
+      conversationalMessage = 'व्यावसायिक वाहन (ऑटो रिक्षा / ट्रक / टॅक्सी) खरेदीसाठी सरकारच्या सर्वोत्तम कर्ज व अनुदान योजना येथे आहेत:';
+    } else if (detectedSector === 'Food Business') {
+      conversationalMessage = 'खाद्य व्यवसाय, हॉटेल किंवा टिफिन सेंटरसाठी सरकारी कर्ज आणि अनुदान योजना येथे आहेत:';
+    } else {
+      conversationalMessage = 'तुमच्या प्रश्न आणि व्यवसायाच्या गरजेनुसार सर्वात योग्य सरकारी योजना येथे आहेत:';
+    }
   } else {
     if (detectedSector === 'Commercial Transport') {
       conversationalMessage = 'Based on your requirement for commercial vehicle or transport financing, here are the strictly verified government credit schemes:';
@@ -1056,10 +941,12 @@ function buildVernacularResponse(message, schemes, language = 'English', userPro
   const isBn = lang.includes('bengali') || lang === 'bn' || /[\u0980-\u09FF]/.test(message);
   const isTe = lang.includes('telugu') || lang === 'te' || /[\u0C00-\u0C7F]/.test(message);
   const isHi = lang.includes('hindi') || lang === 'hi' || /[\u0900-\u097F]/.test(message);
+  const isTa = lang.includes('tamil') || lang === 'ta' || /[\u0B80-\u0BFF]/.test(message);
+  const isMr = lang.includes('marathi') || lang === 'mr';
 
-  const amountLabel = isKn ? 'ಗರಿಷ್ಠ ಮೊತ್ತ:' : (isBn ? 'সর্বোচ্চ পরিমাণ:' : (isTe ? 'ఆర్థిక సహాయం:' : (isHi ? 'अधिकतम राशि:' : 'Max Amount:')));
-  const benefitLabel = isKn ? 'ಪ್ರಯೋಜನ:' : (isBn ? 'সুবিধা:' : (isTe ? 'ప్రయోజనం:' : (isHi ? 'लाभ:' : 'Benefit:')));
-  const detailsLabel = isKn ? 'ವಿವರಗಳು:' : (isBn ? 'বিবরণ:' : (isTe ? 'వివరాలు:' : (isHi ? 'विवरण:' : 'Details:')));
+  const amountLabel = isKn ? 'ಗರಿಷ್ಠ ಮೊತ್ತ:' : (isBn ? 'সর্বোচ্চ পরিমাণ:' : (isTe ? 'ఆర్థిక సహాయం:' : (isHi ? 'अधिकतम राशि:' : (isTa ? 'அதிகபட்ச தொகை:' : (isMr ? 'कमाल रक्कम:' : 'Max Amount:')))));
+  const benefitLabel = isKn ? 'ಪ್ರಯೋಜನ:' : (isBn ? 'সুবিধা:' : (isTe ? 'ప్రయోజనం:' : (isHi ? 'लाभ:' : (isTa ? 'பயன்:' : (isMr ? 'लाभ:' : 'Benefit:')))));
+  const detailsLabel = isKn ? 'ವಿವರಗಳು:' : (isBn ? 'বিবরণ:' : (isTe ? 'వివరాలు:' : (isHi ? 'विवरण:' : (isTa ? 'விவரங்கள்:' : (isMr ? 'तपशील:' : 'Details:')))));
 
   const backwardCompatibleReply = `${conversationalMessage}\n\n` + formattedSchemes.map((s, idx) => 
     `${idx + 1}. **${s.title}**\n   - **${amountLabel}** ${s.max_amount}\n   - **${benefitLabel}** ${s.benefit_tag}\n   - **${detailsLabel}** ${s.description}`
@@ -1447,15 +1334,38 @@ USER'S MESSAGE: "${message}"
 
   if (geminiResult && geminiResult.parsed && geminiResult.parsed.message && Array.isArray(geminiResult.parsed.schemes)) {
     const parsed = geminiResult.parsed;
+    // Pre-resolve all schemes so we can do vernacular overlay for any scheme Gemini returns
+    const allSchemesPool = await dataStore.getSchemes().catch(() => relevantSchemes);
+    const schemeSearchPool = [...new Map([...relevantSchemes, ...(Array.isArray(allSchemesPool) ? allSchemesPool : relevantSchemes)].map(x=>[(x.shortCode||x.schemeId||x.schemeName||Math.random()),x])).values()];
+
     parsed.schemes = parsed.schemes.map(s => {
-      const groundTruth = relevantSchemes.find(gt => 
-        (gt.shortCode && gt.shortCode.toLowerCase() === (s.scheme_id || '').toLowerCase()) ||
-        (gt.schemeId && gt.schemeId.toLowerCase() === (s.scheme_id || '').toLowerCase()) ||
-        (gt.schemeName && gt.schemeName.toLowerCase().includes((s.title || '').toLowerCase())) ||
-        (s.title && s.title.toLowerCase().includes((gt.shortCode || '').toLowerCase()))
+      const titleLower = (s.title || '').toLowerCase();
+      const schemeIdLower = (s.scheme_id || '').toLowerCase();
+      const groundTruth = schemeSearchPool.find(gt => 
+        (gt.shortCode && gt.shortCode.toLowerCase() === schemeIdLower) ||
+        (gt.schemeId && gt.schemeId.toLowerCase() === schemeIdLower) ||
+        (gt.schemeName && titleLower.length > 4 && gt.schemeName.toLowerCase().includes(titleLower)) ||
+        (titleLower && (gt.shortCode||'').length > 2 && titleLower.includes((gt.shortCode || '').toLowerCase())) ||
+        (gt.schemeName && titleLower && titleLower.split(' ').filter(w=>w.length>3).some(w=>gt.schemeName.toLowerCase().includes(w)))
       );
 
       const exactId = groundTruth ? (groundTruth.shortCode || groundTruth.schemeId) : (s.scheme_id || 'PMMY');
+
+      // ─── Vernacular overlay: replace any English card content with native language data ───
+      if (groundTruth && effectiveLang !== 'English') {
+        const vernacularCard = formatSchemeForSchema(groundTruth, detectedSector, effectiveLang);
+        return {
+          ...s,
+          scheme_id: exactId,
+          redirect_url: `/schemes/${exactId}`,
+          title: vernacularCard.title || s.title,
+          description: vernacularCard.description || s.description,
+          sector: vernacularCard.sector || s.sector,
+          max_amount: vernacularCard.max_amount || s.max_amount,
+          benefit_tag: vernacularCard.benefit_tag || s.benefit_tag
+        };
+      }
+
       return {
         ...s,
         scheme_id: exactId,
@@ -1463,14 +1373,16 @@ USER'S MESSAGE: "${message}"
       };
     });
 
+    const isTe = effectiveLang === 'Telugu';
     const isKn = effectiveLang === 'Kannada';
     const isBn = effectiveLang === 'Bengali';
-    const isTe = effectiveLang === 'Telugu';
     const isHi = effectiveLang === 'Hindi';
+    const isTa = effectiveLang === 'Tamil';
+    const isMr = effectiveLang === 'Marathi';
 
-    const amountLabel = isKn ? 'ಗರಿಷ್ಠ ಮೊತ್ತ:' : (isBn ? 'সর্বোচ্চ পরিমাণ:' : (isTe ? 'ఆర్థిక సహాయం:' : (isHi ? 'अधिकतम राशि:' : 'Max Amount:')));
-    const benefitLabel = isKn ? 'ಪ್ರಯೋಜನ:' : (isBn ? 'সুবিধা:' : (isTe ? 'ప్రయోజనం:' : (isHi ? 'लाभ:' : 'Benefit:')));
-    const detailsLabel = isKn ? 'ವಿವರಗಳು:' : (isBn ? 'বিবরণ:' : (isTe ? 'వివరాలు:' : (isHi ? 'विवरण:' : 'Details:')));
+    const amountLabel = isTe ? 'ఆర్థిక సహాయం:' : (isKn ? 'ಗರಿಷ್ಠ ಮೊತ್ತ:' : (isBn ? 'সর্বোচ্চ পরিমাণ:' : (isHi ? 'अधिकतम राशि:' : (isTa ? 'அதிகபட்ச தொகை:' : (isMr ? 'कमाल रक्कम:' : 'Max Amount:')))));
+    const benefitLabel = isTe ? 'ప్రయోజనం:' : (isKn ? 'ಪ್ರಯೋಜನ:' : (isBn ? 'সুবিধা:' : (isHi ? 'लाभ:' : (isTa ? 'பயன்:' : (isMr ? 'लाभ:' : 'Benefit:')))));
+    const detailsLabel = isTe ? 'వివరాలు:' : (isKn ? 'ವಿವರಗಳು:' : (isBn ? 'বিবরণ:' : (isHi ? 'विवरण:' : (isTa ? 'விவரங்கள்:' : (isMr ? 'तपशील:' : 'Details:')))));
 
     const backwardCompatibleReply = `${parsed.message}\n\n` + parsed.schemes.map((s, idx) => 
       `${idx + 1}. **${s.title}**\n   - **${amountLabel}** ${s.max_amount}\n   - **${benefitLabel}** ${s.benefit_tag}\n   - **${detailsLabel}** ${s.description}`

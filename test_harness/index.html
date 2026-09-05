@@ -94,6 +94,10 @@
           <span class="step-num">10</span>
           <div class="step-meta"><strong data-i18n="sidebar.step10_title">Document Checklist</strong><small data-i18n="sidebar.step10_sub">Upload & verify status</small></div>
         </button>
+        <button class="step-btn" onclick="showScreen(11)">
+          <span class="step-num">11</span>
+          <div class="step-meta"><strong data-i18n="sidebar.step11_title">My Applications</strong><small data-i18n="sidebar.step11_sub">Track applied schemes</small></div>
+        </button>
       </div>
 
       <!-- SIH Impact Summary Box -->
@@ -301,7 +305,7 @@
                 </div>
                 <span data-i18n="screen3.emi_calc">EMI Calculator</span>
               </div>
-              <div class="quick-item" onclick="showScreen(10)">
+              <div class="quick-item" onclick="showScreen(11)">
                 <div class="icon-circle amber" title="My Applications">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
@@ -347,10 +351,6 @@
                 <div class="nav-tab active" onclick="showScreen(3)">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                   <small data-i18n="screen3.nav_home">Home</small>
-                </div>
-                <div class="nav-tab" onclick="showScreen(6)">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-                  <small data-i18n="screen3.nav_saved">Saved</small>
                 </div>
                 <div class="nav-tab" onclick="showScreen(5)">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -491,6 +491,17 @@
                 <div class="form-group">
                   <label>👤 <span data-i18n="screen5.name_label">Full Name</span> <span class="required">*</span></label>
                   <input type="text" id="profName" value="Ravi Kumar" placeholder="Ravi Kumar">
+                </div>
+
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label>📱 <span data-i18n="screen5.phone_label">Mobile Number</span> <span class="required">*</span></label>
+                    <input type="tel" id="profPhone" value="9876543210" placeholder="9876543210" maxlength="10">
+                  </div>
+                  <div class="form-group">
+                    <label>✉️ <span data-i18n="screen5.email_label">Email Address</span></label>
+                    <input type="email" id="profEmail" value="ravi.kumar@example.com" placeholder="ravi.kumar@example.com">
+                  </div>
                 </div>
 
                 <div class="form-group">
@@ -646,6 +657,7 @@
                   <button class="pill-btn outline" onclick="setProfStep(3)">← Back</button>
                   <button class="pill-btn primary" onclick="runSchemeMatching()" data-i18n="screen5.find_schemes_btn">Find Matching Schemes ➔</button>
                 </div>
+                <button class="pill-btn save-profile-action-btn" onclick="saveUserProfileDetails(true)" data-i18n="screen5.save_profile_btn">💾 Save Profile Details</button>
               </div>
             </div>
           </div>
@@ -786,22 +798,45 @@
               <button class="back-btn" onclick="showScreen(3)">‹</button>
               <div class="center-title">
                 <h4 data-i18n="screen9.header">Nearby Partners</h4>
-                <small data-i18n="screen9.sub_header">Near Your Location</small>
+                <small id="partnerLocSubText" data-i18n="screen9.sub_header">Detecting Your Location...</small>
               </div>
-              <span class="header-icon">🔍</span>
+              <button class="gps-refresh-btn" onclick="requestUserLiveLocation(true)" title="Detect Your Live GPS Location">🎯 My GPS</button>
             </div>
 
-            <!-- Simulated Map Canvas with Interactive Pins -->
-            <div class="map-view">
-              <div class="map-grid-bg">
-                <div class="road r1"></div>
-                <div class="road r2"></div>
-                <div class="road r3"></div>
+            <!-- Optional Live Location Permission Banner -->
+            <div id="locPermissionBanner" class="loc-permission-banner" style="display: none;">
+              <div class="loc-banner-content">
+                <span class="loc-banner-icon">📍</span>
+                <div class="loc-banner-text">
+                  <strong>Location Access Needed</strong>
+                  <p>Allow GPS to find banks, CSCs & KVKs nearest to you</p>
+                </div>
+                <button class="loc-allow-btn" onclick="requestUserLiveLocation(true)">Allow</button>
               </div>
-              <div class="pin user-pin" title="Your Location" data-i18n="screen9.pin_you">📍 You</div>
-              <div class="pin partner-pin bank-pin" style="top: 30%; right: 25%;" data-i18n="screen9.pin_bank">🏦 Bank</div>
-              <div class="pin partner-pin kvk-pin" style="bottom: 30%; left: 20%;" data-i18n="screen9.pin_kvk">🔬 KVK</div>
-              <div class="pin partner-pin csc-pin" style="top: 25%; left: 30%;" data-i18n="screen9.pin_csc">💻 CSC</div>
+            </div>
+
+            <!-- Partner Type Filter Bar -->
+            <div class="gmaps-filter-bar">
+              <button class="gmaps-chip active" onclick="filterGMap('All', this)">All Partners</button>
+              <button class="gmaps-chip" onclick="filterGMap('Bank', this)">🏦 Banks</button>
+              <button class="gmaps-chip" onclick="filterGMap('CSC', this)">💻 CSC</button>
+              <button class="gmaps-chip" onclick="filterGMap('KVK', this)">🔬 KVK</button>
+            </div>
+
+            <!-- Interactive Google Maps Container -->
+            <div class="gmaps-wrapper">
+              <iframe
+                id="gmapsIframe"
+                class="gmaps-iframe"
+                src="https://maps.google.com/maps?q=17.3850,78.4867+(You+-+Entrepreneur+Location)&t=&z=14&ie=UTF8&iwloc=&output=embed"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
+              <div class="gmaps-live-bar">
+                <span class="live-dot pulse"></span>
+                <span class="live-loc-text">📍 <strong>Hyderabad, TS</strong> (17.3850° N, 78.4867° E)</span>
+              </div>
             </div>
 
             <div class="partner-list" id="partnerListContainer">
@@ -809,7 +844,7 @@
             </div>
 
             <div class="screen-footer">
-              <button class="pill-btn primary" onclick="alert('Opening Google Maps navigation...')" data-i18n="screen9.view_on_map">View on Map</button>
+              <button class="pill-btn primary" onclick="openGoogleMapsGeneral()" data-i18n="screen9.open_in_app">🗺️ Open in App ↗</button>
             </div>
           </div>
 
@@ -835,8 +870,28 @@
               <!-- Rendered via JS -->
             </div>
 
-            <div class="screen-footer">
+            <div class="screen-footer" style="display: flex; flex-direction: column; gap: 8px; margin-top: 14px;">
               <button class="pill-btn primary" onclick="handleSubmitApplication()" data-i18n="screen10.submit_app_btn">Submit Application to Bank</button>
+              <button class="pill-btn outline" onclick="showScreen(9)" data-i18n="screen10.nearby_partner_btn">📍 Find Nearby Partner</button>
+            </div>
+          </div>
+
+          <!-- SCREEN 11: MY APPLICATIONS (APPLIED SCHEMES LIFECYCLE TRACKER) -->
+          <div class="screen" id="screen-11">
+            <div class="sub-header">
+              <button class="back-btn" onclick="showScreen(3)">‹</button>
+              <div class="center-title">
+                <h4 data-i18n="screen11.header">My Applications</h4>
+                <small data-i18n="screen11.sub">Track applied loan & subsidy status</small>
+              </div>
+            </div>
+
+            <div class="applications-container" id="applicationsContainer">
+              <!-- Rendered dynamically via loadMyApplications() in app.js -->
+            </div>
+
+            <div class="screen-footer" style="margin-top: 14px;">
+              <button class="pill-btn primary" onclick="showScreen(6)" data-i18n="screen11.apply_new_btn">+ Apply for Another Scheme</button>
             </div>
           </div>
         </div>
@@ -873,6 +928,15 @@
         </div>
         <p class="endpoint-desc">Haversine / MongoDB 2dsphere spatial channel locator</p>
         <button class="run-api-btn" onclick="testPartnersApi()">Test Spatial Search</button>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method post">POST</span>
+          <code>/api/users/profile</code>
+        </div>
+        <p class="endpoint-desc">MongoDB database storage & multi-step profiling upsert</p>
+        <button class="run-api-btn" onclick="testProfileApi()">Test Profile MongoDB</button>
       </div>
 
       <div class="endpoint-card">

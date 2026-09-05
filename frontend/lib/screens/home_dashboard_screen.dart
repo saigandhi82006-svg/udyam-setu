@@ -8,7 +8,6 @@ import 'document_checklist_screen.dart';
 import 'my_applications_screen.dart';
 import 'scheme_results_screen.dart';
 import 'profile_screen.dart';
-import 'saved_schemes_screen.dart';
 import '../models/user.dart';
 import '../services/mock_data_service.dart';
 
@@ -32,7 +31,6 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
           index: _currentBottomNavIndex,
           children: [
             _buildHomeContent(),
-            const SavedSchemesScreen(),
             ProfileScreen(user: _user),
           ],
         ),
@@ -75,11 +73,6 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
               icon: Icon(Icons.home_outlined),
               activeIcon: Icon(Icons.home_rounded),
               label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.bookmark_outline_rounded),
-              activeIcon: Icon(Icons.bookmark_rounded),
-              label: 'Saved',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline_rounded),

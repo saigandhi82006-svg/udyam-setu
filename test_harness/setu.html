@@ -81,6 +81,11 @@
                     <div class="step-meta"><strong>Document Checklist</strong><small>Upload & verify status</small>
                     </div>
                 </button>
+                <button class="step-btn" onclick="showScreen(11)">
+                    <span class="step-num">11</span>
+                    <div class="step-meta"><strong>My Applications</strong><small>Track applied schemes</small>
+                    </div>
+                </button>
             </div>
 
             <!-- SIH Impact Summary Box -->
@@ -263,7 +268,7 @@
                                 <div class="icon-circle blue">🧮</div>
                                 <span>EMI Calculator</span>
                             </div>
-                            <div class="quick-item" onclick="showScreen(10)">
+                            <div class="quick-item" onclick="showScreen(11)">
                                 <div class="icon-circle amber">📄</div>
                                 <span>My Applications</span>
                             </div>
@@ -284,7 +289,6 @@
                         <div class="dash-bottom-nav">
                             <div class="nav-tab active" onclick="showScreen(3)"><span>🏠</span><small>Home</small></div>
                             <div class="nav-tab" onclick="showScreen(4)"><span>💬</span><small>Chat</small></div>
-                            <div class="nav-tab" onclick="showScreen(6)"><span>⭐</span><small>Saved</small></div>
                             <div class="nav-tab" onclick="showScreen(5)"><span>👤</span><small>Profile</small></div>
                         </div>
                     </div>
@@ -357,6 +361,20 @@
 
                         <div class="form-body">
                             <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" id="profName" value="Ravi Kumar">
+                            </div>
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>Mobile Number</label>
+                                    <input type="tel" id="profPhone" value="9876543210" maxlength="10">
+                                </div>
+                                <div class="form-group">
+                                    <label>Email Address</label>
+                                    <input type="email" id="profEmail" value="ravi.kumar@example.com">
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <label>Age</label>
                                 <input type="number" id="profAge" value="28">
                             </div>
@@ -396,6 +414,7 @@
                             </div>
 
                             <button class="pill-btn primary mt-4" onclick="runSchemeMatching()">Next →</button>
+                            <button class="pill-btn save-profile-action-btn" onclick="saveUserProfileDetails(true)">💾 Save Profile Details</button>
                         </div>
                     </div>
 
@@ -508,22 +527,45 @@
                             <button class="back-btn" onclick="showScreen(3)">‹</button>
                             <div class="center-title">
                                 <h4>Nearby Partners</h4>
-                                <small>Near Your Location</small>
+                                <small id="partnerLocSubText">Detecting Your Location...</small>
                             </div>
-                            <span class="header-icon">🔍</span>
+                            <button class="gps-refresh-btn" onclick="requestUserLiveLocation(true)" title="Detect Your Live GPS Location">🎯 My GPS</button>
                         </div>
 
-                        <!-- Simulated Map Canvas with Interactive Pins -->
-                        <div class="map-view">
-                            <div class="map-grid-bg">
-                                <div class="road r1"></div>
-                                <div class="road r2"></div>
-                                <div class="road r3"></div>
+                        <!-- Optional Live Location Permission Banner -->
+                        <div id="locPermissionBanner" class="loc-permission-banner" style="display: none;">
+                            <div class="loc-banner-content">
+                                <span class="loc-banner-icon">📍</span>
+                                <div class="loc-banner-text">
+                                    <strong>Location Access Needed</strong>
+                                    <p>Allow GPS to find banks, CSCs & KVKs nearest to you</p>
+                                </div>
+                                <button class="loc-allow-btn" onclick="requestUserLiveLocation(true)">Allow</button>
                             </div>
-                            <div class="pin user-pin" title="Your Location">📍 You</div>
-                            <div class="pin partner-pin bank-pin" style="top: 30%; right: 25%;">🏦 Bank</div>
-                            <div class="pin partner-pin kvk-pin" style="bottom: 30%; left: 20%;">🔬 KVK</div>
-                            <div class="pin partner-pin csc-pin" style="top: 25%; left: 30%;">💻 CSC</div>
+                        </div>
+
+                        <!-- Partner Type Filter Bar -->
+                        <div class="gmaps-filter-bar">
+                            <button class="gmaps-chip active" onclick="filterGMap('All', this)">All Partners</button>
+                            <button class="gmaps-chip" onclick="filterGMap('Bank', this)">🏦 Banks</button>
+                            <button class="gmaps-chip" onclick="filterGMap('CSC', this)">💻 CSC</button>
+                            <button class="gmaps-chip" onclick="filterGMap('KVK', this)">🔬 KVK</button>
+                        </div>
+
+                        <!-- Interactive Google Maps Container -->
+                        <div class="gmaps-wrapper">
+                            <iframe
+                                id="gmapsIframe"
+                                class="gmaps-iframe"
+                                src="https://maps.google.com/maps?q=17.3850,78.4867+(You+-+Entrepreneur+Location)&t=&z=14&ie=UTF8&iwloc=&output=embed"
+                                allowfullscreen=""
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                            <div class="gmaps-live-bar">
+                                <span class="live-dot pulse"></span>
+                                <span class="live-loc-text">📍 <strong>Hyderabad, TS</strong> (17.3850° N, 78.4867° E)</span>
+                            </div>
                         </div>
 
                         <div class="partner-list" id="partnerListContainer">
@@ -531,8 +573,7 @@
                         </div>
 
                         <div class="screen-footer">
-                            <button class="pill-btn primary" onclick="alert('Opening Google Maps navigation...')">View
-                                on Map</button>
+                            <button class="pill-btn primary" onclick="openGoogleMapsGeneral()">🗺️ Open in App ↗</button>
                         </div>
                     </div>
 
@@ -560,9 +601,28 @@
                             <!-- Rendered via JS -->
                         </div>
 
-                        <div class="screen-footer">
-                            <button class="pill-btn primary" onclick="handleSubmitApplication()">Submit Application to
-                                Bank</button>
+                        <div class="screen-footer" style="display: flex; flex-direction: column; gap: 8px; margin-top: 14px;">
+                            <button class="pill-btn primary" onclick="handleSubmitApplication()">Submit Application to Bank</button>
+                            <button class="pill-btn outline" onclick="showScreen(9)">📍 Find Nearby Partner</button>
+                        </div>
+                    </div>
+
+                    <!-- SCREEN 11: MY APPLICATIONS (APPLIED SCHEMES LIFECYCLE TRACKER) -->
+                    <div class="screen" id="screen-11">
+                        <div class="sub-header">
+                            <button class="back-btn" onclick="showScreen(3)">‹</button>
+                            <div class="center-title">
+                                <h4>My Applications</h4>
+                                <small>Track applied loan & subsidy status</small>
+                            </div>
+                        </div>
+
+                        <div class="applications-container" id="applicationsContainer">
+                            <!-- Rendered dynamically via loadMyApplications() in app.js -->
+                        </div>
+
+                        <div class="screen-footer" style="margin-top: 14px;">
+                            <button class="pill-btn primary" onclick="showScreen(6)">+ Apply for Another Scheme</button>
                         </div>
                     </div>
                 </div>
