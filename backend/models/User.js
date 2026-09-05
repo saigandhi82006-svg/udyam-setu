@@ -63,6 +63,10 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 240000
   },
+  neededInvestment: {
+    type: Number,
+    default: 500000
+  },
   businessType: {
     type: String,
     enum: [
@@ -89,7 +93,9 @@ const UserSchema = new mongoose.Schema({
     latitude: { type: Number, default: 17.3850 },
     longitude: { type: Number, default: 78.4867 },
     city: { type: String, default: 'Hyderabad' },
-    state: { type: String, default: 'Telangana' }
+    district: { type: String, default: 'Hyderabad' },
+    state: { type: String, default: 'Telangana' },
+    pincode: { type: String, default: '500001' }
   },
   savedSchemes: [{
     type: mongoose.Schema.Types.ObjectId,
@@ -100,3 +106,4 @@ const UserSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.models.User || mongoose.model('User', UserSchema);
+

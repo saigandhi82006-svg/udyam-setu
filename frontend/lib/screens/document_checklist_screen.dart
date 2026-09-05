@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/scheme.dart';
+<<<<<<< HEAD
+=======
+import 'my_applications_screen.dart';
+>>>>>>> 454554d037efbae304b90c5e3e6275c8429223a2
 import 'nearby_partners_screen.dart';
 
 class DocumentChecklistScreen extends StatefulWidget {
@@ -322,7 +326,11 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
             ),
           ),
 
+<<<<<<< HEAD
           // Always Visible Bottom Bar Area: Nearby Partners Option + Done Button
+=======
+          // Bottom Button: Upload Document / Submit Application & Find Nearby Partner
+>>>>>>> 454554d037efbae304b90c5e3e6275c8429223a2
           Container(
             padding: const EdgeInsets.all(14),
             decoration: const BoxDecoration(
@@ -333,6 +341,7 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+<<<<<<< HEAD
                   // Prominent Always Visible Nearby Partners Option (📍 Nearby Partners ->)
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
@@ -392,6 +401,26 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
                           style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                       ],
+=======
+                  ElevatedButton(
+                    onPressed: _isSubmitting ? null : _submitApplication,
+                    child: _isSubmitting
+                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                        : const Text('Submit Application to Bank'),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const NearbyPartnersScreen()),
+                        );
+                      },
+                      icon: const Icon(Icons.location_on_outlined, size: 18),
+                      label: const Text('Find Nearby Partner'),
+>>>>>>> 454554d037efbae304b90c5e3e6275c8429223a2
                     ),
                   ),
                 ],

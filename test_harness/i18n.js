@@ -125,7 +125,7 @@
       "vending_opt": "🛍️ Street Vending / Pushcart (SVANidhi)",
       "listen_btn": "🔊 Listen",
       "voice_prompt": "🎙️ Tap to Speak in your Language",
-      "input_placeholder": "Ask or speak in your language...",
+      "input_placeholder": "Type here...",
       "send_btn": "➤",
       "view_details": "View Full Scheme Details"
     },
@@ -244,7 +244,13 @@
     "screen10": {
       "header": "Required Documents",
       "ready_badge": "Ready",
-      "submit_app_btn": "Submit Application to Bank"
+      "submit_app_btn": "Submit Application to Bank",
+      "nearby_partner_btn": "📍 Find Nearby Partner"
+    },
+    "screen11": {
+      "header": "My Applications",
+      "sub": "Track applied loan & subsidy status",
+      "apply_new_btn": "+ Apply for Another Scheme"
     },
     "common": {
       "registered_scheme": "Registered Scheme",
@@ -533,7 +539,13 @@
     "screen10": {
       "header": "आवश्यक दस्तावेज़",
       "ready_badge": "तैयार",
-      "submit_app_btn": "बैंक में आवेदन जमा करें"
+      "submit_app_btn": "बैंक में आवेदन जमा करें",
+      "nearby_partner_btn": "📍 नजदीकी पार्टनर खोजें"
+    },
+    "screen11": {
+      "header": "मेरे आवेदन",
+      "sub": "ऋण एवं सब्सिडी आवेदन की स्थिति देखें",
+      "apply_new_btn": "+ अन्य योजना के लिए आवेदन करें"
     },
     "common": {
       "registered_scheme": "पंजीकृत योजना",
@@ -822,7 +834,13 @@
     "screen10": {
       "header": "కావలసిన పత్రాలు",
       "ready_badge": "సిద్ధంగా ఉంది",
-      "submit_app_btn": "బ్యాంకుకు దరఖాస్తును సమర్పించండి"
+      "submit_app_btn": "బ్యాంకుకు దరఖాస్తును సమర్పించండి",
+      "nearby_partner_btn": "📍 సమీప భాగస్వామి కేంద్రం"
+    },
+    "screen11": {
+      "header": "నా దరఖాస్తులు",
+      "sub": "రుణం మరియు సబ్సిడీ స్థితిని పరిశీలించండి",
+      "apply_new_btn": "+ మరొక పథకానికి దరఖాస్తు చేయండి"
     },
     "common": {
       "registered_scheme": "నమోదిత పథకం",
@@ -1111,7 +1129,13 @@
     "screen10": {
       "header": "ಅಗತ್ಯವಿರುವ ದಾಖಲೆಗಳು",
       "ready_badge": "ಸಿದ್ಧವಾಗಿದೆ",
-      "submit_app_btn": "ಬ್ಯಾಂಕ್‌ಗೆ ಅರ್ಜಿ ಸಲ್ಲಿಸಿ"
+      "submit_app_btn": "ಬ್ಯಾಂಕ್‌ಗೆ ಅರ್ಜಿ ಸಲ್ಲಿಸಿ",
+      "nearby_partner_btn": "📍 ಹತ್ತಿರದ ಪಾಲುದಾರ ಕೇಂದ್ರ"
+    },
+    "screen11": {
+      "header": "ನನ್ನ ಅರ್ಜಿಗಳು",
+      "sub": "ಸಾಲ ಮತ್ತು ಸಬ್ಸಿಡಿ ಅರ್ಜಿಯ ಸ್ಥಿತಿ ಪರಿಶೀಲಿಸಿ",
+      "apply_new_btn": "+ ಮತ್ತೊಂದು ಯೋಜನೆಗೆ ಅರ್ಜಿ ಸಲ್ಲಿಸಿ"
     },
     "common": {
       "registered_scheme": "ನೋಂದಾಯಿತ ಯೋಜನೆ",
@@ -1400,7 +1424,13 @@
     "screen10": {
       "header": "தேவையான ஆவணங்கள்",
       "ready_badge": "தயார்",
-      "submit_app_btn": "வங்கிக்கு விண்ணப்பத்தை சமர்ப்பிக்கவும்"
+      "submit_app_btn": "வங்கிக்கு விண்ணப்பத்தை சமர்ப்பிக்கவும்",
+      "nearby_partner_btn": "📍 அருகிலுள்ள கூட்டாளர் மையம்"
+    },
+    "screen11": {
+      "header": "என் விண்ணப்பங்கள்",
+      "sub": "விண்ணப்ப நிலையை கண்காணிக்கவும்",
+      "apply_new_btn": "+ மற்றொரு திட்டத்திற்கு விண்ணப்பிக்கவும்"
     },
     "common": {
       "registered_scheme": "பதிவுசெய்யப்பட்ட திட்டம்",
@@ -1689,7 +1719,13 @@
     "screen10": {
       "header": "आवश्यक कागदपत्रे",
       "ready_badge": "तयार आहे",
-      "submit_app_btn": "बँकेत अर्ज सादर करा"
+      "submit_app_btn": "बँकेत अर्ज सादर करा",
+      "nearby_partner_btn": "📍 जवळचा भागीदार केंद्र"
+    },
+    "screen11": {
+      "header": "माझे अर्ज",
+      "sub": "कर्ज व अनुदान अर्जाची स्थिती तपासा",
+      "apply_new_btn": "+ दुसऱ्या योजनेसाठी अर्ज करा"
     },
     "common": {
       "registered_scheme": "नोंदणीकृत योजना",
@@ -1978,7 +2014,13 @@
     "screen10": {
       "header": "প্রয়োজনীয় নথিপত্র",
       "ready_badge": "প্রস্তুত",
-      "submit_app_btn": "ব্যাংকে আবেদন জমা দিন"
+      "submit_app_btn": "ব্যাংকে আবেদন জমা দিন",
+      "nearby_partner_btn": "📍 নিকটস্থ অংশীদার কেন্দ্র"
+    },
+    "screen11": {
+      "header": "আমার আবেদনসমূহ",
+      "sub": "ঋণ ও ভর্তুকি আবেদনের অবস্থা ট্র্যাক করুন",
+      "apply_new_btn": "+ অন্য প্রকল্পের জন্য আবেদন করুন"
     },
     "common": {
       "registered_scheme": "নিবন্ধিত যোজনা",
