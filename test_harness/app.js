@@ -2439,20 +2439,10 @@ function updateLiveGMapDisplay(lat, lng, label, accuracy = null, isLive = true) 
   }
 }
 
-let currentPartnerRadius = 10;
+let currentPartnerRadius = 25;
 
 function setSearchRadius(radiusKm, chipElement) {
   currentPartnerRadius = radiusKm;
-
-  // Update active radius chip UI
-  document.querySelectorAll('.radius-chip').forEach(chip => chip.classList.remove('active'));
-  if (chipElement) {
-    chipElement.classList.add('active');
-  } else {
-    const el = document.getElementById(`rad-${radiusKm}`);
-    if (el) el.classList.add('active');
-  }
-
   logTerminal(`[Partner Search Radius] Updated search zone to ${radiusKm} km radius.`);
   loadNearbyPartners(currentPartnerFilter);
 }
@@ -2462,7 +2452,7 @@ async function loadNearbyPartners(filterType = null) {
   if (filterType) currentPartnerFilter = filterType;
   const container = document.getElementById('partnerListContainer');
   if (container) {
-    container.innerHTML = `<div style="text-align: center; padding: 20px; color: #64748B; font-size: 12px;">⏳ Finding verified partners within ${currentPartnerRadius} km of your GPS...</div>`;
+    container.innerHTML = `<div style="text-align: center; padding: 20px; color: #64748B; font-size: 12px;">⏳ Finding verified assistance centres near you...</div>`;
   }
 
   const userLat = window.userLiveLocation.lat || 17.3850;
