@@ -9,11 +9,15 @@ import 'scheme_detail_screen.dart';
 class SchemeResultsScreen extends StatefulWidget {
   final UserProfile? userProfile;
   final List<Scheme>? preloadedMatches;
+  final double? emiFilterLoanAmount;
+  final double? emiFilterMonthlyAmount;
 
   const SchemeResultsScreen({
     super.key,
     this.userProfile,
     this.preloadedMatches,
+    this.emiFilterLoanAmount,
+    this.emiFilterMonthlyAmount,
   });
 
   @override
@@ -38,12 +42,21 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
 
   void _loadSchemes() async {
     setState(() => _isLoading = true);
-    final user = widget.userProfile ?? MockDataService.defaultUser;
-    final matches = await _apiService.matchSchemes(user);
-    setState(() {
-      _schemes = matches;
-      _isLoading = false;
-    });
+    if (widget.emiFilterLoanAmount != null) {
+      final all = await _apiService.getSchemes();
+      final filtered = all.where((s) => s.maxGrantLoanAmount >= widget.emiFilterLoanAmount!).toList();
+      setState(() {
+        _schemes = filtered.isNotEmpty ? filtered : all;
+        _isLoading = false;
+      });
+    } else {
+      final user = widget.userProfile ?? MockDataService.defaultUser;
+      final matches = await _apiService.matchSchemes(user);
+      setState(() {
+        _schemes = matches;
+        _isLoading = false;
+      });
+    }
   }
 
   void _loadAllSchemes() async {

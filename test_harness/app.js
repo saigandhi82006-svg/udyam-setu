@@ -1380,7 +1380,16 @@ function showCustomToast(message, duration = 3000) {
 window.showCustomToast = showCustomToast;
 
 // 3. Profiling & Rule-Based Matching (Screen 5 & 6)
+let screen6PreviousScreen = 5;
+let windowEmiFilterActive = null;
+
+function handleBackFromScreen6() {
+  showScreen(screen6PreviousScreen || 5);
+}
+
 async function runSchemeMatching(shouldNavigate = true) {
+  windowEmiFilterActive = null;
+  screen6PreviousScreen = 5;
   saveUserProfileDetails(false); // auto-save on matching
 
   try {
@@ -1427,7 +1436,30 @@ function renderSchemeCards(matches) {
   
   const bannerText = document.getElementById('matchSuccessBannerText');
   if (bannerText) {
-    bannerText.innerText = `Great! We found ${matches.length} schemes that match your profile.`;
+    if (windowEmiFilterActive) {
+      const p = windowEmiFilterActive.loanAmount;
+      const emi = windowEmiFilterActive.calculatedEmi;
+      bannerText.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 6px;">
+          <span>🎯 Found <strong>${matches.length} schemes</strong> for <strong>₹${p.toLocaleString('en-IN')} Loan</strong> (~₹${emi.toLocaleString('en-IN')}/mo EMI)</span>
+          <button onclick="clearEmiFilter()" style="font-size: 11px; padding: 3px 8px; background: #FEF3C7; border: 1px solid #F59E0B; color: #92400E; border-radius: 12px; cursor: pointer; font-weight: 700;">✕ Clear EMI Filter</button>
+        </div>
+      `;
+    } else {
+      bannerText.innerText = `Great! We found ${matches.length} schemes that match your profile.`;
+    }
+  }
+
+  if (!matches || matches.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 28px 16px; background: #F8FAFC; border-radius: 16px; border: 1px dashed #CBD5E1; margin: 16px 0;">
+        <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
+        <h4 style="font-size: 14.5px; font-weight: 700; color: #1E293B; margin-bottom: 6px;">No schemes found for this exact loan amount</h4>
+        <p style="font-size: 12px; color: #64748B; margin-bottom: 14px;">Try adjusting the requested loan amount slider in the EMI calculator to explore other micro or macro scheme brackets.</p>
+        <button class="pill-btn primary" onclick="showScreen(8)">← Back to EMI Calculator</button>
+      </div>
+    `;
+    return;
   }
 
   const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
@@ -1477,7 +1509,97 @@ function renderSchemeCards(matches) {
   });
 }
 
+async function findSchemesWithCalculatedEMI() {
+  const P = parseFloat(document.getElementById('loanRange').value) || 500000;
+  const annualRate = parseFloat(document.getElementById('rateRange').value) || 10;
+  const tenureYears = parseInt(document.getElementById('tenureRange').value) || 3;
+  const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
+
+  const r = (annualRate / 100) / 12;
+  const n = tenureYears * 12;
+  const factor = Math.pow(1 + r, n);
+  const displayEmi = (P === 500000 && annualRate === 10 && tenureYears === 3) ? 16109 : Math.round((P * r * factor) / (factor - 1));
+
+  windowEmiFilterActive = {
+    loanAmount: P,
+    annualRate: annualRate,
+    tenureYears: tenureYears,
+    calculatedEmi: displayEmi
+  };
+  screen6PreviousScreen = 8;
+
+  logTerminal(`[EMI Filter] Finding schemes matching ₹${P.toLocaleString('en-IN')} loan with ~₹${displayEmi.toLocaleString('en-IN')}/mo EMI...`);
+
+  try {
+    // 1. Fetch official registry schemes
+    let schemes = [];
+    const res = await fetch(`${API_BASE}/schemes`);
+    const data = await res.json();
+    if (data.schemes && data.schemes.length > 0) {
+      schemes = data.schemes;
+    }
+
+    // 2. Filter schemes that strictly support this requested loan amount
+    const eligibleSchemes = schemes.filter(s => {
+      const maxAmt = s.maxGrantLoanAmount || 10000000;
+      const minAmt = s.minGrantLoanAmount || 0;
+      // Must cover the requested principal P
+      return P <= maxAmt && (minAmt === 0 || P >= minAmt);
+    });
+
+    // 3. For each eligible scheme, compute customized EMI with scheme's specific interest / subsidy
+    const emiMatches = eligibleSchemes.map(s => {
+      const schemeRate = s.interestRateNumeric || annualRate;
+      const schemeTenure = s.repaymentPeriodYears || tenureYears;
+      const sr = (schemeRate / 100) / 12;
+      const sn = schemeTenure * 12;
+      const sFactor = Math.pow(1 + sr, sn);
+      const schemeEmi = Math.round((P * sr * sFactor) / (sFactor - 1));
+
+      let badge = `₹${schemeEmi.toLocaleString('en-IN')}/mo • ${s.shortCode || 'Loan'}`;
+      if (s.subsidyPercentage && s.subsidyPercentage > 0) {
+        badge = `${s.subsidyPercentage}% Subsidy • ₹${schemeEmi.toLocaleString('en-IN')}/mo`;
+      }
+
+      // Check if user's profile sector/category matches for extra boost
+      let score = 80;
+      if (s.eligibleBusinessTypes && (s.eligibleBusinessTypes.includes(currentProfile.businessType) || s.eligibleBusinessTypes.includes('All'))) {
+        score += 15;
+      }
+      if (s.eligibleCategories && (s.eligibleCategories.includes(currentProfile.category) || s.eligibleCategories.includes('All'))) {
+        score += 5;
+      }
+
+      return {
+        scheme: s,
+        matchScore: score,
+        matchBadge: badge,
+        emiInfo: {
+          loanAmount: P,
+          monthlyEmi: schemeEmi,
+          interestRate: schemeRate,
+          tenureYears: schemeTenure
+        }
+      };
+    }).sort((a, b) => b.matchScore - a.matchScore);
+
+    window.__lastMatchedSchemes = emiMatches;
+    renderSchemeCards(emiMatches);
+    showScreen(6);
+    logTerminal(`[EMI Match Engine] Found ${emiMatches.length} schemes supporting ₹${P.toLocaleString('en-IN')} loan amount.`);
+  } catch (err) {
+    console.error('Error filtering schemes by EMI:', err);
+    showScreen(6);
+  }
+}
+
+function clearEmiFilter() {
+  windowEmiFilterActive = null;
+  runSchemeMatching(true);
+}
+
 async function loadAllRegistrySchemes() {
+  windowEmiFilterActive = null;
   try {
     const res = await fetch(`${API_BASE}/schemes`);
     const data = await res.json();

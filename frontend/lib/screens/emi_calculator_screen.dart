@@ -466,7 +466,12 @@ class _EmiCalculatorScreenState extends State<EmiCalculatorScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const SchemeResultsScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => SchemeResultsScreen(
+                        emiFilterLoanAmount: _loanAmount,
+                        emiFilterMonthlyAmount: _monthlyEmi,
+                      ),
+                    ),
                   );
                 },
                 child: const Text('Find Schemes with this EMI'),
