@@ -2611,8 +2611,8 @@ function renderPartners(partners) {
 
     const card = document.createElement('div');
     card.className = 'partner-card';
-    card.title = 'Click to open Google Maps for this place';
-    card.onclick = () => openGoogleMapsForPartner(p);
+    card.title = 'Click to open Google Maps navigation';
+    card.style.cursor = 'pointer';
 
     card.innerHTML = `
       <div class="partner-icon-box ${iconClass}">
@@ -2627,11 +2627,22 @@ function renderPartners(partners) {
         </div>
         <p class="partner-addr-text">${p.address || window.userLiveLocation.label}</p>
       </div>
-      <div class="partner-map-action" title="Show turn-by-turn driving route on Google Maps" onclick="event.stopPropagation(); openGoogleMapsForPartner(p)">
+      <div class="partner-map-action" title="Show turn-by-turn driving route on Google Maps">
         <span>🧭</span>
         <span style="font-weight: 700; color: #0284C7;">Route ➔</span>
       </div>
     `;
+
+    // Direct JS closure event binding for guaranteed reliability
+    card.onclick = () => openGoogleMapsForPartner(p);
+    const actionBtn = card.querySelector('.partner-map-action');
+    if (actionBtn) {
+      actionBtn.onclick = (e) => {
+        e.stopPropagation();
+        openGoogleMapsForPartner(p);
+      };
+    }
+
     container.appendChild(card);
   });
 }
@@ -2679,15 +2690,37 @@ function openGoogleMapsForPartner(partner) {
   // Official Google Maps Directions URL using exact GPS coordinates (guaranteed to calculate road route with 0 errors)
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${destLat},${destLng}&travelmode=driving`;
 
-  // Also update the in-app embedded map iframe to show the live route
+  // Update embedded map display to focus on the destination partner
   const iframe = document.getElementById('gmapsIframe');
   if (iframe) {
-    iframe.src = `https://maps.google.com/maps?saddr=${userLat},${userLng}&daddr=${destLat},${destLng}&t=&z=14&ie=UTF8&output=embed`;
+    iframe.src = `https://maps.google.com/maps?q=${destLat},${destLng}+(${encodeURIComponent(partner.partnerName)})&t=&z=15&ie=UTF8&iwloc=&output=embed`;
   }
 
-  logTerminal(`[Google Maps Route] Tracing road route to ${partner.partnerName} at (${destLat.toFixed(4)}, ${destLng.toFixed(4)})...`);
-  window.open(directionsUrl, '_blank');
+  // Update live status bar
+  const liveBar = document.querySelector('.gmaps-live-bar');
+  if (liveBar) {
+    liveBar.innerHTML = `
+      <span class="live-dot pulse" style="background: #0284C7;"></span>
+      <span class="live-loc-text">🧭 <strong>Navigating to:</strong> ${partner.partnerName} (${destLat.toFixed(4)}°, ${destLng.toFixed(4)}°)</span>
+    `;
+  }
+
+  // Smooth scroll Screen 9 so the map shows the route
+  const screen9 = document.getElementById('screen-9');
+  if (screen9) {
+    screen9.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  logTerminal(`[Google Maps Route] Tracing road route from (${userLat.toFixed(4)}, ${userLng.toFixed(4)}) to ${partner.partnerName} (${destLat.toFixed(4)}, ${destLng.toFixed(4)})...`);
+  
+  // Open Google Maps in new window/tab
+  const win = window.open(directionsUrl, '_blank');
+  if (!win || win.closed || typeof win.closed === 'undefined') {
+    // If popups are blocked by browser, redirect current window or prompt
+    window.location.href = directionsUrl;
+  }
 }
+window.openGoogleMapsForPartner = openGoogleMapsForPartner;
 
 function openGoogleMapsGeneral() {
   const userLat = window.userLiveLocation.lat || 17.3850;
