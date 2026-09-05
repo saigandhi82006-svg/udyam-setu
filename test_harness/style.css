@@ -1085,18 +1085,26 @@ body {
 .chat-messages {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden !important;
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding-bottom: 8px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .chat-bubble {
-  max-width: 80%;
-  padding: 10px 14px;
+  max-width: 94%;
+  padding: 10px 12px;
   font-size: 13px;
-  line-height: 1.4;
+  line-height: 1.45;
   border-radius: 14px;
+  box-sizing: border-box;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  overflow-x: hidden !important;
 }
 
 .chat-bubble.user {
@@ -1112,7 +1120,10 @@ body {
   color: var(--dark-text);
   border: 1px solid var(--border-color);
   border-bottom-left-radius: 2px;
+  width: auto;
+  max-width: 94%;
 }
+
 
 .ai-credit {
   display: block;
@@ -1202,26 +1213,34 @@ body {
 
 .business-chips-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .business-option-chip {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
+  gap: 4px;
   background: #F8FAFC;
   border: 1.2px solid #E2E8F0;
-  border-radius: 12px;
-  padding: 8px 10px;
-  font-size: 11.5px;
+  border-radius: 10px;
+  padding: 6px 8px;
+  font-size: 11px;
   font-weight: 600;
   color: #1E293B;
   cursor: pointer;
   text-align: left;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .business-option-chip:hover {
@@ -1238,12 +1257,15 @@ body {
 
 .business-option-chip .chip-label {
   flex: 1;
-  line-height: 1.35;
+  min-width: 0;
+  line-height: 1.3;
+  word-break: break-word;
+  overflow: hidden;
 }
 
 .business-option-chip .chip-arrow {
   color: #0F766E;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   flex-shrink: 0;
 }
@@ -1439,110 +1461,121 @@ body {
 }
 
 
-/* AI Chat Scheme Recommendation Cards (Screen 4) */
-.ai-scheme-card {
-  position: relative;
+/* AI Chat Scheme Recommendation Cards (Screen 4) - Compact Clean Layout */
+.ai-schemes-container,
+.rag-recommendations {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.ai-scheme-card-clean,
+.ai-scheme-card,
+.scheme-pill {
   background: #FFFFFF;
   border: 1.5px solid #E2E8F0;
-  border-left: 5px solid var(--primary-green);
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin-top: 10px;
+  border-left: 4px solid #0F766E;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   cursor: pointer;
   user-select: none;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-.ai-scheme-card:hover {
+.ai-scheme-card-clean:hover,
+.ai-scheme-card:hover,
+.scheme-pill:hover {
   background: #F0FDF4;
-  border-color: #34D399;
+  border-color: #86EFAC;
   border-left-color: #059669;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.18), 0 2px 6px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.15);
 }
 
-.ai-scheme-card:active {
+.ai-scheme-card-clean:active,
+.ai-scheme-card:active,
+.scheme-pill:active {
   transform: scale(0.985);
 }
 
-.ai-scheme-card-header {
+.ai-scheme-title-row {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 6px;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
+.ai-scheme-clean-name,
 .ai-scheme-title {
   font-size: 13px;
   font-weight: 700;
   color: #0F172A;
-  line-height: 1.3;
+  line-height: 1.35;
+  word-break: break-word;
+  flex: 1;
 }
 
-.ai-scheme-amount {
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--primary-green);
-  white-space: nowrap;
-  background: #DCFCE7;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.ai-scheme-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 6px;
-}
-
-.ai-sector-pill {
-  font-size: 10px;
-  font-weight: 600;
-  color: #475569;
-  background: #E2E8F0;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.ai-benefit-tag {
-  font-size: 10px;
-  font-weight: 700;
-  color: #0369A1;
-  background: #E0F2FE;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.ai-scheme-desc {
-  font-size: 11px;
-  line-height: 1.5;
-  color: #334155;
-  margin: 0 0 8px 0;
-}
-
+.ai-view-scheme-btn-clean,
 .ai-view-scheme-btn {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   width: 100%;
-  padding: 6px 10px;
-  background: var(--primary-green);
-  color: white;
+  padding: 7px 12px;
+  background: linear-gradient(135deg, #0F766E, #059669);
+  color: #FFFFFF;
   border: none;
-  border-radius: 6px;
-  font-size: 11px;
+  border-radius: 8px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
 }
 
+.ai-view-scheme-btn-clean:hover,
 .ai-view-scheme-btn:hover {
-  background: #15803D;
+  background: linear-gradient(135deg, #0D655E, #047857);
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.3);
 }
+
+.ai-view-scheme-btn-clean:active,
+.ai-view-scheme-btn:active {
+  transform: scale(0.98);
+}
+
+.sector-indicator {
+  display: inline-block;
+  max-width: 100%;
+  box-sizing: border-box;
+  background: #EFF6FF;
+  color: #1D4ED8;
+  border: 1px solid #BFDBFE;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  word-break: break-word;
+  white-space: normal;
+  overflow: hidden;
+}
+
 
 /* Greeting Quick-Chips */
 .greeting-chips {

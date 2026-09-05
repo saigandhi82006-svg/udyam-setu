@@ -1175,25 +1175,25 @@ async function sendChatMessage(autoSpeak = false) {
         window.__aiChatSchemes[schemeKey] = s;
 
         const card = document.createElement('div');
-        card.className = 'ai-scheme-card';
+        card.className = 'ai-scheme-card-clean';
         card.dataset.schemekey = schemeKey;
 
-        const header = document.createElement('div');
-        header.className = 'ai-scheme-card-header';
-        header.innerHTML = `<span class="ai-scheme-title">🏷️ ${s.title}</span><span class="ai-scheme-amount">${s.max_amount}</span>`;
-
-        const meta = document.createElement('div');
-        meta.className = 'ai-scheme-meta';
-        meta.innerHTML = `<span class="ai-sector-pill">${s.sector || data.target_sector || 'Govt Scheme'}</span><span class="ai-benefit-tag">${s.benefit_tag || 'No Collateral'}</span>`;
-
-        const desc = document.createElement('p');
-        desc.className = 'ai-scheme-desc';
-        desc.innerText = s.description || '';
+        const titleRow = document.createElement('div');
+        titleRow.className = 'ai-scheme-title-row';
+        titleRow.innerHTML = `<span class="ai-scheme-clean-name">🏷️ ${s.title}</span>`;
 
         const viewBtn = document.createElement('button');
         viewBtn.type = 'button';
-        viewBtn.className = 'ai-view-scheme-btn';
-        const btnText = {te:'పూర్తి వివరాలు చూడండి',hi:'पूरी जानकारी देखें',kn:'ಸಂಪೂರ್ಣ ವಿವರ ನೋಡಿ',ta:'முழு விவரங்கள் காண்க',mr:'संपूर्ण तपशील पहा',bn:'বিস্তারিত দেখুন',en:'View Full Scheme Details'}[langCode] || 'View Full Scheme Details';
+        viewBtn.className = 'ai-view-scheme-btn-clean';
+        const btnText = {
+          te: 'పూర్తి వివరాలు చూడండి',
+          hi: 'पूरी जानकारी देखें',
+          kn: 'ಸಂಪೂರ್ಣ ವಿವರ ನೋಡಿ',
+          ta: 'முழு விவரங்கள் காண்க',
+          mr: 'संपूर्ण तपशील पहा',
+          bn: 'বিস্তারিত দেখুন',
+          en: 'View Scheme Details'
+        }[langCode] || 'View Scheme Details';
         viewBtn.innerHTML = `<span>${btnText}</span> ➔`;
 
         viewBtn.addEventListener('click', (ev) => {
@@ -1205,9 +1205,7 @@ async function sendChatMessage(autoSpeak = false) {
           navigateToSchemeFromCardKey(schemeKey);
         });
 
-        card.appendChild(header);
-        card.appendChild(meta);
-        card.appendChild(desc);
+        card.appendChild(titleRow);
         card.appendChild(viewBtn);
         schemesDiv.appendChild(card);
       });
@@ -1223,15 +1221,25 @@ async function sendChatMessage(autoSpeak = false) {
         window.__aiChatSchemes[schemeKey] = s;
 
         const pill = document.createElement('div');
-        pill.className = 'scheme-pill';
+        pill.className = 'ai-scheme-card-clean';
         pill.dataset.schemekey = schemeKey;
-        const sectorLabel = {te:'రంగం',hi:'क्षेत्र',kn:'ಕ್ಷೇತ್ರ',ta:'துறை',mr:'क्षेत्र',bn:'ক্ষেত্র',en:'Sector'}[langCode] || 'Sector';
+        const btnText = {
+          te: 'పూర్తి వివరాలు చూడండి',
+          hi: 'पूरी जानकारी देखें',
+          kn: 'ಸಂಪೂರ್ಣ ವಿವರ ನೋಡಿ',
+          ta: 'முழு விவரங்கள் காண்க',
+          mr: 'संपूर्ण तपशील पहा',
+          bn: 'বিস্তারিত দেখুন',
+          en: 'View Scheme Details'
+        }[langCode] || 'View Scheme Details';
+
         pill.innerHTML = `
-          <div>
-            <strong>🏷️ ${s.schemeName}</strong><br>
-            <small style="color:#64748B;">${sectorLabel}: ${s.sector || 'Govt Scheme'}</small>
+          <div class="ai-scheme-title-row">
+            <span class="ai-scheme-clean-name">🏷️ ${s.schemeName}</span>
           </div>
-          <span>${s.loanAmount || ''} ${s.subsidy ? '• ' + s.subsidy : ''}</span>
+          <button type="button" class="ai-view-scheme-btn-clean">
+            <span>${btnText}</span> ➔
+          </button>
         `;
         pill.addEventListener('click', () => {
           navigateToSchemeFromCardKey(schemeKey);
