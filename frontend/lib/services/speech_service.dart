@@ -23,7 +23,7 @@ class SpeechService {
   }
 
   Future<void> startListening({
-    required Function(String resultText) onResult,
+    required Function(String resultText, bool isFinal) onResult,
     String localeId = 'en_IN',
   }) async {
     if (!_isAvailable) {
@@ -35,8 +35,16 @@ class SpeechService {
       try {
         await _speech.listen(
           onResult: (val) {
-            onResult(val.recognizedWords);
+            final text = val.recognizedWords;
+            if (text.trim().isNotEmpty) {
+              onResult(text, val.finalResult);
+              if (val.finalResult) {
+                _isListening = false;
+              }
+            }
           },
+          listenFor: const Duration(seconds: 30),
+          pauseFor: const Duration(seconds: 2),
           localeId: localeId,
         );
       } catch (e) {
@@ -46,7 +54,7 @@ class SpeechService {
       // Simulated voice prompt for simulator environments where hardware mic is restricted
       _isListening = true;
       await Future.delayed(const Duration(milliseconds: 1500));
-      onResult('I want a loan for starting a small food business.');
+      onResult('I want a loan for starting a small food business.', true);
       _isListening = false;
     }
   }

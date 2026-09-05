@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 import '../models/chat_message.dart';
 import '../services/api_service.dart';
 import '../services/speech_service.dart';
@@ -98,16 +97,24 @@ class _AiChatScreenState extends State<AiChatScreen> {
   void _toggleSpeech() async {
     if (_isListening) {
       await _speechService.stopListening();
+      final text = _messageController.text.trim();
       setState(() => _isListening = false);
+      if (text.isNotEmpty) {
+        _sendMessage(text);
+      }
     } else {
       setState(() => _isListening = true);
       await _speechService.startListening(
-        onResult: (text) {
-          setState(() {
-            _isListening = false;
-            _messageController.text = text;
-          });
-          _sendMessage(text);
+        onResult: (text, isFinal) {
+          if (text.trim().isNotEmpty) {
+            setState(() {
+              _messageController.text = text;
+            });
+            if (isFinal) {
+              setState(() => _isListening = false);
+              _sendMessage(text);
+            }
+          }
         },
       );
     }
@@ -128,14 +135,14 @@ class _AiChatScreenState extends State<AiChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: const Color(0xFF0F141C),
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0.5,
+        backgroundColor: const Color(0xFF161B26),
+        elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: Navigator.canPop(context)
             ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: Colors.white),
                 onPressed: () => Navigator.pop(context),
               )
             : null,
@@ -146,12 +153,12 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 Container(
                   padding: const EdgeInsets.all(2),
                   decoration: const BoxDecoration(
-                    color: AppTheme.lightGreen,
+                    color: Color(0xFF059669),
                     shape: BoxShape.circle,
                   ),
                   child: const CircleAvatar(
                     radius: 18,
-                    backgroundColor: AppTheme.darkGreen,
+                    backgroundColor: Color(0xFF064E3B),
                     child: Icon(Icons.smart_toy_rounded, color: Colors.white, size: 20),
                   ),
                 ),
@@ -164,7 +171,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                     decoration: BoxDecoration(
                       color: const Color(0xFF10B981),
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+                      border: Border.all(color: const Color(0xFF161B26), width: 2),
                     ),
                   ),
                 ),
@@ -178,19 +185,19 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   children: [
                     const Text(
                       'Udyam Setu AI',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppTheme.darkText),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white),
                     ),
                     const SizedBox(width: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [Color(0xFFECFDF5), Color(0xFFD1FAE5)]),
+                        gradient: const LinearGradient(colors: [Color(0xFF065F46), Color(0xFF047857)]),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFFA7F3D0)),
+                        border: Border.all(color: const Color(0xFF10B981)),
                       ),
                       child: const Text(
                         '🇮🇳 BHASHINI',
-                        style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Color(0xFF047857)),
+                        style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.white),
                       ),
                     ),
                   ],
@@ -198,7 +205,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 const SizedBox(height: 2),
                 const Text(
                   'Online • Digital India Voice (22 Langs)',
-                  style: TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8), fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -206,7 +213,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.auto_awesome_rounded, color: AppTheme.primaryGreen),
+            icon: const Icon(Icons.auto_awesome_rounded, color: Color(0xFF10B981)),
             tooltip: 'Document Guidance',
             onPressed: () {
               _sendMessage('What documents do I need to prepare for my scheme application?');
@@ -239,27 +246,27 @@ class _AiChatScreenState extends State<AiChatScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFFFEF2F2),
+                color: const Color(0xFF450A0A),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFFCA5A5)),
+                border: Border.all(color: const Color(0xFFEF4444)),
               ),
               child: Row(
                 children: [
                   Container(
                     width: 10,
                     height: 10,
-                    decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                    decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       'Listening in $_selectedLanguage... Speak your business details',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.red),
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white),
                     ),
                   ),
                   GestureDetector(
                     onTap: _toggleSpeech,
-                    child: const Icon(Icons.close_rounded, size: 18, color: Colors.red),
+                    child: const Icon(Icons.close_rounded, size: 18, color: Colors.white),
                   ),
                 ],
               ),
@@ -285,142 +292,170 @@ class _AiChatScreenState extends State<AiChatScreen> {
             ),
           ),
 
-          // Modern Floating Text Input Dock (Language -> Typing Area -> Mic inside Pill -> Send Button Outside)
+          // Gemini Dark Expanding Card Dock (Vertically Expanding Text Field + Bottom Control Bar)
           Container(
-            margin: const EdgeInsets.only(left: 14, right: 14, bottom: 14, top: 4),
+            margin: const EdgeInsets.only(left: 10, right: 10, bottom: 14, top: 4),
             child: SafeArea(
-              child: Row(
-                children: [
-                  // Main Capsule Pill containing Language Selector, Text Field, and Mic Button
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(28),
-                        border: Border.all(color: const Color(0xFFCBD5E1), width: 1.2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.06),
-                            blurRadius: 12,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E1F26), // Dark charcoal card from mockup
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: const Color(0xFF333742), width: 1.2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.35),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // 1. Vertically Expanding Text Field
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minHeight: 32,
+                        maxHeight: 140, // Expands vertically as text grows
                       ),
-                      child: Row(
-                        children: [
-                          // 1. Language Selector Badge Pill [LN ENG ^]
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                      child: TextField(
+                        controller: _messageController,
+                        maxLines: null, // Dynamic vertical expansion
+                        keyboardType: TextInputType.multiline,
+                        style: const TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w400, height: 1.4),
+                        cursorColor: Colors.white,
+                        decoration: const InputDecoration(
+                          hintText: 'Ask Gemini...',
+                          hintStyle: TextStyle(fontSize: 14, color: Color(0xFF8E918F), fontWeight: FontWeight.w400),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+                        ),
+                        onChanged: (val) {
+                          setState(() {}); // Re-render to trigger smooth expansion
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // 2. Bottom Control Bar (Language Selector -> Attractive Mic -> Circular Send)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const SizedBox(width: 2),
+
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Language Selector Dropdown (replaces "Pro ▾")
+                            Theme(
+                              data: Theme.of(context).copyWith(
+                                canvasColor: const Color(0xFF282A36),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  value: _selectedLanguage,
+                                  isDense: true,
+                                  icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: Color(0xFFC4C7C5)),
+                                  style: const TextStyle(fontSize: 12, color: Color(0xFFC4C7C5), fontWeight: FontWeight.w600),
+                                  onChanged: (val) {
+                                    if (val != null) setState(() => _selectedLanguage = val);
+                                  },
+                                  items: _languages.map((lang) {
+                                    return DropdownMenuItem<String>(
+                                      value: lang['name']!.split(' ')[0],
+                                      child: Text(
+                                        lang['name']!,
+                                        style: const TextStyle(color: Colors.white, fontSize: 12),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.translate_rounded, size: 14, color: AppTheme.primaryGreen),
-                                const SizedBox(width: 4),
-                                DropdownButtonHideUnderline(
-                                  child: DropdownButton<String>(
-                                    value: _selectedLanguage,
-                                    isDense: true,
-                                    icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: AppTheme.darkText),
-                                    style: const TextStyle(fontSize: 12, color: AppTheme.darkText, fontWeight: FontWeight.w800),
-                                    onChanged: (val) {
-                                      if (val != null) setState(() => _selectedLanguage = val);
-                                    },
-                                    items: _languages.map((lang) {
-                                      return DropdownMenuItem<String>(
-                                        value: lang['name']!.split(' ')[0],
-                                        child: Text(lang['name']!),
-                                      );
-                                    }).toList(),
+                            const SizedBox(width: 10),
+
+                            // Attractive Glowing Gradient Mic Icon Button
+                            GestureDetector(
+                              onTap: _toggleSpeech,
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    colors: _isListening
+                                        ? [const Color(0xFFEF4444), const Color(0xFFDC2626)]
+                                        : [const Color(0xFF6366F1), const Color(0xFFA855F7), const Color(0xFFEC4899)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.35),
+                                    width: 1.2,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: _isListening
+                                          ? const Color(0xAAEF4444)
+                                          : const Color(0x77A855F7),
+                                      blurRadius: _isListening ? 14 : 8,
+                                      spreadRadius: _isListening ? 2 : 0,
+                                    )
+                                  ],
+                                ),
+                                child: Center(
+                                  child: Icon(
+                                    _isListening ? Icons.graphic_eq_rounded : Icons.mic_rounded,
+                                    color: Colors.white,
+                                    size: 18,
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-
-                          // 2. Typing Area ("Type here...")
-                          Expanded(
-                            child: TextField(
-                              controller: _messageController,
-                              maxLines: 3,
-                              minLines: 1,
-                              style: const TextStyle(fontSize: 14, color: AppTheme.darkText, fontWeight: FontWeight.w500),
-                              decoration: InputDecoration(
-                                hintText: 'Type here...',
-                                hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade400, fontWeight: FontWeight.w400),
-                                border: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                               ),
-                              onSubmitted: (text) => _sendMessage(text),
                             ),
-                          ),
+                            const SizedBox(width: 10),
 
-                          // 3. Mic button inside capsule to speak with AI
-                          GestureDetector(
-                            onTap: _toggleSpeech,
-                            child: Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: _isListening ? const Color(0xFFFEF2F2) : const Color(0xFFF1F5F9),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: _isListening ? const Color(0xFFFCA5A5) : const Color(0xFFE2E8F0),
-                                  width: 1,
+                            // Circular Send Button
+                            GestureDetector(
+                              onTap: () => _sendMessage(),
+                              child: Container(
+                                width: 32,
+                                height: 32,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    colors: [Color(0xFF10B981), Color(0xFF059669)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Color(0x5510B981),
+                                      blurRadius: 8,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.arrow_upward_rounded,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
                                 ),
                               ),
-                              child: Icon(
-                                _isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
-                                color: _isListening ? Colors.red : const Color(0xFF475569),
-                                size: 20,
-                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-
-                  // 4. Circular Send button outside the capsule pill
-                  GestureDetector(
-                    onTap: () => _sendMessage(),
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF10B981), Color(0xFF059669)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                            const SizedBox(width: 2),
+                          ],
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF10B981).withOpacity(0.4),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.send_rounded,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
+                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -428,6 +463,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
       ),
     );
   }
+
+
 
   Widget _buildPromptChip(String text, {bool isAction = false}) {
     return Padding(
@@ -439,7 +476,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(
-            color: isAction ? AppTheme.primaryGreen : const Color(0xFFE2E8F0),
+            color: isAction ? const Color(0xFF10B981) : const Color(0xFF2E384D),
             width: 1,
           ),
         ),
@@ -448,10 +485,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
-            color: isAction ? Colors.white : AppTheme.darkText,
+            color: isAction ? Colors.white : const Color(0xFFCBD5E1),
           ),
         ),
-        backgroundColor: isAction ? AppTheme.primaryGreen : Colors.white,
+        backgroundColor: isAction ? const Color(0xFF10B981) : const Color(0xFF1E2430),
         onPressed: () {
           if (isAction) {
             Navigator.push(context, MaterialPageRoute(builder: (_) => const SchemeResultsScreen()));
@@ -474,22 +511,22 @@ class _AiChatScreenState extends State<AiChatScreen> {
         decoration: BoxDecoration(
           gradient: isUser
               ? const LinearGradient(
-                  colors: [Color(0xFF1E6F38), Color(0xFF124E27)],
+                  colors: [Color(0xFF10B981), Color(0xFF047857)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 )
               : null,
-          color: isUser ? null : Colors.white,
+          color: isUser ? null : const Color(0xFF1E2430),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(20),
             topRight: const Radius.circular(20),
             bottomLeft: Radius.circular(isUser ? 20 : 4),
             bottomRight: Radius.circular(isUser ? 4 : 20),
           ),
-          border: isUser ? null : Border.all(color: const Color(0xFFE2E8F0), width: 1),
+          border: isUser ? null : Border.all(color: const Color(0xFF2E384D), width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withOpacity(0.2),
               blurRadius: 8,
               offset: const Offset(0, 3),
             )
@@ -501,7 +538,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
             Text(
               msg.text,
               style: TextStyle(
-                color: isUser ? Colors.white : AppTheme.darkText,
+                color: Colors.white,
                 fontSize: 14,
                 height: 1.45,
                 fontWeight: isUser ? FontWeight.w500 : FontWeight.w400,
@@ -517,9 +554,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
                     children: [
                       const Icon(Icons.auto_awesome_rounded, size: 12, color: Color(0xFF10B981)),
                       const SizedBox(width: 4),
-                      Text(
+                      const Text(
                         'Google Gemini AI • Bhashini',
-                        style: TextStyle(fontSize: 10, color: Colors.grey.shade600, fontWeight: FontWeight.w600),
+                        style: TextStyle(fontSize: 10, color: Color(0xFF94A3B8), fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
@@ -529,22 +566,22 @@ class _AiChatScreenState extends State<AiChatScreen> {
                         SnackBar(
                           content: Text('Playing Bhashini voice audio in $_selectedLanguage...'),
                           duration: const Duration(seconds: 2),
-                          backgroundColor: AppTheme.darkGreen,
+                          backgroundColor: const Color(0xFF047857),
                         ),
                       );
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFECFDF5),
+                        color: const Color(0xFF065F46),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFA7F3D0)),
+                        border: Border.all(color: const Color(0xFF10B981)),
                       ),
                       child: const Row(
                         children: [
-                          Icon(Icons.volume_up_rounded, size: 12, color: Color(0xFF059669)),
+                          Icon(Icons.volume_up_rounded, size: 12, color: Colors.white),
                           SizedBox(width: 4),
-                          Text('Listen', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF059669))),
+                          Text('Listen', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white)),
                         ],
                       ),
                     ),
@@ -565,9 +602,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
         margin: const EdgeInsets.symmetric(vertical: 6),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: const Color(0xFF1E2430),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          border: Border.all(color: const Color(0xFF2E384D)),
         ),
         child: const Row(
           mainAxisSize: MainAxisSize.min,
@@ -575,13 +612,14 @@ class _AiChatScreenState extends State<AiChatScreen> {
             SizedBox(
               width: 14,
               height: 14,
-              child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primaryGreen),
+              child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF10B981)),
             ),
             SizedBox(width: 10),
-            Text('Analyzing matching schemes...', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF64748B))),
+            Text('Analyzing matching schemes...', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF94A3B8))),
           ],
         ),
       ),
     );
   }
 }
+

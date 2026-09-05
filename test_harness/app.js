@@ -684,6 +684,19 @@ function fallbackSpeechSynthesis(cleanText, langCode, btnElement) {
   window.speechSynthesis.speak(utterance);
 }
 
+function autoExpandTextarea(el) {
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+}
+
+function handleChatInputKeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChatMessage();
+  }
+}
+
 function onLanguageChanged() {
   const lang = document.getElementById('chatLangSelect').value;
   const input = document.getElementById('chatInput');
@@ -744,25 +757,33 @@ function triggerBhashiniSpeechInput() {
 
     recognition.onstart = () => {
       voiceBtn.classList.add('listening');
-      voiceText.innerText = `Listening in ${langSelect}... Speak now!`;
+      if (voiceText) voiceText.innerText = `Listening in ${langSelect}... Speak now!`;
     };
+
+    let speechCaptured = false;
 
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
-      input.value = transcript;
-      voiceText.innerText = `Heard: "${transcript}"`;
-      voiceBtn.classList.remove('listening');
-      sendChatMessage(true); // Auto-send and auto-speak reply
+      if (transcript && transcript.trim()) {
+        input.value = transcript;
+        speechCaptured = true;
+        if (voiceText) voiceText.innerText = `Heard: "${transcript}"`;
+        voiceBtn.classList.remove('listening');
+        sendChatMessage(true); // Auto-send and auto-speak reply
+      }
     };
 
     recognition.onerror = () => {
       voiceBtn.classList.remove('listening');
-      voiceText.innerText = 'Tap to Speak';
+      if (voiceText) voiceText.innerText = 'Tap to Speak';
       fallbackSimulatedSpeech(langSelect);
     };
 
     recognition.onend = () => {
       voiceBtn.classList.remove('listening');
+      if (!speechCaptured && input && input.value.trim()) {
+        sendChatMessage(true);
+      }
     };
 
     try {
@@ -807,7 +828,30 @@ function fallbackSimulatedSpeech(langSelect) {
   }, 1500);
 }
 
-let chatHistory = [];
+function scrollToBottomChat() {
+  const phoneScreen = document.querySelector('.phone-screen');
+  if (phoneScreen) {
+    phoneScreen.scrollTop = 0;
+    phoneScreen.scrollLeft = 0;
+  }
+  const container = document.getElementById('chatMessages');
+  if (container) {
+    container.scrollTop = container.scrollHeight;
+    if (window.requestAnimationFrame) {
+      window.requestAnimationFrame(() => {
+        container.scrollTop = container.scrollHeight;
+      });
+    }
+    setTimeout(() => {
+      container.scrollTop = container.scrollHeight;
+      if (phoneScreen) phoneScreen.scrollTop = 0;
+    }, 60);
+    setTimeout(() => {
+      container.scrollTop = container.scrollHeight;
+      if (phoneScreen) phoneScreen.scrollTop = 0;
+    }, 200);
+  }
+}
 
 async function sendChatMessage(autoSpeak = false) {
   const input = document.getElementById('chatInput');
@@ -840,7 +884,7 @@ async function sendChatMessage(autoSpeak = false) {
   };
   typingBubble.innerText = TYPING_TEXT[langCode] || TYPING_TEXT.en;
   chatContainer.appendChild(typingBubble);
-  chatContainer.scrollTop = chatContainer.scrollHeight;
+  scrollToBottomChat();
 
   try {
     const response = await fetch(`${API_BASE}/ai/chat`, {
@@ -1045,7 +1089,7 @@ async function sendChatMessage(autoSpeak = false) {
       <small class="ai-credit">✨ Source: ${data.source || 'Udyam Setu AI Engine'} • Digital India BHASHINI RAG</small>
     `;
     chatContainer.appendChild(aiBubble);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    scrollToBottomChat();
 
     logTerminal(`[POST /api/ai/chat] Type: ${data.type || 'scheme_recommendation'} | Sector: ${sectorName || 'General'}\nMessage: ${displayText.substring(0, 160)}...`);
 
@@ -1079,7 +1123,7 @@ async function sendChatMessage(autoSpeak = false) {
       <small class="ai-credit">✨ Digital India Bhashini Knowledge</small>
     `;
     chatContainer.appendChild(aiBubble);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    scrollToBottomChat();
 
     if (autoSpeak) {
       const btn = aiBubble.querySelector('.listen-btn');

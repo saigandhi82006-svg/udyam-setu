@@ -186,24 +186,28 @@ class _UserProfilingScreenState extends State<UserProfilingScreen> {
   }
 
   void _saveProfileDetails() async {
-    final cleanExp = int.tryParse(_experienceController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 2;
-    final cleanIncome = double.tryParse(_incomeController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 240000;
-    final cleanInvestment = double.tryParse(_investmentController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 500000;
+    final cleanIncome = int.tryParse(_incomeController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 240000;
+    final cleanInvestment = int.tryParse(_investmentController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 500000;
+    final cleanAge = int.tryParse(_ageController.text.trim()) ?? 28;
+    final enteredName = _nameController.text.trim().isEmpty ? 'Ravi Kumar' : _nameController.text.trim();
+
+    int cleanExp = 2;
+    if (_experienceOption.contains('0')) cleanExp = 0;
+    else if (_experienceOption.contains('1')) cleanExp = 1;
+    else if (_experienceOption.contains('3')) cleanExp = 4;
+    else if (_experienceOption.contains('5')) cleanExp = 6;
+
+    String effectiveCategory = _selectedCategory;
+    if (_isDisability == 'Yes') {
+      effectiveCategory = 'Differently Abled (Divyangjan)';
+    }
 
     final userProfile = UserProfile(
-      name: _nameController.text.trim().isEmpty ? 'Ravi Kumar' : _nameController.text.trim(),
-      age: int.tryParse(_ageController.text) ?? 28,
-      gender: _selectedGender,
-      category: _selectedCategory,
-      state: _selectedState,
-      district: _selectedDistrict,
-      pincode: _pincodeController.text.trim(),
-      hasDisability: _hasDisability,
-      disabilityType: _disabilityType,
-      disabilityPercentage: _disabilityPercentage,
-      hasUdidCard: _hasUdidCard,
+      id: 'usr_demo',
+      name: enteredName,
+      age: cleanAge,
+      category: effectiveCategory,
       annualIncome: cleanIncome,
-      locationType: _selectedLocationType,
       neededInvestment: cleanInvestment,
       businessType: _selectedBusinessType,
       experienceYears: cleanExp,

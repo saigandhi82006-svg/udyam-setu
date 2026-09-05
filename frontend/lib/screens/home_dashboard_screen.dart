@@ -237,7 +237,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
           ),
           const SizedBox(height: 14),
 
-          // 2x3 Quick Access Grid matching mockup
+          // 2x3 Quick Access Grid with 3D Glowing Gradient Logos
           GridView.count(
             crossAxisCount: 3,
             shrinkWrap: true,
@@ -249,6 +249,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
               _buildQuickCard(
                 icon: Icons.shield_rounded,
                 iconColor: AppTheme.primaryGreen,
+                gradientColors: const [Color(0xFF10B981), Color(0xFF059669)],
                 label: 'Match Schemes',
                 onTap: () {
                   Navigator.push(
@@ -260,6 +261,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
               _buildQuickCard(
                 icon: Icons.calculate_rounded,
                 iconColor: const Color(0xFF0284C7),
+                gradientColors: const [Color(0xFF0284C7), Color(0xFF0369A1)],
                 label: 'EMI Calculator',
                 onTap: () {
                   Navigator.push(
@@ -271,6 +273,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
               _buildQuickCard(
                 icon: Icons.assignment_turned_in_rounded,
                 iconColor: const Color(0xFFD97706),
+                gradientColors: const [Color(0xFFF59E0B), Color(0xFFD97706)],
                 label: 'My Applications',
                 onTap: () {
                   Navigator.push(
@@ -282,6 +285,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
               _buildQuickCard(
                 icon: Icons.folder_special_rounded,
                 iconColor: const Color(0xFF7C3AED),
+                gradientColors: const [Color(0xFF8B5CF6), Color(0xFF6D28D9)],
                 label: 'Documents',
                 onTap: () {
                   Navigator.push(
@@ -295,6 +299,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
               _buildQuickCard(
                 icon: Icons.store_mall_directory_rounded,
                 iconColor: const Color(0xFF059669),
+                gradientColors: const [Color(0xFF14B8A6), Color(0xFF0D9488)],
                 label: 'Channel Partners',
                 onTap: () {
                   Navigator.push(
@@ -306,6 +311,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
               _buildQuickCard(
                 icon: Icons.headset_mic_rounded,
                 iconColor: const Color(0xFFDC2626),
+                gradientColors: const [Color(0xFFF43F5E), Color(0xFFE11D48)],
                 label: 'Help & Support',
                 onTap: () => setState(() => _currentBottomNavIndex = 1),
               ),
@@ -349,16 +355,20 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: Colors.grey.shade200),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                )
+              ],
             ),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppTheme.lightGreen,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.account_balance_wallet, color: AppTheme.primaryGreen, size: 28),
+                  padding: const EdgeInsets.all(10),
+                  decoration: const BoxDecoration(color: AppTheme.lightGreen, shape: BoxShape.circle),
+                  child: const Icon(Icons.stars_rounded, color: AppTheme.primaryGreen, size: 24),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -366,15 +376,14 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Expanded(
-                            child: Text(
-                              'PM Mudra Yojana',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                            ),
+                          const Text(
+                            'PMEGP Subsidy Loan',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.darkText),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
                               color: AppTheme.lightGreen,
                               borderRadius: BorderRadius.circular(12),
@@ -406,23 +415,24 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
   Widget _buildQuickCard({
     required IconData icon,
     required Color iconColor,
+    required List<Color> gradientColors,
     required String label,
     required VoidCallback onTap,
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(18),
       child: Container(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
             )
           ],
         ),
@@ -430,20 +440,64 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              width: 46,
+              height: 46,
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: Colors.white.withOpacity(0.35), width: 1.2),
+                gradient: LinearGradient(
+                  colors: gradientColors,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: gradientColors[0].withOpacity(0.25),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
-              child: Icon(icon, color: iconColor, size: 24),
+              child: Stack(
+                children: [
+                  // Subtle Gloss Top Reflection
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: 20,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(13),
+                          topRight: Radius.circular(13),
+                        ),
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white.withOpacity(0.35),
+                            Colors.white.withOpacity(0.0),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Icon(icon, color: Colors.white, size: 22),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               label,
               textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 11,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w800,
                 color: AppTheme.darkText,
               ),
             ),

@@ -326,23 +326,25 @@
                                 title="Speak in your mother tongue">🎙️</button>
                         </div>
 
-                        <!-- Language & text input row -->
+                        <!-- Gemini Dark Expanding Card Chat Dock -->
                         <div class="chat-dock-container">
-                            <div class="chat-dock-pill">
-                                <select id="chatLangSelect" class="lang-select" onchange="onLanguageChanged()">
-                                    <option value="English">EN</option>
-                                    <option value="Hindi">HI (हिन्दी)</option>
-                                    <option value="Telugu">TE (తెలుగు)</option>
-                                    <option value="Tamil">TA (தமிழ்)</option>
-                                    <option value="Marathi">MR (मराठी)</option>
-                                    <option value="Kannada">KN (ಕನ್ನಡ)</option>
-                                    <option value="Bengali">BN (বাংলা)</option>
-                                </select>
-                                <input type="text" id="chatInput" placeholder="Type here..."
-                                    onkeypress="if(event.key==='Enter') sendChatMessage()">
-                                <button class="dock-mic-btn" id="voiceBtn" onclick="triggerBhashiniSpeechInput()" title="Speak with AI">🎙️</button>
+                            <div class="chat-dock-card">
+                                <textarea id="chatInput" class="dock-textarea" rows="1" placeholder="Ask Gemini..."
+                                    oninput="autoExpandTextarea(this)" onkeydown="handleChatInputKeyDown(event)"></textarea>
+                                <div class="dock-controls-row">
+                                    <select id="chatLangSelect" class="dock-lang-select" onchange="onLanguageChanged()">
+                                        <option value="English">English ▾</option>
+                                        <option value="Hindi">हिन्दी ▾</option>
+                                        <option value="Telugu">తెలుగు ▾</option>
+                                        <option value="Tamil">தமிழ் ▾</option>
+                                        <option value="Marathi">मराठी ▾</option>
+                                        <option value="Kannada">ಕನ್ನಡ ▾</option>
+                                        <option value="Bengali">বাংলা ▾</option>
+                                    </select>
+                                    <button class="dock-mic-btn-attractive" id="voiceBtn" onclick="triggerBhashiniSpeechInput()" title="Speak with AI">🎙️</button>
+                                    <button class="dock-send-btn" onclick="sendChatMessage()" title="Send message">➔</button>
+                                </div>
                             </div>
-                            <button class="dock-send-btn" onclick="sendChatMessage()" title="Send message">➤</button>
                         </div>
                     </div>
 
