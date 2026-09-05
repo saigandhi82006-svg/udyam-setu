@@ -1864,11 +1864,10 @@ function updateLiveGMapDisplay(lat, lng, label, accuracy = null, isLive = true) 
   const locLabel = label || `${lat.toFixed(4)},${lng.toFixed(4)}`;
 
   if (iframe) {
-    let q = `Banks and Grama Sachivalayam near ${locLabel}`;
+    let q = `Grama Sachivalayam, Rythu Bharosa Kendram and Banks near ${locLabel}`;
     if (currentPartnerFilter === 'Bank') q = `Banks near ${locLabel}`;
-    else if (currentPartnerFilter === 'CSC') q = `Grama Sachivalayam and CSC near ${locLabel}`;
-    else if (currentPartnerFilter === 'KVK') q = `Rythu Bharosa Kendra and KVK near ${locLabel}`;
-    else if (currentPartnerFilter === 'DIC') q = `District Industries Centre near ${locLabel}`;
+    else if (currentPartnerFilter === 'CSC') q = `Grama Sachivalayam near ${locLabel}`;
+    else if (currentPartnerFilter === 'KVK') q = `Rythu Bharosa Kendram near ${locLabel}`;
 
     iframe.src = `https://maps.google.com/maps?q=${encodeURIComponent(q)}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
   }
@@ -1937,55 +1936,28 @@ async function loadNearbyPartners(filterType = null) {
         partnerName: `Grama Sachivalayam (Village Secretariat - ${place})`,
         distanceKm: 0.35,
         type: 'CSC',
-        address: `Panchayat Office Complex, ${place}, ${dist}`,
+        address: `Grama Panchayat Complex, ${place}, ${dist}`,
         location: { coordinates: [userLng + 0.0022, userLat - 0.0018] },
         rating: 4.9,
         searchQuery: `Grama Sachivalayam near ${place} ${dist}`
       },
       {
-        partnerName: `State Bank of India (${place} Branch)`,
-        distanceKm: 0.55,
-        type: 'Bank',
-        address: `Main Commercial Hub, Near Bus Stand, ${place}, ${dist}`,
-        location: { coordinates: [userLng + 0.0035, userLat + 0.0028] },
-        rating: 4.8,
-        searchQuery: `State Bank of India near ${place} ${dist}`
-      },
-      {
-        partnerName: `Chaitanya Godavari Grameena Bank / RRB (${place})`,
-        distanceKm: 0.85,
-        type: 'Bank',
-        address: `Bazaar Center, Near Tehsil Office, ${place}, ${dist}`,
-        location: { coordinates: [userLng - 0.0035, userLat + 0.0040] },
-        rating: 4.7,
-        searchQuery: `Grameena Bank near ${place} ${dist}`
-      },
-      {
-        partnerName: `CSC Digital Seva Kendra (${place} e-Seva)`,
-        distanceKm: 1.10,
-        type: 'CSC',
-        address: `Digital India Center, Near Post Office, ${place}, ${dist}`,
-        location: { coordinates: [userLng + 0.0050, userLat - 0.0040] },
-        rating: 4.9,
-        searchQuery: `CSC Digital Seva Kendra near ${place} ${dist}`
-      },
-      {
-        partnerName: `Rythu Bharosa Kendra (RBK / Agri Hub - ${place})`,
-        distanceKm: 1.45,
+        partnerName: `Rythu Bharosa Kendram (RBK / Agri Hub - ${place})`,
+        distanceKm: 0.65,
         type: 'KVK',
-        address: `Agricultural Extension Hub, ${place}, ${dist}`,
-        location: { coordinates: [userLng - 0.0065, userLat + 0.0070] },
+        address: `Agriculture Extension Centre, ${place}, ${dist}`,
+        location: { coordinates: [userLng - 0.0035, userLat + 0.0030] },
         rating: 4.8,
         searchQuery: `Rythu Bharosa Kendra near ${place} ${dist}`
       },
       {
-        partnerName: `District Industries Centre (DIC MSME Cell - ${dist})`,
-        distanceKm: 2.80,
-        type: 'DIC',
-        address: `Collectorate Complex, MSME Wing, ${dist}`,
-        location: { coordinates: [userLng + 0.0085, userLat + 0.0060] },
+        partnerName: `State Bank of India (${place} Branch)`,
+        distanceKm: 0.95,
+        type: 'Bank',
+        address: `Main Road, Near Bus Stand, ${place}, ${dist}`,
+        location: { coordinates: [userLng + 0.0038, userLat + 0.0032] },
         rating: 4.8,
-        searchQuery: `District Industries Centre near ${dist}`
+        searchQuery: `Bank near ${place} ${dist}`
       }
     ];
 
@@ -2008,7 +1980,7 @@ function renderPartners(partners) {
   const kmAwayWord = (typeof t === 'function') ? t('common.km_away', 'km away') : 'km away';
 
   if (!partners || partners.length === 0) {
-    const categoryName = currentPartnerFilter === 'All' ? 'partner facilities' : (currentPartnerFilter === 'Bank' ? 'Banks' : (currentPartnerFilter === 'CSC' ? 'Sachivalayam / CSCs' : (currentPartnerFilter === 'KVK' ? 'Agri Hubs (RBK/KVK)' : 'DIC Centers')));
+    const categoryName = currentPartnerFilter === 'All' ? 'places' : (currentPartnerFilter === 'Bank' ? 'Banks' : (currentPartnerFilter === 'CSC' ? 'Grama Sachivalayam' : 'Rythu Bharosa Kendram (RBK)'));
     const nextRadius = currentPartnerRadius < 25 ? (currentPartnerRadius === 5 ? 10 : (currentPartnerRadius === 10 ? 15 : 25)) : 25;
 
     container.innerHTML = `
@@ -2016,7 +1988,7 @@ function renderPartners(partners) {
         <div class="icon">🔍</div>
         <h5>No ${categoryName} found within ${currentPartnerRadius} km</h5>
         <p>No verified ${categoryName} are located within your current <strong>${currentPartnerRadius} km radius</strong> of <strong>${window.userLiveLocation.label || 'your location'}</strong>.</p>
-        ${currentPartnerRadius < 25 ? `<button class="expand-btn" onclick="setSearchRadius(${nextRadius})">Expand Search Radius to ${nextRadius} km ➔</button>` : `<button class="expand-btn" onclick="filterGMap('All')">Show All Partner Types</button>`}
+        ${currentPartnerRadius < 25 ? `<button class="expand-btn" onclick="setSearchRadius(${nextRadius})">Expand Search Radius to ${nextRadius} km ➔</button>` : `<button class="expand-btn" onclick="filterGMap('All')">Show All Places</button>`}
       </div>
     `;
     return;
@@ -2027,9 +1999,11 @@ function renderPartners(partners) {
       ? window.UdyamI18n.localizePartnerName(p.partnerName, curLang)
       : p.partnerName;
 
-    const pType = (window.UdyamI18n && typeof window.UdyamI18n.localizePartnerType === 'function')
-      ? window.UdyamI18n.localizePartnerType(p.type, curLang)
-      : (p.type === 'CSC' ? 'Sachivalayam / CSC' : p.type);
+    let pType = p.type === 'CSC' ? 'Grama Sachivalayam' : (p.type === 'KVK' ? 'Rythu Bharosa Kendram' : 'Bank Branch');
+    if (window.UdyamI18n && typeof window.UdyamI18n.localizePartnerType === 'function') {
+      const locType = window.UdyamI18n.localizePartnerType(p.type, curLang);
+      if (locType && locType !== p.type) pType = locType;
+    }
 
     let iconClass = 'bank';
     let iconEmoji = '🏦';
@@ -2039,9 +2013,6 @@ function renderPartners(partners) {
     } else if (p.type === 'KVK') {
       iconClass = 'kvk';
       iconEmoji = '🌾';
-    } else if (p.type === 'DIC') {
-      iconClass = 'dic';
-      iconEmoji = '🏢';
     }
 
     const card = document.createElement('div');
@@ -2130,16 +2101,19 @@ function openGoogleMapsGeneral() {
   const userLng = window.userLiveLocation.lng || 78.4867;
   const locLabel = window.userLiveLocation.label || '';
 
-  let query = `Banks and Grama Sachivalayam near ${locLabel || `${userLat},${userLng}`}`;
+  let query = `Grama Sachivalayam, Rythu Bharosa Kendram and Banks near ${locLabel || `${userLat},${userLng}`}`;
   if (currentPartnerFilter === 'Bank') {
     query = `Banks near ${locLabel || `${userLat},${userLng}`}`;
   } else if (currentPartnerFilter === 'CSC') {
-    query = `Grama Sachivalayam and CSC near ${locLabel || `${userLat},${userLng}`}`;
+    query = `Grama Sachivalayam near ${locLabel || `${userLat},${userLng}`}`;
   } else if (currentPartnerFilter === 'KVK') {
-    query = `Rythu Bharosa Kendra and KVK near ${locLabel || `${userLat},${userLng}`}`;
-  } else if (currentPartnerFilter === 'DIC') {
-    query = `District Industries Centre near ${locLabel || `${userLat},${userLng}`}`;
+    query = `Rythu Bharosa Kendram near ${locLabel || `${userLat},${userLng}`}`;
   }
+
+  // Driving route / nearby search centered on user's exact coordinates
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${encodeURIComponent(query)}&travelmode=driving`;
+  window.open(directionsUrl, '_blank');
+}
 
   // Driving route / nearby search centered on user's exact coordinates
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${encodeURIComponent(query)}&travelmode=driving`;
