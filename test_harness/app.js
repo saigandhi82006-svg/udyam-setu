@@ -919,8 +919,8 @@ async function sendChatMessage(autoSpeak = false) {
     chatHistory.push({ role: 'model', text: data.message || data.reply });
     if (chatHistory.length > 8) chatHistory = chatHistory.slice(-8);
 
-    // Build dynamic recommended scheme cards or greeting quick chips
-    let interactiveContentHtml = '';
+    // Build dynamic interactive content container
+    const interactiveContainer = document.createElement('div');
 
     if (data.type === 'business_selection' || (data.business_options && data.business_options.length > 0)) {
       const options = data.business_options || [];
@@ -934,214 +934,220 @@ async function sendChatMessage(autoSpeak = false) {
         : (isBn ? "👇 আপনার ব্যবসা বা লক্ষ্য নির্বাচন করুন:"
         : "👇 Select your business or goal:")));
 
-      interactiveContentHtml = `
-        <div class="business-selection-container">
-          <div class="selection-title">${titleText}</div>
-          <div class="business-chips-grid">
-            ${options.map(opt => `
-              <button type="button" class="business-option-chip" onclick="selectBusinessOption('${escapeTextForAttr(opt.prompt || opt.label)}')">
-                <span class="chip-label">${opt.label}</span>
-                <span class="chip-arrow">➔</span>
-              </button>
-            `).join('')}
-          </div>
-        </div>
-      `;
+      const selDiv = document.createElement('div');
+      selDiv.className = 'business-selection-container';
+      const titleDiv = document.createElement('div');
+      titleDiv.className = 'selection-title';
+      titleDiv.innerText = titleText;
+      selDiv.appendChild(titleDiv);
+
+      const gridDiv = document.createElement('div');
+      gridDiv.className = 'business-chips-grid';
+
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'business-option-chip';
+        btn.innerHTML = `<span class="chip-label">${opt.label}</span><span class="chip-arrow">➔</span>`;
+        btn.addEventListener('click', () => {
+          sendSuggestedPrompt(opt.prompt || opt.label);
+        });
+        gridDiv.appendChild(btn);
+      });
+      selDiv.appendChild(gridDiv);
+      interactiveContainer.appendChild(selDiv);
+
     } else if (data.type === 'greeting') {
       const isTe = lang === 'Telugu';
       const isHi = lang === 'Hindi';
       const isKn = lang === 'Kannada';
       const isBn = lang === 'Bengali';
 
-      const promptAuto = isTe ? "నాకు కమర్షియల్ ఆటో కొనడానికి లోన్ కావాలి"
-        : (isHi ? "मुझे कमर्शियल ऑटो रिक्शा खरीदने के लिए लोन चाहिए"
-        : (isKn ? "ನನಗೆ ಕಮರ್ಷಿಯಲ್ ಆಟೋ ರಿಕ್ಷಾ ಖರೀದಿಸಲು ಸಾಲ ಬೇಕು"
-        : (isBn ? "আমার বাণিজ্যিক অটো রিকশা কেনার জন্য ঋণ প্রয়োজন"
-        : "I want a commercial auto-rickshaw loan")));
+      const greetingPrompts = [
+        {
+          label: isTe ? "🛺 కమర్షియల్ ఆటో రుణం" : (isHi ? "🛺 कमर्शियल ऑटो लोन" : (isKn ? "🛺 ಕಮರ್ಷಿಯಲ್ ಸಾಲ" : (isBn ? "🛺 বাণিজ্যিক অটো লোন" : "🛺 Commercial Auto Loan"))),
+          prompt: isTe ? "నాకు కమర్షియల్ ఆటో కొనడానికి లోన్ కావాలి" : (isHi ? "मुझे कमर्शियल ऑटो रिक्शा खरीदने के लिए लोन चाहिए" : (isKn ? "ನನಗೆ ಕಮರ್ಷಿಯಲ್ ಆಟೋ ರಿಕ್ಷಾ ಖರೀದಿಸಲು ಸಾಲ ಬೇಕು" : (isBn ? "আমার বাণিজ্যিক অটো রিকশা কেনার জন্য ঋণ প্রয়োজন" : "I want a commercial auto-rickshaw loan")))
+        },
+        {
+          label: isTe ? "🍲 టిఫిన్ సెంటర్ / ఫుడ్ లోన్" : (isHi ? "🍲 टिफिन सेंटर / फ़ूड लोन" : (isKn ? "🍲 ಹೋಟೆಲ್ / ತಿಂಡಿ ಕೇಂದ್ರ" : (isBn ? "🍲 টিফিন সেন্টার / খাবার ব্যবসা" : "🍲 Food / Tiffin Center"))),
+          prompt: isTe ? "నాకు టిఫిన్ సెంటర్ / ఫుడ్ బిజినెస్ లోన్ కావాలి" : (isHi ? "मुझे टिफिन सेंटर / फूड बिजनेस लोन चाहिए" : (isKn ? "ನನಗೆ ಹೋಟೆಲ್ / ತಿಂಡಿ ಕೇಂದ್ರಕ್ಕಾಗಿ ಸಾಲ ಬೇಕು" : (isBn ? "আমার টিফিন সেন্টার / খাবার ব্যবসার জন্য ঋণ প্রয়োজন" : "I want a food business / tiffin loan")))
+        },
+        {
+          label: isTe ? "🌾 వ్యవసాయ రుణం (KCC)" : (isHi ? "🌾 कृषि लोन (KCC)" : (isKn ? "🌾 ಕೃಷಿ ಸಾಲ (KCC)" : (isBn ? "🌾 কৃষি ঋণ (KCC)" : "🌾 Kisan Credit Card"))),
+          prompt: isTe ? "నాకు కిసాన్ క్రెడిట్ కార్డ్ వ్యవసాయ లోన్ కావాలి" : (isHi ? "मुझे किसान क्रेडिट कार्ड कृषि लोन चाहिए" : (isKn ? "ನನಗೆ ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಕೃಷಿ ಸಾಲ ಬೇಕು" : (isBn ? "আমার কিসান ক্রেডিট কার্ড কৃষি ঋণ প্রয়োজন" : "I want Kisan Credit Card agri loan")))
+        },
+        {
+          label: isTe ? "🧵 చేతివృత్తుల లోన్ (విశ్వకర్మ)" : (isHi ? "🧵 विश्वकर्मा योजना" : (isKn ? "🧵 ವಿಶ್ವಕರ್ಮ ಯೋಜನೆ" : (isBn ? "🧵 বিশ্বকর্মা যোজনা" : "🧵 Artisan Vishwakarma"))),
+          prompt: isTe ? "చేతివృత్తుల కోసం పీఎం విశ్వకర్మ లోన్ కావాలి" : (isHi ? "दस्तکاروں के लिए पीएम विश्वकर्मा लोन चाहिए" : (isKn ? "ಕುಶಲಕರ್ಮಿಗಳಿಗಾಗಿ ಪಿಎಂ ವಿಶ್ವಕರ್ಮ ಸಾಲ ಬೇಕು" : (isBn ? "কারিগরদের জন্য প্রধানমন্ত্রী বিশ্বকর্মা ঋণ চাই" : "PM Vishwakarma artisan loan")))
+        },
+        {
+          label: isTe ? "♿ దివ్యాంగుల రుణం (NHFDC)" : (isHi ? "♿ दिव्यांगजन ऋण" : (isKn ? "♿ ವಿಕಲಚೇತನರ ಸಾಲ" : (isBn ? "♿ প্রতিবন্ধী ঋণ (NHFDC)" : "♿ Divyangjan Loan"))),
+          prompt: isTe ? "దివ్యాంగుల స్వయం ఉపాధి రుణ పథకం" : (isHi ? "दिव्यांगजन स्वरोजगार ऋण योजना" : (isKn ? "ವಿಕಲಚೇತನರ ಸ್ವಯಂ ಉದ್ಯೋಗ ಸಾಲ ಯೋಜನೆ" : (isBn ? "প্রতিবন্ধী ব্যক্তিদের স্বনির্ভর কর্মসংস্থান ঋণ প্রকল্প" : "Divyangjan PwD loan")))
+        }
+      ];
 
-      const labelAuto = isTe ? "కమర్షియల్ ఆటో రుణం"
-        : (isHi ? "कमर्शियल ऑटो लोन"
-        : (isKn ? "ಕಮರ್ಷಿಯಲ್ ಆಟೋ ಸಾಲ"
-        : (isBn ? "বাণিজ্যিক অটো লোন"
-        : "Commercial Auto Loan")));
+      const chipsDiv = document.createElement('div');
+      chipsDiv.className = 'greeting-chips';
+      greetingPrompts.forEach(item => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'suggestion-chip';
+        btn.innerText = item.label;
+        btn.addEventListener('click', () => {
+          sendSuggestedPrompt(item.prompt);
+        });
+        chipsDiv.appendChild(btn);
+      });
+      interactiveContainer.appendChild(chipsDiv);
 
-      const promptFood = isTe ? "నాకు టిఫిన్ సెంటర్ / ఫుడ్ బిజినెస్ లోన్ కావాలి"
-        : (isHi ? "मुझे टिफिन सेंटर / फूड बिजनेस लोन चाहिए"
-        : (isKn ? "ನನಗೆ ಹೋಟೆಲ್ / ತಿಂಡಿ ಕೇಂದ್ರಕ್ಕಾಗಿ ಸಾಲ ಬೇಕು"
-        : (isBn ? "আমার টিফিন সেন্টার / খাবার ব্যবসার জন্য ঋণ প্রয়োজন"
-        : "I want a food business / tiffin loan")));
-
-      const labelFood = isTe ? "టిఫిన్ సెంటర్ / ఫుడ్ లోన్"
-        : (isHi ? "टिफिन सेंटर / फ़ूड लोन"
-        : (isKn ? "ಹೋಟೆಲ್ / ತಿಂಡಿ ಕೇಂದ್ರ"
-        : (isBn ? "টিফিন সেন্টার / খাবার ব্যবসা"
-        : "Food / Tiffin Center")));
-
-      const promptKcc = isTe ? "నాకు కిసాన్ క్రెడిట్ కార్డ్ వ్యవసాయ లోన్ కావాలి"
-        : (isHi ? "मुझे किसान क्रेडिट कार्ड कृषि लोन चाहिए"
-        : (isKn ? "ನನಗೆ ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಕೃಷಿ ಸಾಲ ಬೇಕು"
-        : (isBn ? "আমার কিসান ক্রেডিট কার্ড কৃষি ঋণ প্রয়োজন"
-        : "I want Kisan Credit Card agri loan")));
-
-      const labelKcc = isTe ? "వ్యవసాయ రుణం (KCC)"
-        : (isHi ? "कृषि लोन (KCC)"
-        : (isKn ? "ಕೃಷಿ ಸಾಲ (KCC)"
-        : (isBn ? "কৃষি ঋণ (KCC)"
-        : "Kisan Credit Card")));
-
-      const promptArtisan = isTe ? "చేతివృత్తుల కోసం పీఎం విశ్వకర్మ లోన్ కావాలి"
-        : (isHi ? "दस्तکاروں के लिए पीएम विश्वकर्मा लोन चाहिए"
-        : (isKn ? "ಕುಶಲಕರ್ಮಿಗಳಿಗಾಗಿ ಪಿಎಂ ವಿಶ್ವಕರ್ಮ ಸಾಲ ಬೇಕು"
-        : (isBn ? "কারিগরদের জন্য প্রধানমন্ত্রী বিশ্বকর্মা ঋণ চাই"
-        : "PM Vishwakarma artisan loan")));
-
-      const labelArtisan = isTe ? "చేతివృత్తుల లోన్ (విశ్వకర్మ)"
-        : (isHi ? "विश्वकर्मा योजना"
-        : (isKn ? "ವಿಶ್ವಕರ್ಮ ಯೋಜನೆ"
-        : (isBn ? "বিশ্বকর্মা যোজনা"
-        : "Artisan Vishwakarma")));
-
-      const promptPwd = isTe ? "దివ్యాంగుల స్వయం ఉపాధి రుణ పథకం"
-        : (isHi ? "दिव्यांगजन स्वरोजगार ऋण योजना"
-        : (isKn ? "ವಿಕಲಚೇತನರ ಸ್ವಯಂ ಉದ್ಯೋಗ ಸಾಲ ಯೋಜನೆ"
-        : (isBn ? "প্রতিবন্ধী ব্যক্তিদের স্বনির্ভর কর্মসংস্থান ঋণ প্রকল্প"
-        : "Divyangjan PwD loan")));
-
-      const labelPwd = isTe ? "దివ్యాంగుల రుణం (NHFDC)"
-        : (isHi ? "दिव्यांगजन ऋण"
-        : (isKn ? "ವಿಕಲಚೇತನರ ಸಾಲ"
-        : (isBn ? "প্রতিবন্ধী ঋণ (NHFDC)"
-        : "Divyangjan Loan")));
-
-      interactiveContentHtml = `
-        <div class="greeting-chips">
-          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${promptAuto}')">
-            🛺 ${labelAuto}
-          </button>
-          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${promptFood}')">
-            🍲 ${labelFood}
-          </button>
-          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${promptKcc}')">
-            🌾 ${labelKcc}
-          </button>
-          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${promptArtisan}')">
-            🧵 ${labelArtisan}
-          </button>
-          <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('${promptPwd}')">
-            ♿ ${labelPwd}
-          </button>
-        </div>
-      `;
     } else if (data.schemes && data.schemes.length > 0) {
       window.__aiChatSchemes = window.__aiChatSchemes || {};
-      interactiveContentHtml = `
-        <div class="ai-schemes-container">
-          ${data.schemes.map(s => {
-            const schemeKey = 'card_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
-            window.__aiChatSchemes[schemeKey] = s;
-            return `
-            <div class="ai-scheme-card" data-schemekey="${schemeKey}" onclick="navigateToSchemeFromCardKey('${schemeKey}')">
-              <div class="ai-scheme-card-header">
-                <span class="ai-scheme-title">🏷️ ${s.title}</span>
-                <span class="ai-scheme-amount">${s.max_amount}</span>
-              </div>
-              <div class="ai-scheme-meta">
-                <span class="ai-sector-pill">${s.sector || data.target_sector || 'Govt Scheme'}</span>
-                <span class="ai-benefit-tag">${s.benefit_tag || 'No Collateral'}</span>
-              </div>
-              <p class="ai-scheme-desc">${s.description}</p>
-              <button type="button" class="ai-view-scheme-btn" onclick="event.stopPropagation(); navigateToSchemeFromCardKey('${schemeKey}')">
-                <span>${{te:'పూర్తి వివరాలు చూడండి',hi:'पूरी जानकारी देखें',kn:'ಸಂಪೂರ್ಣ ವಿವರ ನೋಡಿ',ta:'முழு விவரங்கள் காண்க',mr:'संपूर्ण तपशील पहा',bn:'বিস্তারিত দেখুন',en:'View Full Scheme Details'}[langCode]||'View Full Scheme Details'}</span> ➔
-              </button>
-            </div>
-          `;}).join('')}
-        </div>
-      `;
+      const schemesDiv = document.createElement('div');
+      schemesDiv.className = 'ai-schemes-container';
+
+      data.schemes.forEach(s => {
+        const schemeKey = 'card_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+        window.__aiChatSchemes[schemeKey] = s;
+
+        const card = document.createElement('div');
+        card.className = 'ai-scheme-card';
+        card.dataset.schemekey = schemeKey;
+
+        const header = document.createElement('div');
+        header.className = 'ai-scheme-card-header';
+        header.innerHTML = `<span class="ai-scheme-title">🏷️ ${s.title}</span><span class="ai-scheme-amount">${s.max_amount}</span>`;
+
+        const meta = document.createElement('div');
+        meta.className = 'ai-scheme-meta';
+        meta.innerHTML = `<span class="ai-sector-pill">${s.sector || data.target_sector || 'Govt Scheme'}</span><span class="ai-benefit-tag">${s.benefit_tag || 'No Collateral'}</span>`;
+
+        const desc = document.createElement('p');
+        desc.className = 'ai-scheme-desc';
+        desc.innerText = s.description || '';
+
+        const viewBtn = document.createElement('button');
+        viewBtn.type = 'button';
+        viewBtn.className = 'ai-view-scheme-btn';
+        const btnText = {te:'పూర్తి వివరాలు చూడండి',hi:'पूरी जानकारी देखें',kn:'ಸಂಪೂರ್ಣ ವಿವರ ನೋಡಿ',ta:'முழு விவரங்கள் காண்க',mr:'संपूर्ण तपशील पहा',bn:'বিস্তারিত দেখুন',en:'View Full Scheme Details'}[langCode] || 'View Full Scheme Details';
+        viewBtn.innerHTML = `<span>${btnText}</span> ➔`;
+
+        viewBtn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          navigateToSchemeFromCardKey(schemeKey);
+        });
+
+        card.addEventListener('click', () => {
+          navigateToSchemeFromCardKey(schemeKey);
+        });
+
+        card.appendChild(header);
+        card.appendChild(meta);
+        card.appendChild(desc);
+        card.appendChild(viewBtn);
+        schemesDiv.appendChild(card);
+      });
+      interactiveContainer.appendChild(schemesDiv);
+
     } else if (data.recommendedSchemes && data.recommendedSchemes.length > 0) {
       window.__aiChatSchemes = window.__aiChatSchemes || {};
-      interactiveContentHtml = `
-        <div class="rag-recommendations">
-          ${data.recommendedSchemes.map(s => {
-            const schemeKey = 'card_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
-            window.__aiChatSchemes[schemeKey] = s;
-            return `
-            <div class="scheme-pill" data-schemekey="${schemeKey}" onclick="navigateToSchemeFromCardKey('${schemeKey}')">
-              <div>
-                <strong>🏷️ ${s.schemeName}</strong><br>
-                <small style="color:#64748B;">${{te:'రంగం',hi:'क्षेत्र',kn:'ಕ್ಷೇತ್ರ',ta:'துறை',mr:'क्षेत्र',bn:'ক্ষেত্র',en:'Sector'}[langCode]||'Sector'}: ${s.sector || 'Govt Scheme'}</small>
-              </div>
-              <span>${s.loanAmount || ''} ${s.subsidy ? '• ' + s.subsidy : ''}</span>
-            </div>
-          `;}).join('')}
-        </div>
-      `;
+      const recDiv = document.createElement('div');
+      recDiv.className = 'rag-recommendations';
+
+      data.recommendedSchemes.forEach(s => {
+        const schemeKey = 'card_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+        window.__aiChatSchemes[schemeKey] = s;
+
+        const pill = document.createElement('div');
+        pill.className = 'scheme-pill';
+        pill.dataset.schemekey = schemeKey;
+        const sectorLabel = {te:'రంగం',hi:'क्षेत्र',kn:'ಕ್ಷೇತ್ರ',ta:'துறை',mr:'क्षेत्र',bn:'ক্ষেত্র',en:'Sector'}[langCode] || 'Sector';
+        pill.innerHTML = `
+          <div>
+            <strong>🏷️ ${s.schemeName}</strong><br>
+            <small style="color:#64748B;">${sectorLabel}: ${s.sector || 'Govt Scheme'}</small>
+          </div>
+          <span>${s.loanAmount || ''} ${s.subsidy ? '• ' + s.subsidy : ''}</span>
+        `;
+        pill.addEventListener('click', () => {
+          navigateToSchemeFromCardKey(schemeKey);
+        });
+        recDiv.appendChild(pill);
+      });
+      interactiveContainer.appendChild(recDiv);
     }
 
     const sectorName = data.target_sector || data.detectedSector;
     let sectorBadge = '';
     const ADVISORY_LABEL = {te:'💡 AI ఆర్థిక సలహా • EMI & తిరిగి చెల్లింపు',hi:'💡 AI वित्तीय सलाह • EMI और पुनर्भुगतान',kn:'💡 AI ಹಣಕಾಸು ಸಲಹೆ • EMI ಮತ್ತು ಮರುಪಾವತಿ',ta:'💡 AI நிதி ஆலோசனை • EMI & திரும்பச் செலுத்தல்',mr:'💡 AI आर्थिक सल्ला • EMI व परतफेड',bn:'💡 AI আর্থিক পরামর্শ • EMI ও পরিশোধ',en:'💡 AI Financial Advisory • EMI & Repayment Terms'};
-    const SECTOR_PREFIX = {te:'🎯 లক్ష్య రంగం',hi:'🎯 लक्षित क्षेत्र',kn:'🎯 ಗುರಿ ಕ್ಷೇತ್ರ',ta:'🎯 இலக்கு துறை',mr:'🎯 लक्ष्य क्षेत्र',bn:'🎯 লক্ষ্য ক্ষেত্র',en:'🎯 Target Sector'};
+    const SECTOR_PREFIX = {te:'🎯 లక్ష్య రంగం',hi:'🎯 लक्षित क्षेत्र',kn:'🎯 ಗುರಿ ಕ್ಷೇತ್ರ',ta:'🎯 இலக்கு துறை',mr:'🎯 लक्ष्य क्षेत्र',bn:'🎯 লক্ষ্য ক্ষেত্র',en:'🎯 Target Sector'};
     if (data.type === 'financial_advisory') {
       sectorBadge = `<div class="sector-indicator" style="background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;">${ADVISORY_LABEL[langCode]||ADVISORY_LABEL.en}</div>`;
     } else if (sectorName && sectorName !== 'General Advisory') {
       sectorBadge = `<div class="sector-indicator">${SECTOR_PREFIX[langCode]||SECTOR_PREFIX.en}: ${sectorName}</div>`;
     }
 
-    const displayText = data.message || data.reply;
+    const displayText = data.message || data.reply || '';
 
     const LISTEN_LABEL = {te:'🔊 వినండి',hi:'🔊 सुनिए',kn:'🔊 ಕೇಳಿ',ta:'🔊 கேளுங்கள்',mr:'🔊 ऐका',bn:'🔊 শুনুন',en:'🔊 Listen'};
     const listenBtnLabel = LISTEN_LABEL[langCode] || LISTEN_LABEL.en;
 
     const aiBubble = document.createElement('div');
     aiBubble.className = 'chat-bubble ai';
-    aiBubble.innerHTML = `
-      ${sectorBadge}
-      <div>${displayText.replace(/\n/g, '<br>')}</div>
-      ${interactiveContentHtml}
-      <button class="listen-btn" onclick="speakBhashiniVoice('${escapeTextForAttr(displayText)}', '${lang}', this)">${listenBtnLabel}</button>
-      <small class="ai-credit">✨ Source: ${data.source || 'Udyam Setu AI Engine'} • Digital India BHASHINI RAG</small>
-    `;
+
+    if (sectorBadge) {
+      const badgeContainer = document.createElement('div');
+      badgeContainer.innerHTML = sectorBadge;
+      aiBubble.appendChild(badgeContainer.firstElementChild || badgeContainer);
+    }
+
+    const msgTextDiv = document.createElement('div');
+    msgTextDiv.innerHTML = displayText.replace(/\n/g, '<br>');
+    aiBubble.appendChild(msgTextDiv);
+
+    if (interactiveContainer.hasChildNodes()) {
+      aiBubble.appendChild(interactiveContainer);
+    }
+
+    const listenBtn = document.createElement('button');
+    listenBtn.className = 'listen-btn';
+    listenBtn.innerText = listenBtnLabel;
+    listenBtn.addEventListener('click', function() {
+      speakBhashiniVoice(displayText, lang, this);
+    });
+    aiBubble.appendChild(listenBtn);
+
+    const creditSmall = document.createElement('small');
+    creditSmall.className = 'ai-credit';
+    creditSmall.innerText = `✨ Source: ${data.source || 'Udyam Setu AI Engine'} • Digital India BHASHINI RAG`;
+    aiBubble.appendChild(creditSmall);
+
     chatContainer.appendChild(aiBubble);
     scrollToBottomChat();
 
     logTerminal(`[POST /api/ai/chat] Type: ${data.type || 'scheme_recommendation'} | Sector: ${sectorName || 'General'}\nMessage: ${displayText.substring(0, 160)}...`);
 
     if (autoSpeak) {
-      const btn = aiBubble.querySelector('.listen-btn');
-      speakBhashiniVoice(displayText, lang, btn);
+      speakBhashiniVoice(displayText, lang, listenBtn);
     }
   } catch (e) {
+    console.error('[sendChatMessage Error]', e);
     typingBubble.remove();
-    const fallbackText = lang === 'Telugu' 
-      ? 'పీఎం ముద్ర యోజన కింద ₹50,000 నుండి ₹10 లక్షల వరకు పూచీకత్తు లేని లోన్ లభిస్తుంది.'
-      : (lang === 'Hindi' 
-        ? 'पीएम मुद्रा योजना के तहत ₹50,000 से ₹10 लाख तक बिना गारंटी लोन मिलता है।'
+    
+    const errorNotice = lang === 'Telugu'
+      ? 'క్షమించండి, సర్వర్ కనెక్ట్ కాలేదు లేదా నెట్‌వర్క్ సమస్య ఉంది. దయచేసి మళ్ళీ ప్రయత్నించండి.'
+      : (lang === 'Hindi'
+        ? 'क्षमा करें, सर्वर से कनेक्शन नहीं हो सका। कृपया पुनः प्रयास करें।'
         : (lang === 'Kannada'
-          ? 'ಪಿಎಂ ಮುದ್ರಾ ಯೋಜನೆ ಅಡಿಯಲ್ಲಿ ₹50,000 ದಿಂದ ₹10 ಲಕ್ಷದವರೆಗೆ ಯಾವುದೇ ಅಡಮಾನವಿಲ್ಲದ ಸಾಲ ಲಭ್ಯವಿದೆ.'
+          ? 'ಕ್ಷಮಿಸಿ, ಸರ್ವರ್ ಸಂಪರ್ಕ ಸಾಧಿಸಲಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.'
           : (lang === 'Bengali'
-            ? 'প্রধানমন্ত্রী মুদ্রা যোজনায় ₹৫০,০০০ থেকে ₹১০ লাখ পর্যন্ত কোনো গ্যারান্টি ছাড়া ঋণ পাওয়া যায়।'
-            : 'PM Mudra Yojana offers up to ₹10 Lakh collateral-free credit for small enterprises.')));
-
-    const listenBtnLabel = lang === 'Telugu' ? '🔊 వినండి (Listen)'
-      : (lang === 'Hindi' ? '🔊 सुनिए (Listen)'
-      : (lang === 'Kannada' ? '🔊 ಕೇಳಿ (Listen)'
-      : (lang === 'Bengali' ? '🔊 শুনুন (Listen)'
-      : '🔊 Listen / వినండి')));
+            ? 'দুঃখিত, সার্ভারের সাথে সংযোগ করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।'
+            : 'Sorry, could not connect to the AI service. Please check your network and try again.')));
 
     const aiBubble = document.createElement('div');
-    aiBubble.className = 'chat-bubble ai';
-    aiBubble.innerHTML = `
-      <div>${fallbackText}</div>
-      <button class="listen-btn" onclick="speakBhashiniVoice('${escapeTextForAttr(fallbackText)}', '${lang}', this)">${listenBtnLabel}</button>
-      <small class="ai-credit">✨ Digital India Bhashini Knowledge</small>
-    `;
+    aiBubble.className = 'chat-bubble ai error-notice';
+    aiBubble.innerHTML = `<div style="color:#DC2626;">⚠️ ${errorNotice}</div>`;
     chatContainer.appendChild(aiBubble);
     scrollToBottomChat();
-
-    if (autoSpeak) {
-      const btn = aiBubble.querySelector('.listen-btn');
-      speakBhashiniVoice(fallbackText, lang, btn);
-    }
   }
 }
 
@@ -1251,6 +1257,11 @@ function sendSuggestedPrompt(promptText) {
 function selectBusinessOption(promptText) {
   sendSuggestedPrompt(promptText);
 }
+
+window.sendSuggestedPrompt = sendSuggestedPrompt;
+window.selectBusinessOption = selectBusinessOption;
+window.navigateToSchemeFromCardKey = navigateToSchemeFromCardKey;
+window.sendChatMessage = sendChatMessage;
 
 function escapeTextForAttr(text) {
   return (text || '').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
