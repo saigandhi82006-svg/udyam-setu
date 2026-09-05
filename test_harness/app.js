@@ -2380,6 +2380,22 @@ async function requestUserLiveLocation(forcePrompt = false) {
 }
 
 async function reverseGeocodeCoords(lat, lng) {
+  // 1. Try BigDataCloud Client Reverse Geocode (fast, CORS-friendly, zero rate-limit blocks)
+  try {
+    const bdcRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`, { cache: 'force-cache' });
+    if (bdcRes.ok) {
+      const data = await bdcRes.json();
+      const locality = data.locality || data.city || data.principalSubdivision || '';
+      const state = data.principalSubdivision || '';
+      if (locality && state && locality !== state) {
+        return `${locality}, ${state}`;
+      } else if (locality || state) {
+        return locality || state;
+      }
+    }
+  } catch (e) {}
+
+  // 2. Try OpenStreetMap Nominatim
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14`, {
       headers: { 'Accept': 'application/json' }
@@ -2387,11 +2403,13 @@ async function reverseGeocodeCoords(lat, lng) {
     if (res.ok) {
       const data = await res.json();
       const addr = data.address || {};
-      const locality = addr.suburb || addr.neighbourhood || addr.city || addr.town || addr.village || addr.county || 'Local Area';
+      const locality = addr.suburb || addr.neighbourhood || addr.city || addr.town || addr.village || addr.county || '';
       const state = addr.state_district || addr.state || '';
-      return state ? `${locality}, ${state}` : locality;
+      if (locality && state) return `${locality}, ${state}`;
+      if (locality) return locality;
     }
   } catch (e) {}
+
   return `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`;
 }
 

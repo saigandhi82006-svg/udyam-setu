@@ -233,6 +233,7 @@ const dataStore = {
 
   // Partners
   async getNearbyPartners(lat, lng, radiusKm = 25, typeFilter = null, locationName = null) {
+    let dbPartnersList = [];
     if (!isInMemoryFallback()) {
       try {
         const query = {
@@ -249,18 +250,35 @@ const dataStore = {
         if (typeFilter && typeFilter !== 'All') query.type = typeFilter;
         const dbPartners = await ChannelPartner.find(query);
         if (dbPartners && dbPartners.length > 0) {
-          return dbPartners.map(p => {
+          dbPartnersList = dbPartners.map(p => {
             const partnerObj = p.toObject();
             partnerObj.distanceKm = calculateHaversineDistance(lat, lng, p.location.coordinates[1], p.location.coordinates[0]);
             return partnerObj;
-          }).sort((a, b) => a.distanceKm - b.distanceKm);
+          });
         }
       } catch (e) {
         // Fall back to memory with Haversine formula
       }
     }
 
-    // In-memory spatial Haversine query
+    // Dynamic Live Spatial POI Discovery (OpenStreetMap Overpass + Reverse Geocoded Anchor Points)
+    try {
+      const partnerLocator = require('./partnerLocatorService');
+      const dynamicPartners = await partnerLocator.getDynamicNearbyPartners(lat, lng, radiusKm, typeFilter, locationName);
+      
+      // Merge MongoDB partners and dynamic live partners (deduplicating by name)
+      const combined = [...dbPartnersList];
+      for (const dp of dynamicPartners) {
+        if (!combined.some(cp => cp.partnerName.toLowerCase() === dp.partnerName.toLowerCase())) {
+          combined.push(dp);
+        }
+      }
+      return combined.sort((a, b) => a.distanceKm - b.distanceKm);
+    } catch (err) {
+      console.warn('Dynamic partner locator fallback error:', err.message);
+    }
+
+    // In-memory spatial Haversine query fallback
     let filtered = memoryDB.partners;
     if (typeFilter && typeFilter !== 'All') {
       filtered = filtered.filter(p => p.type === typeFilter);
@@ -276,92 +294,9 @@ const dataStore = {
       };
     });
 
-    let nearby = calculated
+    return calculated
       .filter(p => p.distanceKm <= radiusKm)
       .sort((a, b) => a.distanceKm - b.distanceKm);
-
-    // If user's live GPS coordinates are outside seed cluster, generate realistic live nearby partners for their exact place
-    if (nearby.length < 2 || locationName) {
-      const locStr = (locationName || '').trim();
-      const parts = locStr ? locStr.split(',').map(s => s.trim()) : [];
-      const placeName = parts[0] || 'Local Area';
-      const districtName = parts.length > 1 ? parts[1] : parts[0] || 'Local District';
-      const fullArea = locStr || `${placeName}, ${districtName}`;
-
-      const dynamicLivePartners = [
-        {
-          _id: 'live_ptn_sachivalayam_1',
-          partnerName: `Grama Sachivalayam (Village Secretariat - ${placeName})`,
-          type: 'CSC',
-          address: `Grama Panchayat Complex, ${placeName}, ${districtName}`,
-          city: placeName,
-          state: districtName,
-          location: {
-            type: 'Point',
-            coordinates: [parseFloat(lng) + 0.0022, parseFloat(lat) - 0.0018]
-          },
-          contactPhone: '+91 1902 (Toll Free)',
-          contactPerson: 'Panchayat Secretary / Digital Assistant',
-          servicesOffered: ['Udyam Registration', 'PMEGP Application Assistance', 'PM Vishwakarma Enrolment', 'Aadhaar e-KYC', 'Caste & Income Certificates'],
-          rating: 4.9,
-          workingHours: '9:00 AM - 6:00 PM (Mon-Sat)',
-          searchQuery: `Grama Sachivalayam near ${placeName} ${districtName}`
-        },
-        {
-          _id: 'live_ptn_rbk_kvk',
-          partnerName: `Rythu Bharosa Kendram (RBK / Agriculture Hub - ${placeName})`,
-          type: 'KVK',
-          address: `Agriculture Extension Centre, ${placeName}, ${districtName}`,
-          city: placeName,
-          state: districtName,
-          location: {
-            type: 'Point',
-            coordinates: [parseFloat(lng) - 0.0035, parseFloat(lat) + 0.0030]
-          },
-          contactPhone: '+91 1800 425 0302',
-          contactPerson: 'Village Agriculture / Horticulture Assistant',
-          servicesOffered: ['Agri-Infrastructure Fund Handholding', 'PMFME Micro Food Processing Support', 'PM-Kisan / Rythu Bharosa Assistance', 'Crop Loan Advisory'],
-          rating: 4.8,
-          workingHours: '9:30 AM - 5:30 PM (Mon-Fri)',
-          searchQuery: `Rythu Bharosa Kendra near ${placeName} ${districtName}`
-        },
-        {
-          _id: 'live_ptn_bank_sbi',
-          partnerName: `State Bank of India (${placeName} Branch)`,
-          type: 'Bank',
-          address: `Main Road, Near Bus Stand, ${placeName}, ${districtName}`,
-          city: placeName,
-          state: districtName,
-          location: {
-            type: 'Point',
-            coordinates: [parseFloat(lng) + 0.0038, parseFloat(lat) + 0.0032]
-          },
-          contactPhone: '+91 1800 11 2211',
-          contactPerson: 'Branch Manager / Agriculture Credit Officer',
-          servicesOffered: ['MUDRA Shishu, Kishore & Tarun Loans', 'PMEGP Subsidy Disbursement', 'CGTMSE Collateral-Free Loans', 'SHG Bank Linkage'],
-          rating: 4.8,
-          workingHours: '10:00 AM - 4:30 PM (Mon-Sat)',
-          searchQuery: `Bank near ${placeName} ${districtName}`
-        }
-      ];
-
-      let liveFiltered = dynamicLivePartners;
-      if (typeFilter && typeFilter !== 'All') {
-        liveFiltered = dynamicLivePartners.filter(p => p.type === typeFilter);
-      }
-
-      nearby = liveFiltered.map(partner => {
-        const pLng = partner.location.coordinates[0];
-        const pLat = partner.location.coordinates[1];
-        const dist = calculateHaversineDistance(lat, lng, pLat, pLng);
-        return {
-          ...partner,
-          distanceKm: dist
-        };
-      }).sort((a, b) => a.distanceKm - b.distanceKm);
-    }
-
-    return nearby;
   },
 
   async addPartner(partnerData) {
