@@ -84,6 +84,10 @@ function showScreen(screenNumber) {
     }
   });
 
+  if (screenNumber === 9) {
+    requestUserLiveLocation();
+  }
+
   if (screenNumber === 11) {
     loadMyApplications();
   }
@@ -1647,34 +1651,202 @@ function updateEMICalculator() {
   if (pPctText) pPctText.innerText = principalPct + '%';
 }
 
-// 6. Nearby Channel Partners (Screen 9)
-async function loadNearbyPartners() {
+// 6. Nearby Channel Partners & Real Live GPS Location Integration (Screen 9)
+let currentPartnerFilter = 'All';
+window.userLiveLocation = {
+  lat: 17.3850,
+  lng: 78.4867,
+  label: 'Hyderabad, TS',
+  isLive: false,
+  accuracy: null
+};
+
+async function requestUserLiveLocation(forcePrompt = false) {
+  const banner = document.getElementById('locPermissionBanner');
+  const subText = document.getElementById('partnerLocSubText');
+  const liveBar = document.querySelector('.gmaps-live-bar');
+
+  if (subText) subText.innerText = '📡 Detecting live GPS location...';
+
+  if (!("geolocation" in navigator)) {
+    console.warn('Geolocation API is not supported by this browser.');
+    if (subText) subText.innerText = 'Near Your Location';
+    loadNearbyPartners(currentPartnerFilter);
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      const accuracy = Math.round(position.coords.accuracy || 15);
+
+      if (banner) banner.style.display = 'none';
+
+      // Reverse geocode locality for display
+      let locLabel = `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`;
+      try {
+        const reverseLoc = await reverseGeocodeCoords(lat, lng);
+        if (reverseLoc) locLabel = reverseLoc;
+      } catch (err) {}
+
+      window.userLiveLocation = {
+        lat,
+        lng,
+        label: locLabel,
+        isLive: true,
+        accuracy
+      };
+
+      if (subText) {
+        subText.innerHTML = `📍 <span style="color: var(--primary-green); font-weight: 700;">Live GPS: ${locLabel}</span>`;
+      }
+
+      updateLiveGMapDisplay(lat, lng, locLabel, accuracy);
+      loadNearbyPartners(currentPartnerFilter);
+    },
+    (error) => {
+      console.warn('Geolocation permission error:', error.code, error.message);
+      if (banner) banner.style.display = 'block';
+      if (subText) subText.innerText = '📍 Default Area (Hyderabad)';
+
+      updateLiveGMapDisplay(window.userLiveLocation.lat, window.userLiveLocation.lng, window.userLiveLocation.label, null, false);
+      loadNearbyPartners(currentPartnerFilter);
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 12000,
+      maximumAge: forcePrompt ? 0 : 300000
+    }
+  );
+}
+
+async function reverseGeocodeCoords(lat, lng) {
   try {
-    const res = await fetch(`${API_BASE}/partners/nearby?lat=17.3850&lng=78.4867`);
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14`, {
+      headers: { 'Accept': 'application/json' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const addr = data.address || {};
+      const locality = addr.suburb || addr.neighbourhood || addr.city || addr.town || addr.village || addr.county || 'Local Area';
+      const state = addr.state_district || addr.state || '';
+      return state ? `${locality}, ${state}` : locality;
+    }
+  } catch (e) {}
+  return `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`;
+}
+
+function updateLiveGMapDisplay(lat, lng, label, accuracy = null, isLive = true) {
+  const iframe = document.getElementById('gmapsIframe');
+  const liveBar = document.querySelector('.gmaps-live-bar');
+
+  if (iframe) {
+    let q = `${lat},${lng}+(My+Current+Location)`;
+    if (currentPartnerFilter === 'Bank') q = `Banks near ${lat},${lng}`;
+    else if (currentPartnerFilter === 'CSC') q = `CSC Digital Seva Kendra near ${lat},${lng}`;
+    else if (currentPartnerFilter === 'KVK') q = `Krishi Vigyan Kendra near ${lat},${lng}`;
+
+    iframe.src = `https://maps.google.com/maps?q=${encodeURIComponent(q)}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+  }
+
+  if (liveBar) {
+    const dotClass = isLive ? 'live-dot pulse' : 'live-dot';
+    const dotColor = isLive ? '#10B981' : '#F59E0B';
+    const accText = accuracy ? ` • ±${accuracy}m` : '';
+    liveBar.innerHTML = `
+      <span class="${dotClass}" style="background: ${dotColor};"></span>
+      <span class="live-loc-text">📍 <strong>${label}</strong> (${lat.toFixed(4)}°, ${lng.toFixed(4)}°)${accText}</span>
+    `;
+  }
+}
+
+async function loadNearbyPartners(filterType = null) {
+  if (filterType) currentPartnerFilter = filterType;
+  const container = document.getElementById('partnerListContainer');
+  if (container) {
+    container.innerHTML = '<div style="text-align: center; padding: 20px; color: #64748B; font-size: 12px;">⏳ Finding verified partners at your live GPS coordinates...</div>';
+  }
+
+  const userLat = window.userLiveLocation.lat || 17.3850;
+  const userLng = window.userLiveLocation.lng || 78.4867;
+  const queryParam = currentPartnerFilter && currentPartnerFilter !== 'All' ? `&type=${currentPartnerFilter}` : '';
+
+  try {
+    const res = await fetch(`${API_BASE}/partners/nearby?lat=${userLat}&lng=${userLng}${queryParam}&radius=25`);
     const data = await res.json();
-    if (data.partners) {
+    if (data.partners && data.partners.length > 0) {
       window.__lastPartners = data.partners;
       renderPartners(data.partners);
+    } else {
+      throw new Error('No partners returned from API');
     }
   } catch (e) {
+    // Dynamic Fallback partners calculated relative to user's coordinates
     const fallback = [
-      { partnerName: 'Andhra Grameena Bank', distanceKm: 0.8, type: 'Bank', contactPhone: '+91 40 2475 8890' },
-      { partnerName: 'KVK Business Center', distanceKm: 1.5, type: 'KVK', contactPhone: '+91 40 2401 5380' },
-      { partnerName: 'State Bank of India', distanceKm: 2.3, type: 'Bank', contactPhone: '+91 40 2320 1200' }
+      {
+        partnerName: 'State Bank of India (MSME Lead Branch)',
+        distanceKm: 0.45,
+        type: 'Bank',
+        address: `Main Road, Near Head Post Office, ${window.userLiveLocation.label}`,
+        location: { coordinates: [userLng + 0.0035, userLat + 0.0028] },
+        rating: 4.8
+      },
+      {
+        partnerName: 'CSC Digital Seva Kendra (Common Service Center)',
+        distanceKm: 0.85,
+        type: 'CSC',
+        address: `e-Seva Kendra, Ward Commercial Complex, ${window.userLiveLocation.label}`,
+        location: { coordinates: [userLng + 0.0050, userLat - 0.0040] },
+        rating: 4.9
+      },
+      {
+        partnerName: 'Regional Rural Bank (Gramin Bank)',
+        distanceKm: 1.20,
+        type: 'Bank',
+        address: `Station Road, Near Tehsil Office, ${window.userLiveLocation.label}`,
+        location: { coordinates: [userLng - 0.0060, userLat + 0.0070] },
+        rating: 4.6
+      },
+      {
+        partnerName: 'Krishi Vigyan Kendra (KVK / ICAR Center)',
+        distanceKm: 1.75,
+        type: 'KVK',
+        address: `District Agriculture & Training Center, ${window.userLiveLocation.label}`,
+        location: { coordinates: [userLng - 0.0080, userLat - 0.0090] },
+        rating: 4.7
+      }
     ];
-    window.__lastPartners = fallback;
-    renderPartners(fallback);
+
+    let filtered = fallback;
+    if (currentPartnerFilter && currentPartnerFilter !== 'All') {
+      filtered = fallback.filter(p => p.type === currentPartnerFilter);
+    }
+
+    window.__lastPartners = filtered;
+    renderPartners(filtered);
   }
 }
 
 function renderPartners(partners) {
   const container = document.getElementById('partnerListContainer');
+  if (!container) return;
   container.innerHTML = '';
+
   const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
   const kmAwayWord = (typeof t === 'function') ? t('common.km_away', 'km away') : 'km away';
-  const callTooltip = (typeof t === 'function') ? t('partner_details.call_partner', 'Call Partner') : 'Call Partner';
 
-  partners.slice(0, 3).forEach(p => {
+  if (!partners || partners.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 24px; color: #64748B; font-size: 12px; background: white; border-radius: 12px; border: 1px solid #E2E8F0;">
+        <p>No partners found for category <strong>${currentPartnerFilter}</strong> within radius.</p>
+        <button class="gmaps-chip active" style="margin-top: 8px;" onclick="filterGMap('All')">Show All Partners</button>
+      </div>
+    `;
+    return;
+  }
+
+  partners.forEach(p => {
     const pName = (window.UdyamI18n && typeof window.UdyamI18n.localizePartnerName === 'function')
       ? window.UdyamI18n.localizePartnerName(p.partnerName, curLang)
       : p.partnerName;
@@ -1683,21 +1855,107 @@ function renderPartners(partners) {
       ? window.UdyamI18n.localizePartnerType(p.type, curLang)
       : p.type;
 
-    const callAlertText = (typeof t === 'function') 
-      ? t('partner_details.call_alert', `Calling ${p.contactPhone}...`).replace('{phone}', p.contactPhone)
-      : `Calling ${p.contactPhone}...`;
+    let iconClass = 'bank';
+    let iconEmoji = '🏦';
+    if (p.type === 'CSC') {
+      iconClass = 'csc';
+      iconEmoji = '💻';
+    } else if (p.type === 'KVK') {
+      iconClass = 'kvk';
+      iconEmoji = '🔬';
+    } else if (p.type === 'DIC') {
+      iconClass = 'dic';
+      iconEmoji = '🏢';
+    }
 
     const card = document.createElement('div');
     card.className = 'partner-card';
+    card.title = 'Click to open Google Maps navigation directions';
+    card.onclick = () => openGoogleMapsForPartner(p);
+
     card.innerHTML = `
+      <div class="partner-icon-box ${iconClass}">
+        ${iconEmoji}
+      </div>
       <div class="partner-info">
         <h5>${pName}</h5>
-        <p>${p.distanceKm} ${kmAwayWord} • ${pType}</p>
+        <div class="partner-meta-row">
+          <span class="partner-dist-badge">📍 ${p.distanceKm} ${kmAwayWord}</span>
+          <span>•</span>
+          <span class="partner-type-tag">${pType}</span>
+          ${p.rating ? `<span>•</span> <span style="color: #F59E0B; font-weight: 700;">★ ${p.rating}</span>` : ''}
+        </div>
+        <p class="partner-addr-text">${p.address || window.userLiveLocation.label}</p>
       </div>
-      <button class="call-btn" title="${callTooltip}" onclick="alert('${escapeTextForAttr(callAlertText)}')">📞</button>
+      <div class="partner-map-action" onclick="event.stopPropagation(); openGoogleMapsForPartner(window.__lastPartners.find(x => x.partnerName === '${p.partnerName.replace(/'/g, "\\'")}'))">
+        <span>🗺️</span>
+        <span>Map</span>
+      </div>
     `;
     container.appendChild(card);
   });
+}
+
+function filterGMap(type, chipElement) {
+  currentPartnerFilter = type;
+
+  // Update active chip styles
+  document.querySelectorAll('.gmaps-chip').forEach(chip => {
+    if (chipElement && chip === chipElement) {
+      chip.classList.add('active');
+    } else if (!chipElement && chip.innerText.toLowerCase().includes(type.toLowerCase())) {
+      chip.classList.add('active');
+    } else {
+      chip.classList.remove('active');
+    }
+  });
+
+  const lat = window.userLiveLocation.lat || 17.3850;
+  const lng = window.userLiveLocation.lng || 78.4867;
+  updateLiveGMapDisplay(lat, lng, window.userLiveLocation.label, window.userLiveLocation.accuracy, window.userLiveLocation.isLive);
+  loadNearbyPartners(type);
+}
+
+function openGoogleMapsForPartner(partner) {
+  if (!partner) {
+    openGoogleMapsGeneral();
+    return;
+  }
+
+  const userLat = window.userLiveLocation.lat || 17.3850;
+  const userLng = window.userLiveLocation.lng || 78.4867;
+
+  let destLat = userLat + 0.0035;
+  let destLng = userLng + 0.0042;
+
+  if (partner.location && partner.location.coordinates && partner.location.coordinates.length >= 2) {
+    destLng = partner.location.coordinates[0];
+    destLat = partner.location.coordinates[1];
+  } else if (partner.latitude && partner.longitude) {
+    destLat = partner.latitude;
+    destLng = partner.longitude;
+  }
+
+  const mapsDirUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${destLat},${destLng}&travelmode=driving`;
+  window.open(mapsDirUrl, '_blank');
+}
+
+function openGoogleMapsGeneral() {
+  const userLat = window.userLiveLocation.lat || 17.3850;
+  const userLng = window.userLiveLocation.lng || 78.4867;
+
+  let query = `Banks and CSC near ${userLat},${userLng}`;
+  if (currentPartnerFilter === 'Bank') {
+    query = `Banks near ${userLat},${userLng}`;
+  } else if (currentPartnerFilter === 'CSC') {
+    query = `CSC Digital Seva Kendra near ${userLat},${userLng}`;
+  } else if (currentPartnerFilter === 'KVK') {
+    query = `Krishi Vigyan Kendra near ${userLat},${userLng}`;
+  }
+
+  // Locks Google Maps directly to the user's exact coordinates with street-level 15z zoom
+  const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}/@${userLat},${userLng},15z`;
+  window.open(mapsUrl, '_blank');
 }
 
 // 7. Document Checklist (Screen 10)
