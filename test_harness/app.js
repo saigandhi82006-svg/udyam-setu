@@ -1620,10 +1620,10 @@ function setProfStep(step) {
 window.setProfStep = setProfStep;
 
 async function saveUserProfileDetails(showAlert = true) {
-  currentProfile.name = document.getElementById('profName')?.value || currentProfile.name || 'Ravi Kumar';
-  currentProfile.phone = document.getElementById('profPhone')?.value || currentProfile.phone || '9876543210';
+  currentProfile.name = document.getElementById('profName')?.value.trim() || currentProfile.name || '';
+  currentProfile.phone = document.getElementById('profPhone')?.value.trim() || currentProfile.phone || '';
   currentProfile.email = document.getElementById('profEmail')?.value || currentProfile.email || '';
-  currentProfile.age = parseInt(document.getElementById('profAge')?.value) || 28;
+  currentProfile.age = parseInt(document.getElementById('profAge')?.value) || currentProfile.age || null;
   currentProfile.gender = document.getElementById('profGender')?.value || 'Male';
   
   const disabilityVal = document.getElementById('profDisability')?.value || 'No';
