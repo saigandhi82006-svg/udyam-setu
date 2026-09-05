@@ -37,7 +37,7 @@ class _AuthScreenState extends State<AuthScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('OTP sent to +91 $phone! Test OTP: 123456'),
+          content: Text('OTP sent successfully to +91 $phone!'),
           backgroundColor: AppTheme.primaryGreen,
         ),
       );
