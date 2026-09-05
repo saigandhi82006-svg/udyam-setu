@@ -1085,7 +1085,7 @@ body {
 .chat-messages {
   flex: 1;
   overflow-y: auto;
-  overflow-x: hidden !important;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -1093,6 +1093,25 @@ body {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 5px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 10px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.35);
 }
 
 .chat-bubble {
@@ -1104,7 +1123,9 @@ body {
   box-sizing: border-box;
   word-break: break-word;
   overflow-wrap: break-word;
-  overflow-x: hidden !important;
+  overflow: visible !important;
+  height: auto;
+  max-height: none;
 }
 
 .chat-bubble.user {
@@ -1112,6 +1133,7 @@ body {
   background: var(--primary-green);
   color: white;
   border-bottom-right-radius: 2px;
+  overflow: visible !important;
 }
 
 .chat-bubble.ai {
@@ -1122,6 +1144,7 @@ body {
   border-bottom-left-radius: 2px;
   width: auto;
   max-width: 94%;
+  overflow: visible !important;
 }
 
 
@@ -1593,7 +1616,6 @@ body {
   margin-bottom: 6px;
   word-break: break-word;
   white-space: normal;
-  overflow: hidden;
 }
 
 
