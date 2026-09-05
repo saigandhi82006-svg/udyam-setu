@@ -94,6 +94,12 @@ function buildGreetingResponse(language = 'English') {
 function isDiscoveryOrUnspecifiedQuery(message = '', userProfile = null) {
   if (!message) return true;
 
+  // 1. If explicit domain or business is mentioned in the query, it is NOT an unspecified discovery query!
+  const detectedSector = detectSectorFromText(message);
+  if (detectedSector) {
+    return false;
+  }
+
   // If user profile has an explicit business type, then it's NOT an unspecified discovery query!
   if (userProfile?.businessType && userProfile.businessType !== 'General Advisory' && userProfile.businessType !== 'Discovery') {
     return false;
@@ -116,14 +122,7 @@ function isDiscoveryOrUnspecifiedQuery(message = '', userProfile = null) {
 
   if (explicitDiscoveryWords.includes(clean)) return true;
 
-  // Check if message mentions any specific domain/business sector
-  const hasSpecificDomain = /(auto|vehicle|lorry|truck|cab|transport|car|tempo|rickshaw|repair|service|mechanic|garage|food|tiffin|hotel|canteen|restaurant|tea stall|chai|bakery|catering|kirana|shop|retail|grocery|supermarket|thela|vendor|vending|pushcart|cart|hawker|farm|crop|kisan|cattle|dairy|tractor|fish|student|college|study|school|handicap|disability|divyang|pwd|women|mahila|female|shg|artisan|weaver|carpenter|potter|blacksmith|tailor|tailoring|textile|garment|boutique|dress|cloth|sewing|craft|vishwakarma|industry|factory|manufacturing|fabrication|workshop|msme|zed|ఆటో|వాహనం|లారీ|రిపేర్|సర్వీస్|మెకానిక్|గ్యారేజ్|ఫుడ్|టిఫిన్|హోటల్|ఆహారం|భోజనం|క్యాటరింగ్|కిరాణా|షాప్|దుకాణం|తోపుడు బండి|తోపుడు|వీధి వ్యాపారం|రైతు|వ్యవసాయం|పంట|పాడి|చేపల|గొర్రెలు|ట్రాక్టర్|టైలరింగ్|వస్త్ర|బట్టలు|దర్జీ|చేనేత|చేతివృత్తులు|వడ్రంగి|కమ్మరి|కుమ్మరి|పరిశ్రమ|తయారీ పరిశ్రమ|ఫ్యాబ్రికేషన్|చదువు|విద్య|దివ్యాంగ|వైకల్యం|మహిళ|ಆಟೋ|ವಾಹನ|ಲಾರಿ|ರಿಪೇರಿ|ಸೇವೆ|ಗ್ಯಾರೇಜ್|ಮೆಕ್ಯಾನಿಕ್|ಆಹಾರ|ತಿಂಡಿ|ಊಟ|ಹೋಟೆಲ್|ಬೇಕರಿ|ಕ್ಯಾಟರಿಂಗ್|ಕಿರಾಣಿ|ಅಂಗಡಿ|ಚಿಲ್ಲರೆ|ತಳ್ಳುವ ಗಾಡಿ|ಬೀದಿ ವ್ಯಾಪಾರ|ಕೃಷಿ|ರೈತ|ಬೆಳೆ|ಹಾಲು|ಹೈನುಗಾರಿಕೆ|ಮೀನು|ಟ್ರಾಕ್ಟರ್|ಟೈಲರಿಂಗ್|ಜವಳಿ|ಬಟ್ಟೆ|ದರ್ಜಿ|ಕರಕುಶಲ|ನೇಕಾರ|ಕುಂಬಾರ|ಕಮ್ಮಾರ|ಬಡಗಿ|ಉತ್ಪಾದನೆ|ಕೈಗಾರಿಕೆ|ಫ್ಯಾಬ್ರಿಕೇಶನ್|ಶಿಕ್ಷಣ|ವಿಕಲಚೇತನ|ದಿವ್ಯಾಂಗ|ಮಹಿಳೆ|অটো|গাড়ি|লরি|রিকশা|মেরামত|গ্যারেজ|সার্ভিস|মেকানিক|খাবার|টিফিন|হোটেল|বেকারি|ক্যাটারিং|মুদি|দোকান|খুচরা|হকার|ঠেলাগাড়ি|ফুটপাত|কৃষি|কৃষক|ফসল|দুগ্ধ|মাছ|ট্র্যাক্টর|দর্জি|পোশাক|বস্ত্র|সেলাই|হস্তশিল্প|তাঁতি|কারিগর|ছুতোর|কামার|কুমার|ম্যানুফ্যাকচারিং|কারখানা|উৎপাদন|ফ্যাব্রিকেশন|শিক্ষা|প্রতিবন্ধী|দিব্যাঙ্গ|মহিলা|गाड़ी|ऑटो|रिक्शा|ट्रक|मरम्मत|गैरेज|सर्विस|मैकेनिक|टिफिन|होटल|खाना|भोजन|ढाबा|किराना|दुकान|खुदरा|जनरल स्टोर|ठेला|रेहड़ी|पटरी|फेरीवाला|खेती|किसान|डेयरी|पशुपालन|मत्स्य|ट्रैक्टर|टेलर|सिलाई|कपड़ा|दर्जी|परिधान|हथकरघा|बुनकर|दस्तकार|कारीगर|बढ़ई|लोहार|कुम्हार|उद्योग|कारखाना|विनिर्माण|फैब्रिकेशन|पढ़ाई|छात्र|दिव्यांग|विकलांग|महिला|गॅरेज|दुरुस्ती|हॉटेल|किराणा|हातगाडी|फेरीवाला|शेती|टेलरिंग|शिवणकाम|विणकर|कारागीर|உணவு|ஹோட்டல்|டிபன்|மளிகை|சில்லறை|தள்ளுவண்டி|தெருவோர|தையல்|ஜவுளி|ஆடை|கைத்தறி|கைவினை|நெசவாளர்|விவசாயம்|பால் பண்ணை|பழுது|கேரேஜ்|வாகனம்|உற்பத்தி|பட்டறை)/i.test(message);
-
-  if (!hasSpecificDomain && clean.length <= 40) {
-    return true;
-  }
-
-  return false;
+  return clean.length <= 15;
 }
 
 const DISCOVERY_BUSINESS_OPTIONS = {
@@ -460,14 +459,14 @@ function isFollowUpInquiry(message = '', conversationHistory = []) {
  * Dynamic Intent Adaptability: Always prioritizes the user's latest query topic over initial profile.
  */
 function classifyUserSector(message = '', userProfile = null) {
-  if (isDiscoveryOrUnspecifiedQuery(message, userProfile)) {
-    return 'Discovery';
-  }
-
   // 1. Dynamic Intent Priority: User message intent STRICTLY overrides static userProfile
   const sectorFromMsg = detectSectorFromText(message);
   if (sectorFromMsg) {
     return sectorFromMsg;
+  }
+
+  if (isDiscoveryOrUnspecifiedQuery(message, userProfile)) {
+    return 'Discovery';
   }
 
   // 2. Only if the message does NOT contain explicit domain keywords, fall back to userProfile
@@ -1205,7 +1204,7 @@ BEHAVIOR RULES:
   }
 
   // 4. CASE A: Conversational Discovery (User clicked "Ask", said "help", or business is not specified)
-  const isDiscovery = (detectedSector === 'Discovery') || isDiscoveryOrUnspecifiedQuery(message, userProfile);
+  const isDiscovery = (detectedSector === 'Discovery');
   if (isDiscovery) {
     const discoverySystemPrompt = `
 You are "Udyam Setu AI", an intelligent government scheme advisory engine.
@@ -1334,11 +1333,18 @@ USER'S MESSAGE: "${message}"
 
   if (geminiResult && geminiResult.parsed && geminiResult.parsed.message && Array.isArray(geminiResult.parsed.schemes)) {
     const parsed = geminiResult.parsed;
+    if (parsed.schemes.length === 0 && relevantSchemes.length > 0) {
+      parsed.schemes = relevantSchemes.slice(0, 3).map(s => formatSchemeForSchema(s, detectedSector, effectiveLang));
+    }
     // Pre-resolve all schemes so we can do vernacular overlay for any scheme Gemini returns
     const allSchemesPool = await dataStore.getSchemes().catch(() => relevantSchemes);
     const schemeSearchPool = [...new Map([...relevantSchemes, ...(Array.isArray(allSchemesPool) ? allSchemesPool : relevantSchemes)].map(x=>[(x.shortCode||x.schemeId||x.schemeName||Math.random()),x])).values()];
 
-    parsed.schemes = parsed.schemes.map(s => {
+    let returnedSchemes = (Array.isArray(parsed.schemes) && parsed.schemes.length > 0)
+      ? parsed.schemes
+      : relevantSchemes.slice(0, 3).map(s => formatSchemeForSchema(s, detectedSector, effectiveLang));
+
+    returnedSchemes = returnedSchemes.map(s => {
       const titleLower = (s.title || '').toLowerCase();
       const schemeIdLower = (s.scheme_id || '').toLowerCase();
       const groundTruth = schemeSearchPool.find(gt => 
@@ -1384,19 +1390,23 @@ USER'S MESSAGE: "${message}"
     const benefitLabel = isTe ? 'ప్రయోజనం:' : (isKn ? 'ಪ್ರಯೋಜನ:' : (isBn ? 'সুবিধা:' : (isHi ? 'लाभ:' : (isTa ? 'பயன்:' : (isMr ? 'लाभ:' : 'Benefit:')))));
     const detailsLabel = isTe ? 'వివరాలు:' : (isKn ? 'ವಿವರಗಳು:' : (isBn ? 'বিবরণ:' : (isHi ? 'विवरण:' : (isTa ? 'விவரங்கள்:' : (isMr ? 'तपशील:' : 'Details:')))));
 
-    const backwardCompatibleReply = `${parsed.message}\n\n` + parsed.schemes.map((s, idx) => 
+    const conversationalMessage = (parsed.message && parsed.type === 'scheme_recommendation')
+      ? parsed.message
+      : (buildVernacularResponse(message, relevantSchemes, effectiveLang, userProfile, detectedSector).message);
+
+    const backwardCompatibleReply = `${conversationalMessage}\n\n` + returnedSchemes.map((s, idx) => 
       `${idx + 1}. **${s.title}**\n   - **${amountLabel}** ${s.max_amount}\n   - **${benefitLabel}** ${s.benefit_tag}\n   - **${detailsLabel}** ${s.description}`
     ).join('\n\n');
 
     return {
       type: 'scheme_recommendation',
-      message: parsed.message,
-      target_sector: parsed.target_sector || detectedSector,
-      schemes: parsed.schemes,
+      message: conversationalMessage,
+      target_sector: detectedSector,
+      schemes: returnedSchemes,
       business_options: [],
       // Backward compatibility
       reply: backwardCompatibleReply,
-      recommendedSchemes: parsed.schemes.map(s => ({
+      recommendedSchemes: returnedSchemes.map(s => ({
         schemeName: s.title,
         loanAmount: s.max_amount,
         subsidy: s.benefit_tag,
@@ -1404,7 +1414,7 @@ USER'S MESSAGE: "${message}"
         url: s.redirect_url,
         schemeId: s.scheme_id
       })),
-      detectedSector: parsed.target_sector || detectedSector,
+      detectedSector: detectedSector,
       source: `Google Gemini (${geminiResult.model}) (Autonomous AI)`,
       language: effectiveLang,
       bhashiniVoiceEnabled: true
