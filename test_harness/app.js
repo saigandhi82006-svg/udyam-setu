@@ -6,22 +6,22 @@ const API_BASE = (window.location && window.location.origin && window.location.o
 let chatHistory = [];
 let currentSelectedScheme = null;
 let currentProfile = {
-  name: 'Ravi Kumar',
-  phone: '9876543210',
-  email: 'ravi.kumar@example.com',
-  age: 28,
-  gender: 'Male',
+  name: '',
+  phone: '',
+  email: '',
+  age: null,
+  gender: '',
   hasDisability: false,
   disabilityType: 'None',
   disabilityPercentage: 'None',
   hasUdidCard: false,
-  category: 'OBC',
-  annualIncome: 240000,
-  neededInvestment: 500000,
-  businessType: 'Food Business',
+  category: 'General',
+  annualIncome: null,
+  neededInvestment: null,
+  businessType: '',
   locationType: 'Rural',
-  experienceYears: 2,
-  education: '8th Pass or Above'
+  experienceYears: 0,
+  education: ''
 };
 
 let currentDocuments = [
@@ -125,6 +125,10 @@ function showScreen(screenNumber) {
       btn.classList.remove('active');
     }
   });
+
+  if (screenNumber === 5) {
+    if (typeof updateAgeCategoryBadge === 'function') updateAgeCategoryBadge();
+  }
 
   if (screenNumber === 9) {
     requestUserLiveLocation();
@@ -370,8 +374,6 @@ async function selectGoogleAccount(email, name, avatarInitials = 'G') {
 
     currentProfile.name = name;
     currentProfile.email = email;
-    if (document.getElementById('profName')) document.getElementById('profName').value = name;
-    if (document.getElementById('profEmail')) document.getElementById('profEmail').value = email;
 
     const avatarEl = document.querySelector('.user-avatar');
     if (avatarEl) avatarEl.innerText = avatarInitials;
@@ -384,8 +386,6 @@ async function selectGoogleAccount(email, name, avatarInitials = 'G') {
   } catch (err) {
     currentProfile.name = name;
     currentProfile.email = email;
-    if (document.getElementById('profName')) document.getElementById('profName').value = name;
-    if (document.getElementById('profEmail')) document.getElementById('profEmail').value = email;
     const avatarEl = document.querySelector('.user-avatar');
     if (avatarEl) avatarEl.innerText = avatarInitials;
     showScreen(3);
@@ -1569,7 +1569,13 @@ function updateAgeCategoryBadge() {
   const ageInput = document.getElementById('profAge');
   const badge = document.getElementById('profAgeBadge');
   if (!ageInput || !badge) return;
-  const age = parseInt(ageInput.value) || 0;
+  const raw = (ageInput.value || '').trim();
+  if (!raw) {
+    badge.style.display = 'none';
+    return;
+  }
+  badge.style.display = 'inline-block';
+  const age = parseInt(raw) || 0;
   if (age < 18) {
     badge.className = 'form-badge-pill';
     badge.style.background = '#FEE2E2';
@@ -1577,9 +1583,13 @@ function updateAgeCategoryBadge() {
     badge.innerText = (typeof t === 'function') ? t('screen5.badge_underage', '⚠️ Minimum age for government schemes is 18 years') : '⚠️ Minimum age for government schemes is 18 years';
   } else if (age <= 35) {
     badge.className = 'form-badge-pill youth';
+    badge.style.background = '';
+    badge.style.color = '';
     badge.innerText = (typeof t === 'function') ? t('screen5.badge_youth', '⚡ Youth (18-35) • High Subsidy Priority') : '⚡ Youth (18-35) • High Subsidy Priority';
   } else if (age <= 55) {
     badge.className = 'form-badge-pill mature';
+    badge.style.background = '';
+    badge.style.color = '';
     badge.innerText = (typeof t === 'function') ? t('screen5.badge_mature', '💼 Prime Entrepreneur (36-55) • Full Credit Eligibility') : '💼 Prime Entrepreneur (36-55) • Full Credit Eligibility';
   } else {
     badge.className = 'form-badge-pill';
@@ -1620,31 +1630,56 @@ function setProfStep(step) {
 window.setProfStep = setProfStep;
 
 async function saveUserProfileDetails(showAlert = true) {
-  currentProfile.name = document.getElementById('profName')?.value.trim() || currentProfile.name || '';
-  currentProfile.phone = document.getElementById('profPhone')?.value.trim() || currentProfile.phone || '';
-  currentProfile.email = document.getElementById('profEmail')?.value || currentProfile.email || '';
-  currentProfile.age = parseInt(document.getElementById('profAge')?.value) || currentProfile.age || null;
-  currentProfile.gender = document.getElementById('profGender')?.value || 'Male';
+  const nameVal = document.getElementById('profName')?.value.trim();
+  if (nameVal) currentProfile.name = nameVal;
+
+  const phoneVal = document.getElementById('profPhone')?.value.trim();
+  if (phoneVal) currentProfile.phone = phoneVal;
+
+  const emailVal = document.getElementById('profEmail')?.value.trim();
+  if (emailVal) currentProfile.email = emailVal;
+
+  const ageVal = parseInt(document.getElementById('profAge')?.value);
+  if (!isNaN(ageVal) && ageVal > 0) currentProfile.age = ageVal;
+
+  const genVal = document.getElementById('profGender')?.value;
+  if (genVal) currentProfile.gender = genVal;
   
-  const disabilityVal = document.getElementById('profDisability')?.value || 'No';
-  currentProfile.hasDisability = disabilityVal === 'Yes';
-  currentProfile.disabilityType = currentProfile.hasDisability ? (document.getElementById('profDisabilityType')?.value || 'Locomotor / Physical') : 'None';
-  currentProfile.disabilityPercentage = currentProfile.hasDisability ? (document.getElementById('profDisabilityPercent')?.value || '40% - 70%') : 'None';
-  currentProfile.hasUdidCard = currentProfile.hasDisability && document.getElementById('profHasUdid')?.value === 'Yes';
-  currentProfile.category = document.getElementById('profCategory')?.value || 'OBC';
-  currentProfile.locationType = document.getElementById('profLocationType')?.value || 'Rural';
-  currentProfile.annualIncome = parseInt(document.getElementById('profIncome')?.value) || 240000;
-  currentProfile.neededInvestment = parseInt(document.getElementById('profInvestment')?.value) || 500000;
-  currentProfile.businessType = document.getElementById('profBusiness')?.value || 'Food Business';
-  currentProfile.experienceYears = parseInt(document.getElementById('profExperience')?.value) || 2;
-  currentProfile.education = document.getElementById('profEducation')?.value || '8th Pass or Above';
+  const disabilityVal = document.getElementById('profDisability')?.value;
+  if (disabilityVal) {
+    currentProfile.hasDisability = disabilityVal === 'Yes';
+    currentProfile.disabilityType = currentProfile.hasDisability ? (document.getElementById('profDisabilityType')?.value || currentProfile.disabilityType || 'Locomotor / Physical') : 'None';
+    currentProfile.disabilityPercentage = currentProfile.hasDisability ? (document.getElementById('profDisabilityPercent')?.value || currentProfile.disabilityPercentage || '40% - 70%') : 'None';
+    currentProfile.hasUdidCard = currentProfile.hasDisability && document.getElementById('profHasUdid')?.value === 'Yes';
+  }
+  
+  const catVal = document.getElementById('profCategory')?.value;
+  if (catVal) currentProfile.category = catVal;
+
+  const locVal = document.getElementById('profLocationType')?.value;
+  if (locVal) currentProfile.locationType = locVal;
+
+  const incVal = parseInt(document.getElementById('profIncome')?.value);
+  if (!isNaN(incVal) && incVal > 0) currentProfile.annualIncome = incVal;
+
+  const invVal = parseInt(document.getElementById('profInvestment')?.value);
+  if (!isNaN(invVal) && invVal > 0) currentProfile.neededInvestment = invVal;
+
+  const bizVal = document.getElementById('profBusiness')?.value;
+  if (bizVal) currentProfile.businessType = bizVal;
+
+  const expVal = parseInt(document.getElementById('profExperience')?.value);
+  if (!isNaN(expVal)) currentProfile.experienceYears = expVal;
+
+  const eduVal = document.getElementById('profEducation')?.value;
+  if (eduVal) currentProfile.education = eduVal;
 
   try {
     localStorage.setItem('udyam_user_profile', JSON.stringify(currentProfile));
   } catch (e) {}
 
   // Update user avatar initials on Screen 3
-  const initials = currentProfile.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'RK';
+  const initials = currentProfile.name ? currentProfile.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'US';
   document.querySelectorAll('.user-avatar').forEach(el => el.innerText = initials);
 
   // Persist / Sync profile to MongoDB database backend
@@ -1656,7 +1691,7 @@ async function saveUserProfileDetails(showAlert = true) {
     });
     const data = await res.json();
     if (data.success) {
-      logTerminal(`[POST /api/users/profile] Profile details saved to MongoDB for ${currentProfile.name} (Phone: ${currentProfile.phone}, Email: ${currentProfile.email || 'N/A'})`);
+      logTerminal(`[POST /api/users/profile] Profile details saved to MongoDB for ${currentProfile.name || 'User'} (Phone: ${currentProfile.phone || 'N/A'}, Email: ${currentProfile.email || 'N/A'})`);
     }
   } catch (err) {
     console.warn('Backend MongoDB sync error, data retained in local storage:', err);
@@ -1664,54 +1699,19 @@ async function saveUserProfileDetails(showAlert = true) {
 
   if (showAlert) {
     const contactInfo = currentProfile.phone ? `📱 ${currentProfile.phone}` : (currentProfile.email ? `✉️ ${currentProfile.email}` : '');
-    showCustomToast(`✅ Profile Details Saved to MongoDB! (${currentProfile.name} • ${contactInfo})`);
+    showCustomToast(`✅ Profile Details Saved to MongoDB! (${currentProfile.name || 'User'} ${contactInfo ? '• ' + contactInfo : ''})`);
   }
 }
 window.saveUserProfileDetails = saveUserProfileDetails;
 
 async function loadSavedUserProfile() {
+  // Do not autofill form fields automatically so that form starts completely blank
   try {
     const saved = localStorage.getItem('udyam_user_profile');
     if (saved) {
       const data = JSON.parse(saved);
-      Object.assign(currentProfile, data);
-
-      if (document.getElementById('profName') && data.name) document.getElementById('profName').value = data.name;
-      if (document.getElementById('profPhone') && data.phone) document.getElementById('profPhone').value = data.phone;
-      if (document.getElementById('profEmail') && data.email) document.getElementById('profEmail').value = data.email;
-      if (document.getElementById('profAge') && data.age) document.getElementById('profAge').value = data.age;
-      if (document.getElementById('profGender') && data.gender) document.getElementById('profGender').value = data.gender;
-      if (document.getElementById('profCategory') && data.category) document.getElementById('profCategory').value = data.category;
-      if (document.getElementById('profLocationType') && data.locationType) document.getElementById('profLocationType').value = data.locationType;
-      if (document.getElementById('profIncome') && data.annualIncome) document.getElementById('profIncome').value = data.annualIncome;
-      if (document.getElementById('profInvestment') && data.neededInvestment) document.getElementById('profInvestment').value = data.neededInvestment;
-      if (document.getElementById('profBusiness') && data.businessType) document.getElementById('profBusiness').value = data.businessType;
-      if (document.getElementById('profEducation') && data.education) document.getElementById('profEducation').value = data.education;
-
-      if (data.hasDisability && document.getElementById('profDisability')) {
-        document.getElementById('profDisability').value = 'Yes';
-        if (typeof toggleDisabilityFields === 'function') toggleDisabilityFields();
-        if (document.getElementById('profDisabilityType') && data.disabilityType) document.getElementById('profDisabilityType').value = data.disabilityType;
-        if (document.getElementById('profDisabilityPercent') && data.disabilityPercentage) document.getElementById('profDisabilityPercent').value = data.disabilityPercentage;
-        if (document.getElementById('profHasUdid')) document.getElementById('profHasUdid').value = data.hasUdidCard ? 'Yes' : 'No';
-      }
-
-      if (typeof updateAgeCategoryBadge === 'function') updateAgeCategoryBadge();
-    }
-  } catch (e) {}
-
-  // Fetch from MongoDB backend on initialization
-  try {
-    const queryParam = currentProfile.phone || currentProfile.email || 'usr_demo';
-    const res = await fetch(`${API_BASE}/users/profile?userId=${encodeURIComponent(queryParam)}`);
-    const data = await res.json();
-    if (data.success && data.user) {
-      if (!localStorage.getItem('udyam_user_profile')) {
-        Object.assign(currentProfile, data.user);
-        if (document.getElementById('profName') && data.user.name) document.getElementById('profName').value = data.user.name;
-        if (document.getElementById('profPhone') && data.user.phone) document.getElementById('profPhone').value = data.user.phone;
-        if (document.getElementById('profEmail') && data.user.email) document.getElementById('profEmail').value = data.user.email;
-        if (document.getElementById('profAge') && data.user.age) document.getElementById('profAge').value = data.user.age;
+      if (data && typeof data === 'object') {
+        Object.assign(currentProfile, data);
       }
     }
   } catch (e) {}

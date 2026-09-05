@@ -137,10 +137,12 @@ router.post('/match', async (req, res) => {
   try {
     const {
       age = 28,
-      category = 'OBC',
-      annualIncome = 240000,
+      category = 'General',
+      annualIncome = 0,
+      neededInvestment = 0,
+      investmentAmount = 0,
       businessType = 'Food Business',
-      experienceYears = 2,
+      experienceYears = 0,
       gender = 'Male',
       hasDisability = false,
       disabilityType = 'None',
@@ -152,6 +154,7 @@ router.post('/match', async (req, res) => {
     } = req.body;
 
     const lang = (language || req.query.lang || req.headers['x-language'] || '').toLowerCase();
+    const finalInvestment = Number(neededInvestment || investmentAmount || 0);
 
     let allSchemes = await dataStore.getSchemes();
     const matches = matchSchemesForUser(
@@ -159,6 +162,7 @@ router.post('/match', async (req, res) => {
         age: Number(age),
         category,
         annualIncome: Number(annualIncome),
+        neededInvestment: finalInvestment,
         businessType,
         experienceYears: Number(experienceYears),
         gender,
@@ -187,6 +191,7 @@ router.post('/match', async (req, res) => {
         age: Number(age),
         category,
         annualIncome: Number(annualIncome),
+        neededInvestment: finalInvestment,
         businessType,
         experienceYears: Number(experienceYears),
         gender,

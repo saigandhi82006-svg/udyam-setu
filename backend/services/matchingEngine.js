@@ -1,15 +1,19 @@
 /**
  * Udyam Setu - Deterministic Rule-Based Scheme Matching Engine
  * SIH Problem Statement ID: 92
+ * 
+ * Strict & exact demographic, sectoral, financial, and age-based matching.
  */
 
 function matchSchemesForUser(userProfile, allSchemes) {
   const {
     age = 28,
-    category = 'OBC',
-    annualIncome = 240000,
+    category = 'General',
+    annualIncome = 0,
+    neededInvestment = 0,
+    investmentAmount = 0,
     businessType = 'Food Business',
-    experienceYears = 2,
+    experienceYears = 0,
     gender = 'Male',
     hasDisability = false,
     disabilityType = 'None',
@@ -19,13 +23,21 @@ function matchSchemesForUser(userProfile, allSchemes) {
     education = '8th Pass or Above'
   } = userProfile;
 
+  const targetInvestment = Number(neededInvestment || investmentAmount || 0);
+  const userAge = Number(age) || 0;
+  const userIncome = Number(annualIncome) || 0;
+
   const isDivyangjan = hasDisability === true || 
     hasDisability === 'Yes' || 
     String(hasDisability).toLowerCase() === 'true' || 
     category === 'Differently Abled (Divyangjan)' ||
-    (disabilityType && disabilityType !== 'None');
+    (disabilityType && disabilityType !== 'None' && disabilityType.trim() !== '');
 
-  const isWomen = gender === 'Female' || category === 'Women Entrepreneur';
+  const isWomen = (gender && gender.toLowerCase() === 'female') || 
+    (category && category.toLowerCase().includes('women'));
+
+  const isSC_ST = category === 'SC' || category === 'ST';
+  const isMinority = category === 'Minority';
   const isRural = (locationType || 'Rural').toLowerCase().includes('rural');
 
   const results = [];
@@ -34,150 +46,146 @@ function matchSchemesForUser(userProfile, allSchemes) {
     const reasons = [];
     const bonuses = [];
 
-    // --- Hard Constraint 1: Age Check ---
+    // --- Hard Rule 1: Age Check ---
     const minAge = scheme.minAge || 18;
-    const maxAge = scheme.maxAge || 70;
-    const isAgeEligible = age >= minAge && age <= maxAge;
-    if (!isAgeEligible) {
-      continue; // Disqualified by hard rule
-    }
-    reasons.push(`Meets age criteria (${minAge}-${maxAge} yrs, applicant is ${age} yrs)`);
-
-    // --- Hard Constraint 2: Income Ceiling Check ---
-    const isIncomeEligible = !scheme.maxIncome || scheme.maxIncome === 0 || annualIncome <= scheme.maxIncome;
-    if (!isIncomeEligible) {
-      continue; // Disqualified by income cap
-    }
-    if (scheme.maxIncome > 0) {
-      reasons.push(`Income ₹${annualIncome.toLocaleString('en-IN')} is within maximum limit of ₹${scheme.maxIncome.toLocaleString('en-IN')}`);
-    } else {
-      reasons.push('No restrictive income ceiling');
+    const maxAge = scheme.maxAge || 75;
+    if (userAge > 0) {
+      if (userAge < minAge || userAge > maxAge) {
+        continue; // Disqualified by strict age criteria
+      }
+      reasons.push(`Meets required age criteria (${minAge}-${maxAge} yrs, applicant is ${userAge} yrs)`);
     }
 
-    // --- Hard Constraint 3: Social Category & Disability Match ---
+    // --- Hard Rule 2: Income Ceiling Check ---
+    if (scheme.maxIncome && scheme.maxIncome > 0 && userIncome > 0) {
+      if (userIncome > scheme.maxIncome) {
+        continue; // Disqualified by income ceiling
+      }
+      reasons.push(`Income ₹${userIncome.toLocaleString('en-IN')} is within ceiling of ₹${scheme.maxIncome.toLocaleString('en-IN')}`);
+    }
+
+    // --- Hard Rule 3: Affirmative Demographics & Social Category Check ---
     const eligibleCats = scheme.eligibleCategories || ['All'];
-    const isCategoryEligible =
-      eligibleCats.includes('All') ||
+    const isUniversalCategory = eligibleCats.includes('All');
+
+    // Strict exclusive checks:
+    // A. Disability-only scheme (e.g. NHFDC-DSY)
+    const isDivyangOnlyScheme = eligibleCats.length === 1 && 
+      (eligibleCats[0].toLowerCase().includes('divyang') || eligibleCats[0].toLowerCase().includes('differently'));
+    if (isDivyangOnlyScheme && !isDivyangjan) {
+      continue; // Exclude non-disabled applicants from 100% Divyangjan schemes
+    }
+
+    // B. Women-only scheme (e.g. Mahila Coir Yojana MCY)
+    const isWomenOnlyScheme = eligibleCats.length === 1 && 
+      eligibleCats[0].toLowerCase().includes('women');
+    if (isWomenOnlyScheme && !isWomen) {
+      continue; // Exclude male applicants from women-only schemes
+    }
+
+    // C. SC/ST and Women only scheme (e.g. Stand-Up India)
+    if (scheme.shortCode === 'STAND-UP' && !isWomen && !isSC_ST) {
+      continue; // Stand-Up India is strictly for SC/ST or Women
+    }
+
+    // Category eligibility test:
+    const isCategoryEligible = isUniversalCategory ||
       eligibleCats.includes(category) ||
       (isWomen && eligibleCats.some(c => c.toLowerCase().includes('women'))) ||
       (isDivyangjan && eligibleCats.some(c => c.toLowerCase().includes('differently') || c.toLowerCase().includes('divyang'))) ||
-      (eligibleCats.includes('Marginalized') && ['SC', 'ST', 'OBC'].includes(category));
+      (isSC_ST && eligibleCats.some(c => c === 'SC' || c === 'ST' || c === 'Marginalized')) ||
+      (isMinority && eligibleCats.some(c => c.toLowerCase().includes('minority')));
 
     if (!isCategoryEligible) {
-      continue; // Disqualified by category restriction
+      continue; // Disqualified by social category
     }
-    reasons.push(`Eligible for ${category} category`);
+    reasons.push(`Eligible under ${category || 'General'} social category`);
 
-    // --- Hard Constraint 4: Business Type Match ---
+    // --- Hard Rule 4: Strict Business Sector Match ---
     const eligibleBusinesses = scheme.eligibleBusinessTypes || ['All'];
-    const isExactSectorMatch = eligibleBusinesses.includes(businessType);
-    const isPrimaryMatch = scheme.primaryBusinessType === businessType;
-    const isAllMatch = eligibleBusinesses.includes('All');
+    let isBusinessEligible = false;
 
-    const isBusinessEligible =
-      isExactSectorMatch ||
-      isPrimaryMatch ||
-      isAllMatch ||
-      (businessType.includes('Food') && eligibleBusinesses.some(b => b.includes('Food'))) ||
-      (businessType.includes('Retail') && eligibleBusinesses.some(b => b.includes('Retail') || b.includes('Kirana'))) ||
-      (businessType.includes('Street') && eligibleBusinesses.some(b => b.includes('Street') || b.includes('Vending'))) ||
-      (businessType.includes('Handicraft') && eligibleBusinesses.some(b => b.includes('Handicraft') || b.includes('Handloom'))) ||
-      (businessType.includes('Agriculture') && eligibleBusinesses.some(b => b.includes('Agriculture') || b.includes('Allied'))) ||
-      (businessType.includes('Textile') && eligibleBusinesses.some(b => b.includes('Textile') || b.includes('Garment'))) ||
-      (businessType.includes('Fabrication') && eligibleBusinesses.some(b => b.includes('Fabrication') || b.includes('Manufacturing'))) ||
-      (businessType.includes('Services') && eligibleBusinesses.some(b => b.includes('Service') || b.includes('Repair')));
+    // Special case: Universal disability empowerment scheme applies across all micro sectors
+    if (scheme.shortCode === 'NHFDC-DSY' && isDivyangjan) {
+      isBusinessEligible = true;
+    } else if (businessType) {
+      const bTypeLower = businessType.toLowerCase().trim();
+      isBusinessEligible = eligibleBusinesses.some(eb => {
+        const ebLower = eb.toLowerCase().trim();
+        if (ebLower === bTypeLower) return true;
+        if (bTypeLower.includes('food') && ebLower.includes('food')) return true;
+        if (bTypeLower.includes('retail') && (ebLower.includes('retail') || ebLower.includes('kirana'))) return true;
+        if (bTypeLower.includes('street') && (ebLower.includes('street') || ebLower.includes('vending'))) return true;
+        if (bTypeLower.includes('handicraft') && (ebLower.includes('handicraft') || ebLower.includes('handloom') || ebLower.includes('artisan'))) return true;
+        if (bTypeLower.includes('agriculture') && (ebLower.includes('agriculture') || ebLower.includes('allied') || ebLower.includes('farmer'))) return true;
+        if (bTypeLower.includes('textile') && (ebLower.includes('textile') || ebLower.includes('garment') || ebLower.includes('apparel'))) return true;
+        if (bTypeLower.includes('manufacturing') && (ebLower.includes('manufacturing') || ebLower.includes('fabrication') || ebLower.includes('industry'))) return true;
+        if (bTypeLower.includes('service') && (ebLower.includes('service') || ebLower.includes('repair'))) return true;
+        if (bTypeLower.includes('education') && (ebLower.includes('education') || ebLower.includes('student'))) return true;
+        return false;
+      });
+    } else {
+      isBusinessEligible = true;
+    }
 
     if (!isBusinessEligible) {
-      continue; // Disqualified by business domain
+      continue; // Strictly disqualified: business sector does not match scheme domain
     }
-    reasons.push(`Eligible for ${businessType} activity`);
+    reasons.push(`Tailored specifically for ${businessType} enterprise`);
 
-    // --- Dynamic Match Score Computation (Normalized 60 - 98%) ---
-    let score = 65; // Base score for clearing all hard constraints
+    // --- Hard Rule 5: Investment / Loan Amount Compatibility ---
+    if (targetInvestment > 0) {
+      // If scheme requires minimum investment (e.g. ₹10L for Stand-Up, ₹10L for AIF, ₹5L for CGTMSE)
+      if (scheme.minGrantLoanAmount && targetInvestment < scheme.minGrantLoanAmount) {
+        continue; // Disqualified: requested loan is below scheme's minimum threshold
+      }
 
-    // 1. Differently Abled / Divyangjan High-Priority Boost
+      // If scheme has a maximum grant/loan cap that is far too low for the project
+      // (e.g. asking ₹20 Lakhs for a ₹50,000 street vendor micro-loan)
+      if (scheme.maxGrantLoanAmount && targetInvestment > (scheme.maxGrantLoanAmount * 2.5)) {
+        continue; // Disqualified: requested loan exceeds scheme maximum cap
+      }
+      reasons.push(`Loan requirement ₹${targetInvestment.toLocaleString('en-IN')} matches scheme lending limits`);
+    }
+
+    // --- Dynamic Match Score Computation (75% - 98%) ---
+    let score = 75; // Base score for fulfilling all hard requirements
+
+    const isPrimaryExact = scheme.primaryBusinessType && 
+      scheme.primaryBusinessType.toLowerCase().trim() === businessType.toLowerCase().trim();
+    if (isPrimaryExact) {
+      score += 10;
+      bonuses.push(`Primary designated flagship scheme for ${businessType}`);
+    }
+
     if (isDivyangjan) {
-      const isDirectDivyangScheme = scheme.targetSector?.toLowerCase().includes('differently') || 
-        scheme.targetSector?.toLowerCase().includes('divyang') ||
-        scheme.shortCode === 'NHFDC-DSY';
-
-      if (isDirectDivyangScheme) {
-        score += 25;
-        bonuses.push('100% Dedicated Divyangjan Swavalamban Empowerment Priority');
-        reasons.push(`Qualified under Divyangjan Category (${disabilityType !== 'None' ? disabilityType : 'PwD'}, ${disabilityPercentage} benchmark disability)`);
+      if (scheme.shortCode === 'NHFDC-DSY') {
+        score += 15;
+        bonuses.push('100% Dedicated Divyangjan Swavalamban Priority Loan');
       } else if (scheme.shortCode === 'PMEGP' || scheme.shortCode === 'PMEGP-SERVICE') {
-        score += 18;
-        bonuses.push('PMEGP Special Category 35% Capital Subsidy for Persons with Disabilities');
-        reasons.push('Eligible for highest 35% non-repayable government capital grant as Divyangjan');
-      } else {
-        score += 8;
-        bonuses.push('Special priority consideration under Divyangjan financial inclusion');
+        score += 10;
+        bonuses.push('Special 35% Capital Subsidy for Divyangjan Entrepreneurs');
       }
     }
 
-    // 2. Age Bracket & Youth Priority
-    if (age >= 18 && age <= 35) {
-      score += 6;
-      bonuses.push('Youth Entrepreneur (18-35) high employability priority');
-    } else if (age >= 50) {
-      score += 4;
-      bonuses.push('Experienced mature entrepreneur demographic boost');
-    }
-
-    // 3. Women Entrepreneurship Boost
     if (isWomen) {
-      score += 10;
-      bonuses.push('Women Entrepreneur special concession & interest rebate');
-      reasons.push('Eligible for priority women quotas across credit-guarantee schemes');
+      score += 6;
+      bonuses.push('Women Entrepreneur priority quota & interest subvention');
     }
 
-    // 4. Rural Area Higher Subsidy Benefit
-    if (isRural && (scheme.subsidyPercentage >= 25 || scheme.shortCode?.startsWith('PMEGP'))) {
-      score += 8;
-      bonuses.push('Rural enterprise location qualifies for maximum 35% capital subsidy');
-      reasons.push('Rural jurisdiction grants higher subsidy tier than urban centers');
+    if (isRural && (scheme.subsidyPercentage >= 25 || scheme.shortCode?.startsWith('PMEGP') || scheme.shortCode === 'PMFME')) {
+      score += 5;
+      bonuses.push('Rural location eligible for higher capital subsidy');
     }
 
-    // 5. Specific category prioritization bonus
-    if (!eligibleCats.includes('All')) {
-      if (eligibleCats.includes(category)) {
-        score += 8;
-        bonuses.push(`Special demographic priority for ${category}`);
-      }
-    } else {
+    if (targetInvestment > 0 && scheme.maxGrantLoanAmount && targetInvestment <= scheme.maxGrantLoanAmount) {
       score += 4;
     }
 
-    // 6. Business Type Specificity Bonus (Direct Sector Alignment)
-    if (isPrimaryMatch) {
-      score += 15;
-      bonuses.push(`Primary designated scheme for ${businessType}`);
-      reasons.push(`Tailored specifically for ${businessType} enterprise development`);
-    } else if (isExactSectorMatch) {
-      score += 10;
-      bonuses.push(`Direct sector match for ${businessType}`);
-    } else {
-      score += 3;
-    }
+    // Clamp score
+    score = Math.min(98, Math.max(70, score));
 
-    // 7. Low-Income / Marginalized Empowerment Bonus
-    if (annualIncome <= 300000) {
-      score += 5;
-      bonuses.push('Low-income priority bracket (Subsidies favored)');
-    }
-
-    // 8. Experience validation bonus
-    if (experienceYears >= (scheme.minExperienceYears || 0)) {
-      if (experienceYears >= 2) {
-        score += 5;
-        bonuses.push(`${experienceYears} years experience provides creditworthiness boost`);
-      }
-    }
-
-    // Normalization clamp between 60% and 98%
-    score = Math.min(98, Math.max(60, score));
-
-    // Dynamic tag assignment
+    // Dynamic tag
     let highlightTag = 'Eligible Scheme';
     if (isDivyangjan && (scheme.shortCode === 'NHFDC-DSY' || scheme.shortCode === 'PMEGP')) {
       highlightTag = 'Divyangjan Priority (35% Subsidy)';
@@ -201,13 +209,13 @@ function matchSchemesForUser(userProfile, allSchemes) {
 
   // Sort descending by matchPercentage, prioritizing schemes whose primaryBusinessType matches user.businessType, then by maxGrantLoanAmount
   results.sort((a, b) => {
-    if (b.matchPercentage !== a.matchPercentage) {
-      return b.matchPercentage - a.matchPercentage;
-    }
-    const aPrimary = a.scheme.primaryBusinessType === businessType ? 1 : 0;
-    const bPrimary = b.scheme.primaryBusinessType === businessType ? 1 : 0;
+    const aPrimary = (a.scheme.primaryBusinessType && a.scheme.primaryBusinessType.toLowerCase() === businessType.toLowerCase()) ? 1 : 0;
+    const bPrimary = (b.scheme.primaryBusinessType && b.scheme.primaryBusinessType.toLowerCase() === businessType.toLowerCase()) ? 1 : 0;
     if (bPrimary !== aPrimary) {
       return bPrimary - aPrimary;
+    }
+    if (b.matchPercentage !== a.matchPercentage) {
+      return b.matchPercentage - a.matchPercentage;
     }
     return (b.scheme.maxGrantLoanAmount || 0) - (a.scheme.maxGrantLoanAmount || 0);
   });

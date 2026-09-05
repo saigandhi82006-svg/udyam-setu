@@ -435,15 +435,11 @@ async function seedData() {
   console.log('🌱 Seeding Udyam Setu Database with realistic Indian government schemes...');
   await connectDB();
 
-  // Combine baseline schemes with multi-sector schemes catalog, deduplicating by shortCode
-  const existingCodes = new Set(SEED_SCHEMES.map(s => s.shortCode || s.schemeName.toLowerCase()));
-  const newSchemes = COMPREHENSIVE_GOVT_SCHEMES.filter(s => 
-    !existingCodes.has(s.shortCode) && !existingCodes.has(s.schemeName.toLowerCase())
-  ).map((s, idx) => ({
+  // Use the canonical 21-schemes catalog with full 7-language support
+  const allSchemesCombined = COMPREHENSIVE_GOVT_SCHEMES.map((s, idx) => ({
     _id: `65e0000000000000000000${(20 + idx).toString()}`,
     ...s
   }));
-  const allSchemesCombined = [...SEED_SCHEMES, ...newSchemes];
 
   // Populate In-Memory Store always
   dataStore.memoryDB.schemes = [...allSchemesCombined];
