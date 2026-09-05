@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/scheme.dart';
-<<<<<<< HEAD
-=======
 import 'my_applications_screen.dart';
->>>>>>> 454554d037efbae304b90c5e3e6275c8429223a2
 import 'nearby_partners_screen.dart';
 
 class DocumentChecklistScreen extends StatefulWidget {
@@ -326,11 +323,7 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
             ),
           ),
 
-<<<<<<< HEAD
-          // Always Visible Bottom Bar Area: Nearby Partners Option + Done Button
-=======
           // Bottom Button: Upload Document / Submit Application & Find Nearby Partner
->>>>>>> 454554d037efbae304b90c5e3e6275c8429223a2
           Container(
             padding: const EdgeInsets.all(14),
             decoration: const BoxDecoration(
@@ -341,67 +334,6 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-<<<<<<< HEAD
-                  // Prominent Always Visible Nearby Partners Option (📍 Nearby Partners ->)
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const NearbyPartnersScreen()),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      margin: const EdgeInsets.only(bottom: 10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.location_on_rounded, size: 18, color: AppTheme.primaryGreen),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              'Nearby Partners',
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.darkText,
-                              ),
-                            ),
-                          ),
-                          Icon(Icons.arrow_forward_ios_rounded, size: 13, color: Color(0xFF94A3B8)),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Existing Done Button
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const NearbyPartnersScreen()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(44),
-                      backgroundColor: AppTheme.primaryGreen,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.check, size: 18, color: Colors.white),
-                        SizedBox(width: 6),
-                        Text(
-                          'Done',
-                          style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
-                        ),
-                      ],
-=======
                   ElevatedButton(
                     onPressed: _isSubmitting ? null : _submitApplication,
                     child: _isSubmitting
@@ -420,7 +352,6 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
                       },
                       icon: const Icon(Icons.location_on_outlined, size: 18),
                       label: const Text('Find Nearby Partner'),
->>>>>>> 454554d037efbae304b90c5e3e6275c8429223a2
                     ),
                   ),
                 ],
