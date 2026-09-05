@@ -91,53 +91,99 @@ window.addEventListener('udyam:languageChanged', (event) => {
   if (typeof loadMyApplications === 'function') loadMyApplications();
 });
 
-// Screen Switcher
+// Screen Switcher & Universal Navigation History Stack
+let navigationHistory = [3]; // Rooted at Home Dashboard
 let currentActiveScreen = 1;
-let previousScreenBeforeDocuments = 3;
 
-function handleBackFromDocuments() {
-  showScreen(previousScreenBeforeDocuments || 3);
-}
-window.handleBackFromDocuments = handleBackFromDocuments;
+function showScreen(screenNumber, pushHistory = true) {
+  const targetScreen = parseInt(screenNumber);
+  if (isNaN(targetScreen) || targetScreen < 1 || targetScreen > 12) return;
 
-function showScreen(screenNumber) {
-  if (screenNumber === 10 && currentActiveScreen !== 10) {
-    previousScreenBeforeDocuments = currentActiveScreen;
+  if (pushHistory) {
+    if (targetScreen === 3) {
+      // Returning to Home Dashboard resets the navigation stack to Home
+      navigationHistory = [3];
+    } else {
+      if (navigationHistory.length === 0 || navigationHistory[0] === 1 || navigationHistory[0] === 2) {
+        navigationHistory = [3];
+      }
+      if (navigationHistory[navigationHistory.length - 1] !== targetScreen) {
+        navigationHistory.push(targetScreen);
+      }
+    }
   }
-  currentActiveScreen = screenNumber;
+
+  currentActiveScreen = targetScreen;
 
   for (let i = 1; i <= 12; i++) {
     const s = document.getElementById(`screen-${i}`);
     if (s) s.classList.remove('active');
   }
-  const target = document.getElementById(`screen-${screenNumber}`);
+  const target = document.getElementById(`screen-${targetScreen}`);
   if (target) {
     target.classList.add('active');
     target.scrollTop = 0;
   }
 
-  // Update Left Navigation
+  // Update Left Navigation & Bottom Navigation Tabs
   const stepBtns = document.querySelectorAll('.step-btn');
   stepBtns.forEach((btn, idx) => {
-    if (idx + 1 === screenNumber) {
+    if (idx + 1 === targetScreen) {
       btn.classList.add('active');
     } else {
       btn.classList.remove('active');
     }
   });
 
-  if (screenNumber === 5) {
+  const navTabs = document.querySelectorAll('.nav-tab');
+  navTabs.forEach(tab => tab.classList.remove('active'));
+  if (targetScreen === 3) {
+    document.querySelectorAll('.nav-tab:nth-child(1)').forEach(t => t.classList.add('active'));
+  } else if (targetScreen === 5) {
+    document.querySelectorAll('.nav-tab:nth-child(2)').forEach(t => t.classList.add('active'));
+  }
+
+  if (targetScreen === 5) {
     if (typeof updateAgeCategoryBadge === 'function') updateAgeCategoryBadge();
   }
 
-  if (screenNumber === 9) {
+  if (targetScreen === 9) {
     requestUserLiveLocation();
   }
 
-  if (screenNumber === 11) {
+  if (targetScreen === 11) {
     loadMyApplications();
   }
 }
+window.showScreen = showScreen;
+
+function navigateBack() {
+  if (navigationHistory && navigationHistory.length > 1) {
+    navigationHistory.pop(); // Remove active screen
+    const previousScreen = navigationHistory[navigationHistory.length - 1] || 3;
+    showScreen(previousScreen, false);
+  } else {
+    // If only Home exists in stack or history is empty, stay/return to Home
+    navigationHistory = [3];
+    showScreen(3, false);
+  }
+}
+window.navigateBack = navigateBack;
+
+function handleBackFromDocuments() {
+  navigateBack();
+}
+window.handleBackFromDocuments = handleBackFromDocuments;
+
+function handleBackFromScreen6() {
+  navigateBack();
+}
+window.handleBackFromScreen6 = handleBackFromScreen6;
+
+function handleBackFromDetails() {
+  navigateBack();
+}
+window.handleBackFromDetails = handleBackFromDetails;
 
 function switchView(view) {
   const panel = document.getElementById('apiPanel');
