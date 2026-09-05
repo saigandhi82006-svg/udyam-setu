@@ -2,19 +2,21 @@ const express = require('express');
 const router = express.Router();
 const dataStore = require('../services/dataStore');
 
-// GET /api/partners/nearby?lat=X&lng=Y&radius=25&type=Bank
+// GET /api/partners/nearby?lat=X&lng=Y&radius=25&type=Bank&locationName=Perkipalem
 router.get('/nearby', async (req, res) => {
   try {
-    const lat = parseFloat(req.query.lat) || 17.3850; // Default to central coordinates (Hyderabad)
+    const lat = parseFloat(req.query.lat) || 17.3850; // Default to central coordinates
     const lng = parseFloat(req.query.lng) || 78.4867;
     const radius = parseFloat(req.query.radius) || 25;
     const type = req.query.type || null;
+    const locationName = req.query.locationName || req.query.label || null;
 
-    const partners = await dataStore.getNearbyPartners(lat, lng, radius, type);
+    const partners = await dataStore.getNearbyPartners(lat, lng, radius, type, locationName);
 
     return res.json({
       success: true,
       userCoordinates: { lat, lng },
+      locationName: locationName || 'Local Area',
       radiusKm: radius,
       filterType: type || 'All',
       count: partners.length,

@@ -3304,5 +3304,65 @@ body {
   }
 }
 
+.radius-chip {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid #CBD5E1;
+  background: white;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
 
+.radius-chip:hover {
+  background: #F1F5F9;
+  border-color: #94A3B8;
+}
 
+.radius-chip.active {
+  background: var(--primary-green, #16A34A);
+  color: white;
+  border-color: var(--primary-green, #16A34A);
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.25);
+}
+
+.empty-partner-box {
+  text-align: center;
+  padding: 28px 16px;
+  background: white;
+  border-radius: 14px;
+  border: 1px dashed #CBD5E1;
+  margin: 10px 0;
+}
+
+.empty-partner-box .icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.empty-partner-box h5 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1E293B;
+  margin-bottom: 6px;
+}
+
+.empty-partner-box p {
+  font-size: 12px;
+  color: #64748B;
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+
+.empty-partner-box .expand-btn {
+  background: #F0FDF4;
+  color: #16A34A;
+  border: 1px solid #86EFAC;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}

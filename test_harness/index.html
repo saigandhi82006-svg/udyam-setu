@@ -819,8 +819,20 @@
             <div class="gmaps-filter-bar">
               <button class="gmaps-chip active" onclick="filterGMap('All', this)">All Partners</button>
               <button class="gmaps-chip" onclick="filterGMap('Bank', this)">🏦 Banks</button>
-              <button class="gmaps-chip" onclick="filterGMap('CSC', this)">💻 CSC</button>
-              <button class="gmaps-chip" onclick="filterGMap('KVK', this)">🔬 KVK</button>
+              <button class="gmaps-chip" onclick="filterGMap('CSC', this)">🏛️ Sachivalayam / CSC</button>
+              <button class="gmaps-chip" onclick="filterGMap('KVK', this)">🌾 Agri Hub (RBK)</button>
+              <button class="gmaps-chip" onclick="filterGMap('DIC', this)">🏢 DIC Cell</button>
+            </div>
+
+            <!-- Search Radius Filter Selector -->
+            <div class="radius-filter-bar" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; background: #F8FAFC; padding: 6px 10px; border-radius: 10px; border: 1px solid #E2E8F0;">
+              <span style="font-size: 11px; font-weight: 700; color: #475569;">📏 Radius:</span>
+              <div style="display: flex; gap: 6px;">
+                <button class="radius-chip" id="rad-5" onclick="setSearchRadius(5, this)">5 km</button>
+                <button class="radius-chip active" id="rad-10" onclick="setSearchRadius(10, this)">10 km</button>
+                <button class="radius-chip" id="rad-15" onclick="setSearchRadius(15, this)">15 km</button>
+                <button class="radius-chip" id="rad-25" onclick="setSearchRadius(25, this)">25 km</button>
+              </div>
             </div>
 
             <!-- Interactive Google Maps Container -->

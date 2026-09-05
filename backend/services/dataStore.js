@@ -232,7 +232,7 @@ const dataStore = {
   },
 
   // Partners
-  async getNearbyPartners(lat, lng, radiusKm = 25, typeFilter = null) {
+  async getNearbyPartners(lat, lng, radiusKm = 25, typeFilter = null, locationName = null) {
     if (!isInMemoryFallback()) {
       try {
         const query = {
@@ -246,7 +246,7 @@ const dataStore = {
             }
           }
         };
-        if (typeFilter) query.type = typeFilter;
+        if (typeFilter && typeFilter !== 'All') query.type = typeFilter;
         const dbPartners = await ChannelPartner.find(query);
         if (dbPartners && dbPartners.length > 0) {
           return dbPartners.map(p => {
@@ -280,93 +280,140 @@ const dataStore = {
       .filter(p => p.distanceKm <= radiusKm)
       .sort((a, b) => a.distanceKm - b.distanceKm);
 
-    // If user's live GPS coordinates are outside seed cluster, generate realistic live nearby partners
-    if (nearby.length < 2) {
+    // If user's live GPS coordinates are outside seed cluster, generate realistic live nearby partners for their exact place
+    if (nearby.length < 2 || locationName) {
+      const locStr = (locationName || '').trim();
+      const parts = locStr ? locStr.split(',').map(s => s.trim()) : [];
+      const placeName = parts[0] || 'Local Area';
+      const districtName = parts.length > 1 ? parts[1] : parts[0] || 'Local District';
+      const fullArea = locStr || `${placeName}, ${districtName}`;
+
       const dynamicLivePartners = [
         {
-          _id: 'live_ptn_bank_1',
-          partnerName: 'State Bank of India (MSME Lead Branch)',
+          _id: 'live_ptn_sachivalayam_1',
+          partnerName: `Grama Sachivalayam (Village Secretariat - ${placeName})`,
+          type: 'CSC',
+          address: `Grama Panchayat Complex, Ward #1, ${placeName}, ${districtName}`,
+          city: placeName,
+          state: districtName,
+          location: {
+            type: 'Point',
+            coordinates: [parseFloat(lng) + 0.0022, parseFloat(lat) - 0.0018]
+          },
+          contactPhone: '+91 1902 (Toll Free)',
+          contactPerson: 'Panchayat Secretary / Digital Assistant',
+          servicesOffered: ['Udyam Registration', 'PMEGP Verification', 'PM SVANidhi Application', 'Aadhaar e-KYC', 'Caste & Income Certificates'],
+          rating: 4.9,
+          workingHours: '9:00 AM - 6:00 PM (Mon-Sat)',
+          searchQuery: `Grama Sachivalayam near ${placeName} ${districtName}`
+        },
+        {
+          _id: 'live_ptn_bank_sbi',
+          partnerName: `State Bank of India (${placeName} Branch)`,
           type: 'Bank',
-          address: 'Main Commercial Hub, Near Head Post Office, Local Area',
-          city: 'Your City',
-          state: 'Your State',
+          address: `Main Commercial Street, Near Bus Station, ${placeName}, ${districtName}`,
+          city: placeName,
+          state: districtName,
           location: {
             type: 'Point',
             coordinates: [parseFloat(lng) + 0.0042, parseFloat(lat) + 0.0035]
           },
           contactPhone: '+91 1800 11 2211',
-          contactPerson: 'Lead District Branch Manager',
-          servicesOffered: ['Mudra Loans', 'PMEGP Subsidy Disbursement', 'CGTMSE Guarantees', 'KCC Credit'],
+          contactPerson: 'Lead MSME & Agriculture Credit Officer',
+          servicesOffered: ['Mudra Shishu, Kishore & Tarun', 'PMEGP Subsidy Disbursement', 'CGTMSE Guarantees', 'KCC Crop Loans'],
           rating: 4.8,
-          workingHours: '10:00 AM - 4:30 PM (Mon-Sat)'
+          workingHours: '10:00 AM - 4:30 PM (Mon-Sat)',
+          searchQuery: `State Bank of India near ${placeName} ${districtName}`
         },
         {
-          _id: 'live_ptn_csc_1',
-          partnerName: 'CSC Digital Seva Kendra (Common Service Center)',
+          _id: 'live_ptn_bank_rrb',
+          partnerName: `Chaitanya Godavari Grameena Bank / RRB (${placeName})`,
+          type: 'Bank',
+          address: `Bazaar Center, Near Tehsil Office, ${placeName}, ${districtName}`,
+          city: placeName,
+          state: districtName,
+          location: {
+            type: 'Point',
+            coordinates: [parseFloat(lng) - 0.0035, parseFloat(lat) + 0.0040]
+          },
+          contactPhone: '+91 1800 425 1515',
+          contactPerson: 'Rural Credit & Micro-Finance Manager',
+          servicesOffered: ['Mudra Loans', 'SHG Livelihood Finance', 'PM SVANidhi Street Vendor Credit', 'Artisan Loans'],
+          rating: 4.7,
+          workingHours: '10:00 AM - 4:00 PM (Mon-Sat)',
+          searchQuery: `Grameena Bank near ${placeName} ${districtName}`
+        },
+        {
+          _id: 'live_ptn_bank_union',
+          partnerName: `Union Bank of India (MSME Center - ${placeName})`,
+          type: 'Bank',
+          address: `Station Road, Market Yard, ${placeName}, ${districtName}`,
+          city: placeName,
+          state: districtName,
+          location: {
+            type: 'Point',
+            coordinates: [parseFloat(lng) - 0.0055, parseFloat(lat) - 0.0048]
+          },
+          contactPhone: '+91 1800 22 2244',
+          contactPerson: 'Chief Branch Manager',
+          servicesOffered: ['Stand Up India', 'PMEGP Loans', 'Mudra Tarun Loans', 'Machinery Finance'],
+          rating: 4.6,
+          workingHours: '10:00 AM - 4:30 PM (Mon-Sat)',
+          searchQuery: `Union Bank of India near ${placeName} ${districtName}`
+        },
+        {
+          _id: 'live_ptn_csc_seva',
+          partnerName: `CSC Digital Seva Kendra (${placeName} e-Seva)`,
           type: 'CSC',
-          address: 'Ward Office Road, Digital India e-Seva Center',
-          city: 'Your City',
-          state: 'Your State',
+          address: `Near Post Office, Digital India Center, ${placeName}, ${districtName}`,
+          city: placeName,
+          state: districtName,
           location: {
             type: 'Point',
             coordinates: [parseFloat(lng) + 0.0031, parseFloat(lat) - 0.0028]
           },
           contactPhone: '+91 94401 55667',
-          contactPerson: 'VLE Certified Operator',
-          servicesOffered: ['Udyam Registration', 'PMEGP Online Application', 'PM SVANidhi Verification', 'Aadhaar e-KYC'],
+          contactPerson: 'Certified VLE Entrepreneur',
+          servicesOffered: ['PM Vishwakarma Artisan Registration', 'Udyam Certificate Download', 'DPR File Upload', 'Aadhaar e-KYC'],
           rating: 4.9,
-          workingHours: '9:00 AM - 8:00 PM (All Days)'
+          workingHours: '8:30 AM - 8:30 PM (All Days)',
+          searchQuery: `CSC Digital Seva Kendra near ${placeName} ${districtName}`
         },
         {
-          _id: 'live_ptn_kvk_1',
-          partnerName: 'Krishi Vigyan Kendra (KVK / ICAR Center)',
+          _id: 'live_ptn_rbk_kvk',
+          partnerName: `Rythu Bharosa Kendra (RBK / Agri Hub - ${placeName})`,
           type: 'KVK',
-          address: 'District Agriculture & Technology Campus',
-          city: 'Your City',
-          state: 'Your State',
+          address: `Agriculture Extension Campus, ${placeName}, ${districtName}`,
+          city: placeName,
+          state: districtName,
           location: {
             type: 'Point',
-            coordinates: [parseFloat(lng) - 0.0065, parseFloat(lat) + 0.0080]
+            coordinates: [parseFloat(lng) - 0.0065, parseFloat(lat) + 0.0070]
           },
           contactPhone: '+91 40 2401 5380',
-          contactPerson: 'Senior Scientist & Agri-Business Head',
-          servicesOffered: ['Agri-Business Incubation', 'Food Processing Training', 'DPR Preparation', 'Govt Grant Handholding'],
-          rating: 4.7,
-          workingHours: '9:30 AM - 5:30 PM (Mon-Fri)'
+          contactPerson: 'Agriculture & Micro-Enterprise Officer',
+          servicesOffered: ['Agri-Business Incubation', 'Food Processing Training', 'PMFME Subsidy DPR Handholding', 'Dairy Support'],
+          rating: 4.8,
+          workingHours: '9:30 AM - 5:30 PM (Mon-Fri)',
+          searchQuery: `Rythu Bharosa Kendra near ${placeName} ${districtName}`
         },
         {
-          _id: 'live_ptn_bank_2',
-          partnerName: 'Regional Rural Bank (Gramin Bank)',
-          type: 'Bank',
-          address: 'Station Road, Near Tehsil Office',
-          city: 'Your City',
-          state: 'Your State',
-          location: {
-            type: 'Point',
-            coordinates: [parseFloat(lng) - 0.0055, parseFloat(lat) - 0.0070]
-          },
-          contactPhone: '+91 1800 425 1515',
-          contactPerson: 'Rural Credit Officer',
-          servicesOffered: ['Mudra Shishu & Kishore Loans', 'SHG Livelihood Finance', 'Stand Up India'],
-          rating: 4.6,
-          workingHours: '10:00 AM - 4:00 PM (Mon-Sat)'
-        },
-        {
-          _id: 'live_ptn_dic_1',
-          partnerName: 'District Industries Centre (DIC MSME Cell)',
+          _id: 'live_ptn_dic_cell',
+          partnerName: `District Industries Centre (DIC MSME Cell - ${districtName})`,
           type: 'DIC',
-          address: 'Collectorate Complex, MSME Facilitation Wing',
-          city: 'Your City',
-          state: 'Your State',
+          address: `Collectorate Complex, MSME Facilitation Wing, ${districtName}`,
+          city: districtName,
+          state: districtName,
           location: {
             type: 'Point',
             coordinates: [parseFloat(lng) + 0.0085, parseFloat(lat) + 0.0060]
           },
           contactPhone: '+91 1800 180 6763',
-          contactPerson: 'General Manager (DIC)',
-          servicesOffered: ['PMEGP Task Force Verification', 'Subsidies Clearance', 'Industrial Land & Shed Allocation'],
+          contactPerson: 'General Manager (DIC MSME)',
+          servicesOffered: ['PMEGP Task Force Verification', 'Industrial Subsidies Clearance', 'Industrial Shed Allocation'],
           rating: 4.8,
-          workingHours: '10:00 AM - 5:00 PM (Mon-Fri)'
+          workingHours: '10:00 AM - 5:00 PM (Mon-Fri)',
+          searchQuery: `District Industries Centre near ${districtName}`
         }
       ];
 
