@@ -19,13 +19,13 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
   @override
   void initState() {
     super.initState();
-    // Default 5 documents matching Screen 10 mockup
+    // Default 5 documents matching Screen 10 mockup (all initialized as Pending)
     _documents = [
-      SchemeDocument(docName: 'Aadhaar Card', description: 'National Identity Proof', status: 'Uploaded'),
-      SchemeDocument(docName: 'PAN Card', description: 'Tax Identification Proof', status: 'Uploaded'),
+      SchemeDocument(docName: 'Aadhaar Card', description: 'National Identity Proof', status: 'Pending'),
+      SchemeDocument(docName: 'PAN Card', description: 'Tax Identification Proof', status: 'Pending'),
       SchemeDocument(docName: 'Business Plan', description: 'Revenue & Machine Quotations', status: 'Pending'),
       SchemeDocument(docName: 'Bank Statement', description: 'Past 6 months passbook records', status: 'Pending'),
-      SchemeDocument(docName: 'Address Proof', description: 'Electricity bill / Ration card', status: 'Uploaded'),
+      SchemeDocument(docName: 'Address Proof', description: 'Electricity bill / Ration card', status: 'Pending'),
     ];
 
     // If scheme has specific documents, merge them

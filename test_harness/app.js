@@ -22,11 +22,11 @@ let currentProfile = {
 };
 
 let currentDocuments = [
-  { docName: 'Aadhaar Card', status: 'Uploaded', size: '1.2 MB' },
-  { docName: 'PAN Card', status: 'Uploaded', size: '0.8 MB' },
-  { docName: 'Business Plan', status: 'Pending', size: '' },
-  { docName: 'Bank Statement', status: 'Pending', size: '' },
-  { docName: 'Address Proof', status: 'Uploaded', size: '2.1 MB' }
+  { docName: 'Aadhaar Card', status: 'Pending', size: '', fileName: '' },
+  { docName: 'PAN Card', status: 'Pending', size: '', fileName: '' },
+  { docName: 'Business Plan', status: 'Pending', size: '', fileName: '' },
+  { docName: 'Bank Statement', status: 'Pending', size: '', fileName: '' },
+  { docName: 'Address Proof', status: 'Pending', size: '', fileName: '' }
 ];
 
 // Initialize on page load
