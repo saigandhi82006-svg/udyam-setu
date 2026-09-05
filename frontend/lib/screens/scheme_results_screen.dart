@@ -9,11 +9,15 @@ import 'scheme_detail_screen.dart';
 class SchemeResultsScreen extends StatefulWidget {
   final UserProfile? userProfile;
   final List<Scheme>? preloadedMatches;
+  final double? emiFilterLoanAmount;
+  final double? emiFilterMonthlyAmount;
 
   const SchemeResultsScreen({
     super.key,
     this.userProfile,
     this.preloadedMatches,
+    this.emiFilterLoanAmount,
+    this.emiFilterMonthlyAmount,
   });
 
   @override
@@ -38,12 +42,21 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
 
   void _loadSchemes() async {
     setState(() => _isLoading = true);
-    final user = widget.userProfile ?? MockDataService.defaultUser;
-    final matches = await _apiService.matchSchemes(user);
-    setState(() {
-      _schemes = matches;
-      _isLoading = false;
-    });
+    if (widget.emiFilterLoanAmount != null) {
+      final all = await _apiService.getSchemes();
+      final filtered = all.where((s) => s.maxGrantLoanAmount >= widget.emiFilterLoanAmount!).toList();
+      setState(() {
+        _schemes = filtered.isNotEmpty ? filtered : all;
+        _isLoading = false;
+      });
+    } else {
+      final user = widget.userProfile ?? MockDataService.defaultUser;
+      final matches = await _apiService.matchSchemes(user);
+      setState(() {
+        _schemes = matches;
+        _isLoading = false;
+      });
+    }
   }
 
   void _loadAllSchemes() async {
@@ -125,12 +138,12 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
           children: [
             const Text(
               'Matching Schemes',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.darkText),
+              style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: AppTheme.darkText),
             ),
             const SizedBox(height: 1),
             Text(
               _showAll ? 'All Central & State Schemes' : 'Based on your information',
-              style: const TextStyle(fontSize: 10, color: Color(0xFF64748B), fontWeight: FontWeight.normal),
+              style: const TextStyle(fontSize: 9.5, color: Color(0xFF64748B), fontWeight: FontWeight.normal),
             ),
           ],
         ),
@@ -152,7 +165,7 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.stars_rounded, color: Color(0xFFD97706), size: 14),
+                      const Icon(Icons.stars_rounded, color: Color(0xFFD97706), size: 13.5),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
@@ -160,7 +173,7 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
                               ? 'Showing all ${_schemes.length} official government schemes.'
                               : 'Great! We found ${_schemes.length} schemes that match your profile.',
                           style: const TextStyle(
-                            fontSize: 10.5,
+                            fontSize: 10,
                             color: Color(0xFF15803D),
                             fontWeight: FontWeight.w600,
                           ),
@@ -202,8 +215,8 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primaryGreen,
                           foregroundColor: Colors.white,
-                          minimumSize: const Size.fromHeight(44),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+                          minimumSize: const Size.fromHeight(42),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(21)),
                           elevation: 1.5,
                         ),
                         child: const Row(
@@ -211,10 +224,10 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
                           children: [
                             Text(
                               'View All Schemes',
-                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                              style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
                             ),
                             SizedBox(width: 6),
-                            Icon(Icons.arrow_forward_rounded, size: 14),
+                            Icon(Icons.arrow_forward_rounded, size: 13.5),
                           ],
                         ),
                       ),
@@ -292,7 +305,7 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
                           scheme.schemeName,
                           softWrap: true,
                           style: const TextStyle(
-                            fontSize: 13,
+                            fontSize: 12.5,
                             fontWeight: FontWeight.w700,
                             color: AppTheme.darkText,
                             height: 1.25,
@@ -323,7 +336,7 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
                             scheme.matchBadge ?? '$matchScore% Match',
                             style: TextStyle(
                               color: badgeText,
-                              fontSize: 9.5,
+                              fontSize: 9,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -344,7 +357,7 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 10,
+                          fontSize: 9.5,
                           color: Color(0xFF64748B),
                           fontWeight: FontWeight.w500,
                         ),
@@ -357,13 +370,13 @@ class _SchemeResultsScreenState extends State<SchemeResultsScreen> {
                         Text(
                           'View Details',
                           style: TextStyle(
-                            fontSize: 10.5,
+                            fontSize: 10,
                             color: AppTheme.primaryGreen,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         SizedBox(width: 2),
-                        Icon(Icons.arrow_forward_rounded, size: 10.5, color: AppTheme.primaryGreen),
+                        Icon(Icons.arrow_forward_rounded, size: 10, color: AppTheme.primaryGreen),
                       ],
                     ),
                   ],
