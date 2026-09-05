@@ -2309,31 +2309,66 @@ function openGoogleMapsGeneral() {
 }
 
 // 7. Document Checklist (Screen 10)
+function getDocUploadI18n() {
+  const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
+  const dictionary = {
+    en: { upload: 'Upload', reupload: 'Re-upload', ready: 'Ready', pending: 'Pending Upload', selectFile: 'Select document' },
+    hi: { upload: 'अपलोड', reupload: 'पुनः अपलोड', ready: 'तैयार', pending: 'लंबित', selectFile: 'दस्तावेज़ चुनें' },
+    te: { upload: 'అప్‌లోడ్', reupload: 'మళ్ళీ అప్‌లోడ్', ready: 'సిద్ధంగా ఉంది', pending: 'పెండింగ్', selectFile: 'పత్రం ఎంచుకోండి' },
+    kn: { upload: 'ಅಪ್‌ಲೋಡ್', reupload: 'ಮರು ಅಪ್‌ಲೋಡ್', ready: 'ಸಿದ್ಧವಾಗಿದೆ', pending: 'ಬಾಕಿ ಇದೆ', selectFile: 'ದಾಖಲೆ ಆಯ್ಕೆಮಾಡಿ' },
+    ta: { upload: 'பதிவேற்று', reupload: 'மறு பதிவேற்று', ready: 'தயார்', pending: 'நிலுவை', selectFile: 'ஆவணத்தைத் தேர்ந்தெடுக்கவும்' },
+    mr: { upload: 'अपलोड', reupload: 'पुन्हा अपलोड', ready: 'तयार', pending: 'प्रलंबित', selectFile: 'दस्तऐवज निवडा' },
+    bn: { upload: 'আপলোড', reupload: 'পুনরায় আপলোড', ready: 'প্রস্তুত', pending: 'মুলতুবি', selectFile: 'নথি নির্বাচন করুন' }
+  };
+  return dictionary[curLang] || dictionary.en;
+}
+
 function renderDocumentChecklist() {
   const container = document.getElementById('docListContainer');
+  if (!container) return;
   container.innerHTML = '';
   const curLang = (window.UdyamI18n ? window.UdyamI18n.getActiveLanguage() : window.__currentLanguage) || 'en';
+  const i18nTexts = getDocUploadI18n();
 
   let uploadedCount = 0;
   currentDocuments.forEach((doc, idx) => {
-    if (doc.status === 'Uploaded') uploadedCount++;
+    const isUploaded = doc.status === 'Uploaded';
+    if (isUploaded) uploadedCount++;
 
     const localizedDocName = (window.UdyamI18n && typeof window.UdyamI18n.localizeDocumentName === 'function')
       ? window.UdyamI18n.localizeDocumentName(doc.docName, curLang)
       : doc.docName;
-    const localizedStatus = (typeof t === 'function')
-      ? (doc.status === 'Uploaded' ? t('common.uploaded', 'Uploaded') : t('common.pending', 'Pending'))
-      : doc.status;
+    const localizedStatus = isUploaded 
+      ? (typeof t === 'function' ? t('common.uploaded', 'Uploaded') : 'Uploaded') 
+      : (typeof t === 'function' ? t('common.pending', 'Pending') : 'Pending');
 
     const item = document.createElement('div');
     item.className = 'doc-item';
     item.innerHTML = `
-      <div class="doc-meta">
-        <h5>${localizedDocName}</h5>
-        <span class="${doc.status.toLowerCase()}">${localizedStatus} ${doc.size ? '(' + doc.size + ')' : ''}</span>
+      <div class="doc-main-info">
+        <div class="doc-icon-box ${isUploaded ? 'uploaded' : ''}">
+          ${isUploaded ? '📄' : '📑'}
+        </div>
+        <div class="doc-meta">
+          <h5>${localizedDocName}</h5>
+          <span class="${doc.status.toLowerCase()}">
+            ${isUploaded ? `✓ ${localizedStatus} (${doc.size || '1.2 MB'})` : `⏳ ${i18nTexts.pending}`}
+          </span>
+          ${doc.fileName ? `<small style="font-size: 9.5px; color: #64748B; margin-top: 1px;">📁 ${doc.fileName}</small>` : ''}
+        </div>
       </div>
-      <div class="status-badge-circle ${doc.status.toLowerCase()}" onclick="toggleDocStatus(${idx})">
-        ${doc.status === 'Uploaded' ? '✓' : '⧗'}
+      <div class="doc-actions-grp">
+        <input type="file" id="docFileInput_${idx}" style="display: none;" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" onchange="handleDocFileSelect(${idx}, this)" />
+        ${isUploaded ? `
+          <span class="doc-status-chip">✓ ${i18nTexts.ready}</span>
+          <button type="button" class="doc-btn-upload outline" onclick="triggerDocUpload(${idx})" title="${i18nTexts.reupload}">
+            <span>🔄</span> <span>${i18nTexts.reupload}</span>
+          </button>
+        ` : `
+          <button type="button" class="doc-btn-upload primary" onclick="triggerDocUpload(${idx})" title="${i18nTexts.upload}">
+            <span>📤</span> <span>${i18nTexts.upload}</span>
+          </button>
+        `}
       </div>
     `;
     container.appendChild(item);
@@ -2358,10 +2393,53 @@ function renderDocumentChecklist() {
   if (progEl) progEl.style.width = `${pct}%`;
 }
 
+function triggerDocUpload(index) {
+  const fileInput = document.getElementById(`docFileInput_${index}`);
+  if (fileInput) {
+    fileInput.click();
+  } else {
+    toggleDocStatus(index);
+  }
+}
+
+function handleDocFileSelect(index, inputElement) {
+  const doc = currentDocuments[index];
+  if (!doc) return;
+
+  if (inputElement && inputElement.files && inputElement.files.length > 0) {
+    const file = inputElement.files[0];
+    let sizeFormatted = '1.2 MB';
+    if (file.size < 1024 * 1024) {
+      sizeFormatted = `${Math.round(file.size / 1024)} KB`;
+    } else {
+      sizeFormatted = `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
+    }
+    doc.status = 'Uploaded';
+    doc.size = sizeFormatted;
+    doc.fileName = file.name;
+    logTerminal(`[Document Manager] 📤 Uploaded "${file.name}" (${sizeFormatted}) for ${doc.docName}`);
+  } else {
+    // Fallback simulation
+    doc.status = 'Uploaded';
+    doc.size = doc.size || '1.4 MB';
+    doc.fileName = `${doc.docName.toLowerCase().replace(/\\s+/g, '_')}_document.pdf`;
+    logTerminal(`[Document Manager] 📤 Uploaded simulated file for ${doc.docName}`);
+  }
+
+  renderDocumentChecklist();
+
+  // Show a quick transient notification toast if possible
+  if (typeof showToast === 'function') {
+    showToast(`✅ ${doc.docName} uploaded successfully!`);
+  }
+}
+
 function toggleDocStatus(index) {
   const doc = currentDocuments[index];
+  if (!doc) return;
   doc.status = doc.status === 'Uploaded' ? 'Pending' : 'Uploaded';
   doc.size = doc.status === 'Uploaded' ? '1.4 MB' : '';
+  if (doc.status === 'Pending') doc.fileName = '';
   renderDocumentChecklist();
   logTerminal(`[Document Manager] Toggled "${doc.docName}" status to: ${doc.status}`);
 }

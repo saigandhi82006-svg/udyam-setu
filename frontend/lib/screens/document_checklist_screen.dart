@@ -249,22 +249,61 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
                             ],
                           ),
                         ),
-                        // Status Circle Indicator / Upload Action
-                        GestureDetector(
-                          onTap: () => _pickAndUploadDocument(doc),
-                          child: Container(
-                            padding: const EdgeInsets.all(5),
+                        // Dedicated Upload / Re-upload Button for each document
+                        if (isUploaded) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                             decoration: BoxDecoration(
-                              color: isUploaded ? const Color(0xFFDCFCE7) : const Color(0xFFFEF3C7),
-                              shape: BoxShape.circle,
+                              color: const Color(0xFFDCFCE7),
+                              borderRadius: BorderRadius.circular(6),
                             ),
-                            child: Icon(
-                              isUploaded ? Icons.check : Icons.hourglass_top_rounded,
-                              color: isUploaded ? const Color(0xFF15803D) : const Color(0xFFD97706),
-                              size: 16,
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.check, size: 12, color: Color(0xFF15803D)),
+                                SizedBox(width: 2),
+                                Text(
+                                  'Ready',
+                                  style: TextStyle(color: Color(0xFF15803D), fontSize: 9.5, fontWeight: FontWeight.bold),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
+                          const SizedBox(width: 6),
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              side: BorderSide(color: Colors.grey.shade300),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            onPressed: () => _pickAndUploadDocument(doc),
+                            icon: const Icon(Icons.sync_rounded, size: 13, color: Color(0xFF475569)),
+                            label: const Text(
+                              'Re-upload',
+                              style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: Color(0xFF475569)),
+                            ),
+                          ),
+                        ] else ...[
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryGreen,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              elevation: 0,
+                            ),
+                            onPressed: () => _pickAndUploadDocument(doc),
+                            icon: const Icon(Icons.upload_file_rounded, size: 14),
+                            label: const Text(
+                              'Upload',
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   );

@@ -2074,11 +2074,55 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.doc-item:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.doc-main-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.doc-icon-box {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #F1F5F9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.doc-icon-box.uploaded {
+  background: #DCFCE7;
+  color: #15803D;
+}
+
+.doc-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .doc-meta h5 {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
+  color: #1E293B;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .doc-meta span {
@@ -2087,6 +2131,64 @@ body {
 
 .doc-meta span.uploaded { color: #15803D; font-weight: bold; }
 .doc-meta span.pending { color: #D97706; font-weight: bold; }
+
+.doc-actions-grp {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.doc-btn-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.doc-btn-upload.primary {
+  background: #15803D;
+  color: white;
+  box-shadow: 0 2px 4px rgba(21, 128, 61, 0.2);
+}
+
+.doc-btn-upload.primary:hover {
+  background: #166534;
+  transform: translateY(-1px);
+}
+
+.doc-btn-upload.primary:active {
+  transform: translateY(0);
+}
+
+.doc-btn-upload.outline {
+  background: #F8FAFC;
+  color: #475569;
+  border: 1px solid #CBD5E1;
+}
+
+.doc-btn-upload.outline:hover {
+  background: #F1F5F9;
+  border-color: #94A3B8;
+  color: #1E293B;
+}
+
+.doc-status-chip {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: #DCFCE7;
+  color: #15803D;
+  white-space: nowrap;
+}
 
 .status-badge-circle {
   width: 24px;
